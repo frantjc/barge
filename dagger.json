@@ -1,0 +1,31 @@
+{
+  "name": "barge-dev",
+  "engineVersion": "v0.19.7",
+  "sdk": {
+    "source": "go"
+  },
+  "dependencies": [
+    {
+      "name": "doug",
+      "source": "github.com/vito/daggerverse/doug@main",
+      "pin": "776610fc77055f983a3dca99f5f55946616c624e"
+    },
+    {
+      "name": "go",
+      "source": "github.com/frantjc/daggerverse/go@main",
+      "pin": "e7d1f330e3497014ed5302950598c07783a36fb9"
+    },
+    {
+      "name": "tls",
+      "source": "github.com/frantjc/daggerverse/tls@main",
+      "pin": "e7d1f330e3497014ed5302950598c07783a36fb9"
+    },
+    {
+      "name": "wolfi",
+      "source": "github.com/dagger/dagger/modules/wolfi@v0.19.7",
+      "pin": "81fe990dd3cd47ae45dd91ba680f8854aa56aa66"
+    }
+  ],
+  "source": ".dagger",
+  "disableDefaultFunctionCaching": true
+}
