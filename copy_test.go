@@ -1,10 +1,12 @@
 package barge_test
 
 import (
+	"flag"
 	"fmt"
 	"net/url"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/frantjc/barge"
@@ -20,8 +22,12 @@ import (
 )
 
 var (
-	rawOci = os.Getenv("TEST_BARGE_OCI")
+	oci string
 )
+
+func init() {
+	flag.StringVar(&oci, "oci", "", "")
+}
 
 func FuzzCopy(f *testing.F) {
 	tmp, err := os.CreateTemp(f.TempDir(), "test-0.1.0.tgz")
@@ -31,24 +37,28 @@ func FuzzCopy(f *testing.F) {
 	assert.NoError(f, tmp.Close())
 	archive := fmt.Sprintf("archive://%s", tmp.Name())
 	directory := fmt.Sprintf("directory://%s", f.TempDir())
+	file := f.TempDir()
 
 	f.Add(archive, directory)
 	f.Add(directory, archive)
+	f.Add(archive, file)
+	f.Add(file, archive)
 
-	if rawOci != "" {
-		u, err := url.Parse(rawOci)
+	for _, o := range strings.Split(oci, ",") {
+		if !strings.Contains(o, "://") {
+			o = fmt.Sprintf("oci://%s", o)
+		}
+		u, err := url.Parse(o)
 		assert.NoError(f, err)
 		q := url.Values{}
 		switch u.Scheme {
-		case "http":
-			q.Add("insecure", "1")
-		case "https", "oci", "":
+		case "oci", "":
 		default:
-			f.Fatalf("unknown scheme for TEST_BARGE_OCI: %s", rawOci)
+			f.Fatalf("unknown scheme in -oci=%s", o)
 		}
 		oci := fmt.Sprintf("oci://%s?%s", path.Join(u.Host, u.Path), q.Encode())
 		f.Add(archive, oci)
-		// f.Add(oci, archive)
+		f.Add(oci, archive)
 	}
 
 	f.Fuzz(func(t *testing.T, src, dest string) {

@@ -1,28 +1,84 @@
 package utils
 
 import (
+	"context"
+	"fmt"
 	"net/url"
+	"os"
 	"path"
 	"strconv"
+	"strings"
 
+	"github.com/fluxcd/pkg/auth"
+	"github.com/fluxcd/pkg/auth/aws"
+	"github.com/fluxcd/pkg/auth/azure"
+	authutils "github.com/fluxcd/pkg/auth/utils"
+	xslices "github.com/frantjc/x/slices"
 	"helm.sh/helm/v3/pkg/registry"
+	orasauth "oras.land/oras-go/v2/registry/remote/auth"
 )
 
 func NewRegistryClientFromURL(u *url.URL) (*registry.Client, error) {
 	opts := []registry.ClientOption{}
-	registry.ClientOptPlainHTTP()
+
 	if user := u.User; user != nil {
 		if password, ok := user.Password(); ok {
 			username := user.Username()
 			opts = append(opts, registry.ClientOptBasicAuth(username, password))
 		}
+	} else if provider := u.Query().Get("provider"); provider != "" {
+		authOpts := []auth.Option{}
+		if provider == azure.ProviderName {
+			authOpts = append(authOpts, auth.WithAllowShellOut())
+		}
+
+		opts = append(opts, registry.ClientOptAuthorizer(orasauth.Client{
+			Credential: func(ctx context.Context, _ string) (orasauth.Credential, error) {
+				authenticator, err := authutils.GetArtifactRegistryCredentials(ctx, provider, fmt.Sprintf("oci://%s", RefFromURL(u)), authOpts...)
+				if err != nil {
+					return orasauth.EmptyCredential, err
+				}
+
+				authConfig, err := authenticator.Authorization()
+				if err != nil {
+					return orasauth.EmptyCredential, err
+				}
+
+				return orasauth.Credential{
+					Username:     authConfig.Username,
+					Password:     authConfig.Password,
+					RefreshToken: authConfig.IdentityToken,
+					AccessToken:  authConfig.RegistryToken,
+				}, nil
+			},
+		}))
+	} else if hostname := u.Hostname(); hostname == "ghcr.io" {
+		opts = append(opts, registry.ClientOptBasicAuth(os.Getenv("GITHUB_ACTOR"), os.Getenv("GITHUB_TOKEN")))
+	} else if xslices.Some([]string{".azurecr.io", ".azurecr.us", ".azurecr.cn"}, func(suffix string, _ int) bool {
+		return strings.HasSuffix(hostname, suffix)
+	}) {
+		q := u.Query()
+		q.Add("provider", azure.ProviderName)
+		u.RawQuery = q.Encode()
+		return NewRegistryClientFromURL(u)
+	} else if strings.HasSuffix(hostname, ".amazonaws.com") {
+		q := u.Query()
+		q.Add("provider", aws.ProviderName)
+		u.RawQuery = q.Encode()
+		return NewRegistryClientFromURL(u)
 	}
+
 	if insecure, _ := strconv.ParseBool(u.Query().Get("insecure")); insecure {
 		opts = append(opts, registry.ClientOptPlainHTTP())
 	}
+
 	return registry.NewClient(opts...)
 }
 
 func RefFromURL(u *url.URL) string {
-	return path.Join(u.Host, u.Path)
+	ref := path.Join(u.Host, u.Path)
+	if strings.Contains(u.Path, ":") {
+		return ref
+	}
+	return fmt.Sprintf("%s:latest", ref)
 }

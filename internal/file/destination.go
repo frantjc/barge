@@ -21,16 +21,15 @@ func init() {
 type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	fi, err := os.Stat(filepath.Join(u.Host, u.Path))
-	if err != nil {
+	name := filepath.Join(u.Host, u.Path)
+
+	if fi, err := os.Stat(name); err != nil {
 		if !os.IsNotExist(err) {
 			return err
 		}
+	} else if fi.IsDir() {
+		return utils.WriteChartToDirectory(c, name)
 	}
 
-	if fi.IsDir() {
-		return utils.WriteChartToDirectory(c, fi.Name())
-	}
-
-	return utils.WriteChartToFile(c, filepath.Join(u.Host, u.Path))
+	return utils.WriteChartToFile(c, name)
 }

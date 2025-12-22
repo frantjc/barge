@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/frantjc/barge/.dagger/internal/dagger"
@@ -58,29 +59,41 @@ func (m *BargeDev) Fmt(ctx context.Context) *dagger.Changeset {
 	return root.Changes(m.Source)
 }
 
-func (m *BargeDev) Test(ctx context.Context) (string, error) {
-	chartmuseum := dag.Container().
-		From("ghcr.io/helm/chartmuseum:v0.16.3").
-		WithExposedPort(8080).
-		WithEnvVariable("DEBUG", "1").
-		WithEnvVariable("STORAGE", "local").
-		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/data").
-		AsService()
+func (m *BargeDev) Test(
+	// +optional
+	oci []string,
+) (*dagger.Container, error) {
+	// chartmuseum := dag.Container().
+	// 	From("ghcr.io/helm/chartmuseum:v0.16.3").
+	// 	WithExposedPort(8080).
+	// 	WithEnvVariable("DEBUG", "1").
+	// 	WithEnvVariable("STORAGE", "local").
+	// 	WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/data").
+	// 	AsService()
+	// chartmuseumAlias := "chartmuseum"
 
 	registry := dag.Container().
 		From("docker.io/distribution/distribution:3").
 		WithExposedPort(5000).
 		AsService()
+	registryAlias := "registry"
+
+	test := []string{"go", "test", "-race", "-cover"}
+	for _, o := range append(oci,
+		fmt.Sprintf("%s:5000/test", registryAlias),
+		fmt.Sprintf("%s:5000/test:tag", registryAlias),
+	) {
+		test = append(test, "-oci", o)
+	}
+	test = append(test, "./...")
 
 	return dag.Go(dagger.GoOpts{
 		Module: m.Source,
 	}).
 		Container().
-		WithServiceBinding("chartmuseum", chartmuseum).
-		WithServiceBinding("registry", registry).
-		WithEnvVariable("TEST_BARGE_OCI", "http://registry:5000/test").
-		WithExec([]string{"go", "test", "-race", "-cover", "./..."}).
-		CombinedOutput(ctx)
+		// WithServiceBinding(chartmuseumAlias, chartmuseum).
+		WithServiceBinding(registryAlias, registry).
+		WithExec(test), nil
 }
 
 func (m *BargeDev) Version(ctx context.Context) string {

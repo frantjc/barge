@@ -12,6 +12,7 @@ import (
 	_ "github.com/frantjc/barge/internal/artifactory"
 	_ "github.com/frantjc/barge/internal/chartmuseum"
 	_ "github.com/frantjc/barge/internal/directory"
+	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/http"
 	_ "github.com/frantjc/barge/internal/oci"
 	xerrors "github.com/frantjc/x/errors"
@@ -31,13 +32,12 @@ func main() {
 	xos.ExitFromError(err)
 }
 
-
 func newBarge() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "barge",
-		Version: SemVer(),
+		Use:           "barge",
+		Version:       SemVer(),
 		SilenceErrors: true,
-		SilenceUsage: true,
+		SilenceUsage:  true,
 	}
 	cmd.AddCommand(newCopy())
 	return cmd
@@ -45,11 +45,11 @@ func newBarge() *cobra.Command {
 
 func newCopy() *cobra.Command {
 	return &cobra.Command{
-		Use: "copy",
-		Aliases: []string{"cp"},
+		Use:           "copy",
+		Aliases:       []string{"cp"},
 		SilenceErrors: true,
-		SilenceUsage: true,
-		Args: cobra.ExactArgs(2),
+		SilenceUsage:  true,
+		Args:          cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return barge.Copy(cmd.Context(), args[0], args[1])
 		},

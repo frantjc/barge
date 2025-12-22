@@ -17,8 +17,17 @@ func (m *BargeDev) IsFmted(ctx context.Context) error {
 }
 
 // +check
-func (m *BargeDev) TestsPass(ctx context.Context) error {
-	if _, err := m.Test(ctx); err != nil {
+func (m *BargeDev) TestsPass(
+	ctx context.Context,
+	// +optional
+	oci []string,
+) error {
+	test, err := m.Test(oci)
+	if err != nil {
+		return err
+	}
+
+	if _, err = test.CombinedOutput(ctx); err != nil {
 		return err
 	}
 

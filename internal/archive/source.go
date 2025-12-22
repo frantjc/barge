@@ -31,4 +31,3 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 
 	return c, nil
 }
-

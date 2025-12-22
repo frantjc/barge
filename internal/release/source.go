@@ -20,4 +20,3 @@ type source struct{}
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 	panic("unimplemented")
 }
-

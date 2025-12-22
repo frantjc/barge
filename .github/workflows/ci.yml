@@ -18,10 +18,4 @@ jobs:
         with:
           repository: dagger/dagger
           version: v0.19.7
-      - shell: dagger {0}
-        run: |
-          isFmted &
-          test --module steamapps --repository corekeeper | combinedOutput &
-          test --module wolfi --repository zlib/go-1.25 | combinedOutput &
-          test --module git --repository github.com/frantjc/sindri/testdata/git/std:${{ github.sha }} --repository github.com/frantjc/sindri/testdata/git/nonstd:${{ github.sha }} | combinedOutput &
-          .wait
+      - run: dagger checks

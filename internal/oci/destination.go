@@ -8,6 +8,7 @@ import (
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/utils"
 	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/registry"
 )
 
 func init() {
@@ -38,8 +39,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 
 	ref := utils.RefFromURL(u)
 
-	// TODO(frantjc): registry.PushOptStrictMode(false)?
-	if _, err := r.Push(data, ref); err != nil {
+	if _, err := r.Push(data, ref, registry.PushOptStrictMode(false)); err != nil {
 		return err
 	}
 

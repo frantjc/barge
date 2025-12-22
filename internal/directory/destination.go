@@ -21,5 +21,5 @@ func init() {
 type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	return utils.WriteChartToDirectory(c, filepath.Join(u.Host, u.Path))	
+	return utils.WriteChartToDirectory(c, filepath.Join(u.Host, u.Path))
 }
