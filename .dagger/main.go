@@ -68,7 +68,7 @@ func (m *BargeDev) Test(
 		WithExposedPort(8080).
 		WithEnvVariable("DEBUG", "1").
 		WithEnvVariable("STORAGE", "local").
-		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/data").
+		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
 		AsService()
 	chartmuseumAlias := "chartmuseum"
 

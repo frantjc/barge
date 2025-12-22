@@ -15,14 +15,10 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 )
 
-const (
-	Scheme = "chartmuseum"
-)
-
 func init() {
 	barge.RegisterDestination(
 		new(destination),
-		Scheme,
+		"chartmuseum",
 		"cm",
 	)
 }
@@ -40,7 +36,6 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	// TODO(frantjc): Use io.Pipe here.
 	buf := new(bytes.Buffer)
 	mw := multipart.NewWriter(buf)
-	defer mw.Close()
 	fw, err := mw.CreateFormFile("chart", fmt.Sprintf("%s-%s.tgz", c.Name(), c.Metadata.Version))
 	if err != nil {
 		return err
@@ -60,7 +55,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.JoinPath("api/charts").String(), buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.JoinPath("/api/charts").String(), buf)
 	if err != nil {
 		return err
 	}
@@ -72,6 +67,10 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 	defer res.Body.Close()
+
+	if statusCode := res.StatusCode; 200 > statusCode || statusCode >= 400 {
+		return fmt.Errorf("http status code %d %s", res.StatusCode, res.Status)
+	}
 
 	return nil
 }
