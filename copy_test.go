@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	oci string
+	oci         string
 	chartmuseum string
 )
 
@@ -47,7 +47,7 @@ func FuzzCopy(f *testing.F) {
 	f.Add(file, archive)
 
 	for _, o := range strings.Split(oci, ",") {
-		if o  == "" {
+		if o == "" {
 			continue
 		}
 		if !strings.Contains(o, "://") {
@@ -66,7 +66,7 @@ func FuzzCopy(f *testing.F) {
 	}
 
 	for _, c := range strings.Split(chartmuseum, ",") {
-		if c  == "" {
+		if c == "" {
 			continue
 		}
 		u, err := url.Parse(c)
