@@ -22,7 +22,7 @@ func (m *BargeDev) TestsPass(
 	// +optional
 	oci []string,
 ) error {
-	test, err := m.Test(oci)
+	test, err := m.Test(ctx, oci)
 	if err != nil {
 		return err
 	}

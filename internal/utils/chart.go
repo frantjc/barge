@@ -19,7 +19,7 @@ import (
 // TODO(frantjc): Context propagation.
 
 // WriteChartToDirectory writes the contents of the given
-// chart to dir.
+// Chart to dir.
 func WriteChartToDirectory(c *chart.Chart, dir string) error {
 	// TODO(frantjc): Is it worth doing this in parallel?
 	eg := new(errgroup.Group)
@@ -52,7 +52,7 @@ func WriteChartToDirectory(c *chart.Chart, dir string) error {
 }
 
 // WriteChartToFile writes the gzipped tar contents of
-// the given chart to the named file.
+// the given Chart to the named file.
 func WriteChartToFile(c *chart.Chart, name string) error {
 	rc, err := WriteChartToArchive(c)
 	if err != nil {
@@ -74,7 +74,7 @@ func WriteChartToFile(c *chart.Chart, name string) error {
 }
 
 // WriteChartToArchive returns a pipe that the gzipped tar
-// contents of the given chart can be read from.
+// contents of the given Chart can be read from.
 func WriteChartToArchive(c *chart.Chart) (io.ReadCloser, error) {
 	pr, pw := io.Pipe()
 

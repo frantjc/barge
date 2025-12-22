@@ -2,12 +2,12 @@ package http
 
 import (
 	"context"
-	"net/http"
 	"net/url"
 
 	"github.com/frantjc/barge"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/getter"
 )
 
 func init() {
@@ -21,16 +21,17 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	settings := barge.HelmSettings()
+
+	g, err := getter.All(settings).ByScheme(u.Scheme)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	buf, err := g.Get(u.String())
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 
-	return loader.LoadArchive(res.Body)
+	return loader.LoadArchive(buf)
 }

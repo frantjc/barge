@@ -53,7 +53,11 @@ func NewRegistryClientFromURL(u *url.URL) (*registry.Client, error) {
 			},
 		}))
 	} else if hostname := u.Hostname(); hostname == "ghcr.io" {
-		opts = append(opts, registry.ClientOptBasicAuth(os.Getenv("GITHUB_ACTOR"), os.Getenv("GITHUB_TOKEN")))
+		if githubActor := os.Getenv("GITHUB_ACTOR"); githubActor != "" {
+			if githubToken := os.Getenv("GITHUB_TOKEN"); githubToken != "" {
+				opts = append(opts, registry.ClientOptBasicAuth(githubActor, githubToken))
+			}
+		}
 	} else if xslices.Some([]string{".azurecr.io", ".azurecr.us", ".azurecr.cn"}, func(suffix string, _ int) bool {
 		return strings.HasSuffix(hostname, suffix)
 	}) {

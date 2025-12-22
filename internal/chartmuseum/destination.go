@@ -3,6 +3,7 @@ package chartmuseum
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -55,12 +56,30 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 
+	user := u.User
+	u.User = nil
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.JoinPath("/api/charts").String(), buf)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	if user != nil {
+		if password, ok := user.Password(); ok {
+			username := user.Username()
+			req.Header.Add(
+				"Authorization",
+				fmt.Sprintf(
+					"Basic %s",
+					base64.RawURLEncoding.EncodeToString(
+						[]byte(fmt.Sprintf("%s:%s", username, password)),
+					),
+				),
+			)
+		}
+	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -69,7 +88,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	defer res.Body.Close()
 
 	if statusCode := res.StatusCode; 200 > statusCode || statusCode >= 400 {
-		return fmt.Errorf("http status code %d %s", res.StatusCode, res.Status)
+		return fmt.Errorf("http status %s", res.Status)
 	}
 
 	return nil

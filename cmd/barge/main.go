@@ -15,6 +15,8 @@ import (
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/http"
 	_ "github.com/frantjc/barge/internal/oci"
+	_ "github.com/frantjc/barge/internal/release"
+	_ "github.com/frantjc/barge/internal/repo"
 	xerrors "github.com/frantjc/x/errors"
 	xos "github.com/frantjc/x/os"
 	"github.com/spf13/cobra"
@@ -44,7 +46,7 @@ func newBarge() *cobra.Command {
 }
 
 func newCopy() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:           "copy",
 		Aliases:       []string{"cp"},
 		SilenceErrors: true,
@@ -54,4 +56,6 @@ func newCopy() *cobra.Command {
 			return barge.Copy(cmd.Context(), args[0], args[1])
 		},
 	}
+	barge.AddFlags(cmd.Flags())
+	return cmd
 }

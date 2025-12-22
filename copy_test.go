@@ -17,6 +17,8 @@ import (
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/http"
 	_ "github.com/frantjc/barge/internal/oci"
+	_ "github.com/frantjc/barge/internal/release"
+	_ "github.com/frantjc/barge/internal/repo"
 	"github.com/frantjc/barge/testdata"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,11 +26,15 @@ import (
 var (
 	oci         string
 	chartmuseum string
+	repo        string
+	http        string
 )
 
 func init() {
-	flag.StringVar(&oci, "oci", "", "run oci tests against these comma-delimited registries")
-	flag.StringVar(&chartmuseum, "cm", "", "run chartmuseum tests against these comma-delimited urls")
+	flag.StringVar(&oci, "oci", "", "run copy tests against these comma-delimited registries")
+	flag.StringVar(&chartmuseum, "cm", "", "run copy tests against these comma-delimited urls")
+	flag.StringVar(&repo, "repo", "", "run copy tests against these comma-delimited repos")
+	flag.StringVar(&http, "http", "", "run copy tests against these comma-delimited http(s)")
 }
 
 func FuzzCopy(f *testing.F) {
@@ -49,17 +55,11 @@ func FuzzCopy(f *testing.F) {
 	for _, o := range strings.Split(oci, ",") {
 		if o == "" {
 			continue
-		}
-		if !strings.Contains(o, "://") {
+		} else if !strings.Contains(o, "://") {
 			o = fmt.Sprintf("oci://%s", o)
 		}
 		u, err := url.Parse(o)
 		assert.NoError(f, err)
-		switch u.Scheme {
-		case "oci", "":
-		default:
-			f.Fatalf("unknown scheme in -oci=%s", o)
-		}
 		oci := fmt.Sprintf("oci://%s", path.Join(u.Host, u.Path))
 		f.Add(archive, oci)
 		f.Add(oci, archive)
@@ -85,6 +85,28 @@ func FuzzCopy(f *testing.F) {
 		}
 		chartmuseum := u.String()
 		f.Add(archive, chartmuseum)
+	}
+
+	for _, r := range strings.Split(repo, ",") {
+		if r == "" {
+			continue
+		} else if !strings.Contains(r, "://") {
+			r = fmt.Sprintf("repo://%s", r)
+		}
+		u, err := url.Parse(r)
+		assert.NoError(f, err)
+		repo := u.String()
+		f.Add(repo, archive)
+	}
+
+	for _, h := range strings.Split(http, ",") {
+		if h == "" {
+			continue
+		}
+		u, err := url.Parse(h)
+		assert.NoError(f, err)
+		http := u.String()
+		f.Add(http, archive)
 	}
 
 	f.Fuzz(func(t *testing.T, src, dest string) {

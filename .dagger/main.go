@@ -60,6 +60,7 @@ func (m *BargeDev) Fmt(ctx context.Context) *dagger.Changeset {
 }
 
 func (m *BargeDev) Test(
+	ctx context.Context,
 	// +optional
 	oci []string,
 ) (*dagger.Container, error) {
@@ -71,6 +72,8 @@ func (m *BargeDev) Test(
 		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
 		AsService()
 	chartmuseumAlias := "chartmuseum"
+	chartmuseumURL := fmt.Sprintf("http://%s:8080", chartmuseumAlias)
+	chartmuseumRepo := chartmuseumAlias
 
 	registry := dag.Container().
 		From("docker.io/distribution/distribution:3").
@@ -81,20 +84,30 @@ func (m *BargeDev) Test(
 	test := []string{
 		"go", "test", "-race", "-cover", "-test.v",
 		"-cm",
-		fmt.Sprintf("http://%s:8080", chartmuseumAlias),
+		chartmuseumURL,
 		"-oci",
 		strings.Join([]string{
 			fmt.Sprintf("%s:5000/test", registryAlias),
 			fmt.Sprintf("%s:5000/test:tag", registryAlias),
 		}, ","),
+		"-repo",
+		strings.Join([]string{
+			fmt.Sprintf("%s/test", chartmuseumRepo),
+			fmt.Sprintf("%s/test/0.2.0", chartmuseumRepo),
+		}, ","),
+		"-http",
+		fmt.Sprintf("%s/charts/test-0.2.0.tgz", chartmuseumURL),
 	}
 	test = append(test, "./...")
 
 	return dag.Go(dagger.GoOpts{
-		Module: m.Source,
+		Module:                  m.Source,
+		AdditionalWolfiPackages: []string{"helm-4", "curl"},
 	}).
 		Container().
 		WithServiceBinding(chartmuseumAlias, chartmuseum).
+		WithExec([]string{"curl", "-X", "POST", "-F", "chart=@testdata/test-0.2.0.tgz", fmt.Sprintf("%s/api/charts", chartmuseumURL)}).
+		WithExec([]string{"helm", "repo", "add", chartmuseumRepo, chartmuseumURL}).
 		WithServiceBinding(registryAlias, registry).
 		WithExec(test), nil
 }
