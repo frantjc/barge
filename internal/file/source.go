@@ -20,10 +20,5 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	c, err := loader.Load(filepath.Join(u.Host, u.Path))
-	if err != nil {
-		return nil, err
-	}
-
-	return c, nil
+	return loader.Load(filepath.Join(u.Host, u.Path))
 }

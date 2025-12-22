@@ -26,10 +26,11 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		return nil, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
-	return loader.LoadArchive(resp.Body)
+	return loader.LoadArchive(res.Body)
 }
