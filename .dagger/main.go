@@ -63,14 +63,14 @@ func (m *BargeDev) Test(
 	// +optional
 	oci []string,
 ) (*dagger.Container, error) {
-	// chartmuseum := dag.Container().
-	// 	From("ghcr.io/helm/chartmuseum:v0.16.3").
-	// 	WithExposedPort(8080).
-	// 	WithEnvVariable("DEBUG", "1").
-	// 	WithEnvVariable("STORAGE", "local").
-	// 	WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/data").
-	// 	AsService()
-	// chartmuseumAlias := "chartmuseum"
+	chartmuseum := dag.Container().
+		From("ghcr.io/helm/chartmuseum:v0.16.3").
+		WithExposedPort(8080).
+		WithEnvVariable("DEBUG", "1").
+		WithEnvVariable("STORAGE", "local").
+		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/data").
+		AsService()
+	chartmuseumAlias := "chartmuseum"
 
 	registry := dag.Container().
 		From("docker.io/distribution/distribution:3").
@@ -78,12 +78,15 @@ func (m *BargeDev) Test(
 		AsService()
 	registryAlias := "registry"
 
-	test := []string{"go", "test", "-race", "-cover"}
-	for _, o := range append(oci,
-		fmt.Sprintf("%s:5000/test", registryAlias),
-		fmt.Sprintf("%s:5000/test:tag", registryAlias),
-	) {
-		test = append(test, "-oci", o)
+	test := []string{
+		"go", "test", "-race", "-cover", "-test.v",
+		"-cm",
+		fmt.Sprintf("http://%s:8080", chartmuseumAlias),
+		"-oci",
+		strings.Join([]string{
+			fmt.Sprintf("%s:5000/test", registryAlias),
+			fmt.Sprintf("%s:5000/test:tag", registryAlias),
+		}, ","),
 	}
 	test = append(test, "./...")
 
@@ -91,7 +94,7 @@ func (m *BargeDev) Test(
 		Module: m.Source,
 	}).
 		Container().
-		// WithServiceBinding(chartmuseumAlias, chartmuseum).
+		WithServiceBinding(chartmuseumAlias, chartmuseum).
 		WithServiceBinding(registryAlias, registry).
 		WithExec(test), nil
 }
@@ -130,9 +133,7 @@ func (m *BargeDev) Tag(ctx context.Context) string {
 
 func (m *BargeDev) Binary(ctx context.Context) *dagger.File {
 	return dag.Go(dagger.GoOpts{
-		Module: m.Source.Filter(dagger.DirectoryFilterOpts{
-			Exclude: []string{".github/", "e2e/"},
-		}),
+		Module: m.Source,
 	}).
 		Build(dagger.GoBuildOpts{
 			Pkg:     "./cmd/barge",
@@ -142,11 +143,7 @@ func (m *BargeDev) Binary(ctx context.Context) *dagger.File {
 
 func (m *BargeDev) Vulncheck(ctx context.Context) (string, error) {
 	return dag.Go(dagger.GoOpts{
-		Module: m.Source.Filter(dagger.DirectoryFilterOpts{
-			Exclude: []string{
-				".dagger/",
-			},
-		}),
+		Module: m.Source,
 	}).
 		Container().
 		WithExec([]string{"go", "install", "golang.org/x/vuln/cmd/govulncheck@v1.1.4"}).
@@ -156,11 +153,7 @@ func (m *BargeDev) Vulncheck(ctx context.Context) (string, error) {
 
 func (m *BargeDev) Vet(ctx context.Context) (string, error) {
 	return dag.Go(dagger.GoOpts{
-		Module: m.Source.Filter(dagger.DirectoryFilterOpts{
-			Exclude: []string{
-				".dagger/",
-			},
-		}),
+		Module: m.Source,
 	}).
 		Container().
 		WithExec([]string{"go", "vet", "./..."}).
@@ -169,11 +162,7 @@ func (m *BargeDev) Vet(ctx context.Context) (string, error) {
 
 func (m *BargeDev) Staticcheck(ctx context.Context) (string, error) {
 	return dag.Go(dagger.GoOpts{
-		Module: m.Source.Filter(dagger.DirectoryFilterOpts{
-			Exclude: []string{
-				".dagger/",
-			},
-		}),
+		Module: m.Source,
 	}).
 		Container().
 		WithExec([]string{"go", "install", "honnef.co/go/tools/cmd/staticcheck@v0.6.1"}).

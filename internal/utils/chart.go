@@ -79,9 +79,11 @@ func WriteChartToArchive(c *chart.Chart) (io.ReadCloser, error) {
 	pr, pw := io.Pipe()
 
 	go func() {
+		defer pw.Close()
 		zw := gzip.NewWriter(pw)
 		defer zw.Close()
 		tw := tar.NewWriter(zw)
+		defer tw.Close()
 
 		if err := writeChart(c, func(data []byte, rel string) error {
 			if err := tw.WriteHeader(&tar.Header{
@@ -99,11 +101,9 @@ func WriteChartToArchive(c *chart.Chart) (io.ReadCloser, error) {
 
 			return nil
 		}); err != nil {
-			pw.CloseWithError(err)
+			_ = pw.CloseWithError(err)
 			return
 		}
-
-		pw.CloseWithError(zw.Close())
 	}()
 
 	return pr, nil

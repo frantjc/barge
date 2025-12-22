@@ -1,4 +1,4 @@
-package chartmuseum
+package repo
 
 import (
 	"context"
@@ -11,8 +11,7 @@ import (
 func init() {
 	barge.RegisterSource(
 		new(source),
-		Scheme,
-		"cm",
+		"repo",
 	)
 }
 

@@ -23,10 +23,12 @@ import (
 
 var (
 	oci string
+	chartmuseum string
 )
 
 func init() {
-	flag.StringVar(&oci, "oci", "", "")
+	flag.StringVar(&oci, "oci", "", "run oci tests against these comma-delimited registries")
+	flag.StringVar(&chartmuseum, "cm", "", "run chartmuseum tests against these comma-delimited urls")
 }
 
 func FuzzCopy(f *testing.F) {
@@ -45,20 +47,44 @@ func FuzzCopy(f *testing.F) {
 	f.Add(file, archive)
 
 	for _, o := range strings.Split(oci, ",") {
+		if o  == "" {
+			continue
+		}
 		if !strings.Contains(o, "://") {
 			o = fmt.Sprintf("oci://%s", o)
 		}
 		u, err := url.Parse(o)
 		assert.NoError(f, err)
-		q := url.Values{}
 		switch u.Scheme {
 		case "oci", "":
 		default:
 			f.Fatalf("unknown scheme in -oci=%s", o)
 		}
-		oci := fmt.Sprintf("oci://%s?%s", path.Join(u.Host, u.Path), q.Encode())
+		oci := fmt.Sprintf("oci://%s", path.Join(u.Host, u.Path))
 		f.Add(archive, oci)
 		f.Add(oci, archive)
+	}
+
+	for _, c := range strings.Split(chartmuseum, ",") {
+		if c  == "" {
+			continue
+		}
+		u, err := url.Parse(c)
+		assert.NoError(f, err)
+		switch u.Scheme {
+		case "cm", "chartmuseum":
+		case "http":
+			u.Scheme = "chartmuseum"
+			q := u.Query()
+			q.Set("insecure", "1")
+			u.RawQuery = q.Encode()
+		case "https":
+			u.Scheme = "chartmuseum"
+		default:
+			f.Fatalf("unknown scheme in -cm=%s", c)
+		}
+		chartmuseum := u.String()
+		f.Add(archive, chartmuseum)
 	}
 
 	f.Fuzz(func(t *testing.T, src, dest string) {
