@@ -112,45 +112,74 @@ func (m *BargeDev) Test(
 		WithExec(test), nil
 }
 
-func (m *BargeDev) Version(ctx context.Context) string {
-	version := "v0.0.0-unknown"
-
+func (m *BargeDev) Release(ctx context.Context, githubToken *dagger.Secret) error {
 	gitRef := m.Source.AsGit().LatestVersion()
 
-	if ref, err := gitRef.Ref(ctx); err == nil {
-		version = strings.TrimPrefix(ref, "refs/tags/")
+	ref, err := gitRef.Ref(ctx)
+	if err != nil {
+		return err
 	}
 
-	if latestVersionCommit, err := gitRef.Commit(ctx); err == nil {
-		if headCommit, err := m.Source.AsGit().Head().Commit(ctx); err == nil {
-			if headCommit != latestVersionCommit {
-				if len(headCommit) > 7 {
-					headCommit = headCommit[:7]
-				}
-				version += "-" + headCommit
-			}
+	tag := strings.TrimPrefix(ref, "refs/tags/")
+
+	release := dag.Wolfi().
+		Container(dagger.WolfiContainerOpts{
+			Packages: []string{"gh"},
+		}).
+		WithSecretVariable("GITHUB_TOKEN", githubToken).
+		WithExec([]string{"gh", "release", "-R=frantjc/barge", "create", tag, "--generate-notes", "--draft"})
+
+	g0 := dag.Go(dagger.GoOpts{
+		Module: gitRef.Tree(),
+	})
+
+	for _, goos := range []string{"darwin", "linux"} {
+		for _, goarch := range []string{"amd64", "arm64"} {
+			file := fmt.Sprintf("barge_%s_%s_%s", tag, goos, goarch)
+
+			release = release.
+				WithFile(
+					file,
+					g0.Build(dagger.GoBuildOpts{
+						Pkg:     "./cmd/barge",
+						Ldflags: "-s -w -X main.version=" + tag,
+						Goos:    goos,
+						Goarch:  goarch,
+					}),
+				).
+				WithExec([]string{
+					"gh", "release", "-R=frantjc/barge", "upload", tag, file,
+				})
 		}
 	}
 
-	if empty, _ := m.Source.AsGit().Uncommitted().IsEmpty(ctx); !empty {
-		version += "+dirty"
+	_, err = release.
+		WithExec([]string{"gh", "release", "-R=frantjc/barge", "edit", tag, "--latest", "--draft=false"}).
+		Sync(ctx)
+	if err != nil {
+		return err
 	}
 
-	return version
+	return nil
 }
 
-func (m *BargeDev) Tag(ctx context.Context) string {
-	before, _, _ := strings.Cut(strings.TrimPrefix(m.Version(ctx), "v"), "+")
-	return before
-}
-
-func (m *BargeDev) Binary(ctx context.Context) *dagger.File {
+func (m *BargeDev) Binary(
+	ctx context.Context,
+	// +default=v0.0.0-unknown
+	version string,
+	// +optional
+	goarch string,
+	// +optional
+	goos string,
+) *dagger.File {
 	return dag.Go(dagger.GoOpts{
 		Module: m.Source,
 	}).
 		Build(dagger.GoBuildOpts{
 			Pkg:     "./cmd/barge",
-			Ldflags: "-s -w -X main.version=" + m.Version(ctx),
+			Ldflags: "-s -w -X main.version=" + version,
+			Goos:    goos,
+			Goarch:  goarch,
 		})
 }
 
@@ -181,36 +210,4 @@ func (m *BargeDev) Staticcheck(ctx context.Context) (string, error) {
 		WithExec([]string{"go", "install", "honnef.co/go/tools/cmd/staticcheck@v0.6.1"}).
 		WithExec([]string{"staticcheck", "./..."}).
 		CombinedOutput(ctx)
-}
-
-func (m *BargeDev) Coder(ctx context.Context) (*dagger.LLM, error) {
-	gopls := dag.Go(dagger.GoOpts{Module: m.Source}).
-		Container().
-		WithExec([]string{"go", "install", "golang.org/x/tools/gopls@latest"})
-
-	instructions, err := gopls.WithExec([]string{"gopls", "mcp", "-instructions"}).Stdout(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return dag.Doug().
-		Agent(
-			dag.LLM().
-				WithEnv(
-					dag.Env().
-						WithCurrentModule().
-						WithWorkspace(m.Source.Filter(dagger.DirectoryFilterOpts{
-							Exclude: []string{".dagger/", ".github/"},
-						})),
-				).
-				WithBlockedFunction("BargeDev", "tag").
-				WithBlockedFunction("BargeDev", "version").
-				WithSystemPrompt(instructions).
-				WithMCPServer(
-					"gopls",
-					gopls.AsService(dagger.ContainerAsServiceOpts{
-						Args: []string{"gopls", "mcp"},
-					}),
-				),
-		), nil
 }

@@ -6,19 +6,9 @@
   },
   "dependencies": [
     {
-      "name": "doug",
-      "source": "github.com/vito/daggerverse/doug@main",
-      "pin": "776610fc77055f983a3dca99f5f55946616c624e"
-    },
-    {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "e7d1f330e3497014ed5302950598c07783a36fb9"
-    },
-    {
-      "name": "tls",
-      "source": "github.com/frantjc/daggerverse/tls@main",
-      "pin": "e7d1f330e3497014ed5302950598c07783a36fb9"
+      "pin": "20fda2ff7672c789fc919ff018abf03c1a447cfb"
     },
     {
       "name": "wolfi",
