@@ -64,8 +64,6 @@ func (m *BargeDev) Test(
 	// +optional
 	oci []string,
 	// +optional
-	githubActor string,
-	// +optional
 	githubToken *dagger.Secret,
 ) (*dagger.Container, error) {
 	chartmuseum := dag.Container().
@@ -112,9 +110,8 @@ func (m *BargeDev) Test(
 	}).
 		Container().
 		With(func(r *dagger.Container) *dagger.Container {
-			if githubToken != nil && githubActor != "" {
+			if githubToken != nil {
 				return r.
-					WithEnvVariable("GITHUB_ACTOR", githubActor).
 					WithSecretVariable("GITHUB_TOKEN", githubToken)
 			}
 			return r

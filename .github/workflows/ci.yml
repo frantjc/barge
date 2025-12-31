@@ -21,7 +21,7 @@ jobs:
       - env:
           ENV_CONTENTS: |
             bargeDev_testsPass_githubToken=env://GITHUB_TOKEN
-            bargeDev_testsPass_githubActor=${{ github.actor }}
+            bargeDev_testsPass_githubRepo=${{ github.repository }}
         run: echo $ENV_CONTENTS > .env
       - env:
           GITHUB_TOKEN: ${{ github.token }}

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"os"
 	"path"
 	"strconv"
 	"strings"
 
+	"github.com/cli/cli/v2/pkg/cmd/factory"
 	"github.com/fluxcd/pkg/auth"
 	"github.com/fluxcd/pkg/auth/aws"
 	"github.com/fluxcd/pkg/auth/azure"
@@ -29,9 +29,11 @@ func NewRegistryClientFromURL(ctx context.Context, u *url.URL) (*registry.Client
 	} else if provider := u.Query().Get("provider"); provider != "" {
 		opts = append(opts, cliOptForURLAndProvider(u, provider))
 	} else if hostname := u.Hostname(); hostname == "ghcr.io" {
-		if githubActor := os.Getenv("GITHUB_ACTOR"); githubActor != "" {
-			if githubToken := os.Getenv("GITHUB_TOKEN"); githubToken != "" {
-				opts = append(opts, registry.ClientOptBasicAuth(githubActor, githubToken))
+		if cfg, err := factory.New("v0.0.0-unknown").Config(); err == nil {
+			authCfg := cfg.Authentication()
+			if user, err := authCfg.ActiveUser("github.com"); err == nil {
+				token, _ := authCfg.ActiveToken("github.com")
+				opts = append(opts, registry.ClientOptBasicAuth(user, token))
 			}
 		}
 	} else if xslices.Some([]string{".azurecr.io", ".azurecr.us", ".azurecr.cn"}, func(suffix string, _ int) bool {

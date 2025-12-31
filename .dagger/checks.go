@@ -22,15 +22,16 @@ func (m *BargeDev) IsFmted(ctx context.Context) error {
 func (m *BargeDev) TestsPass(
 	ctx context.Context,
 	// +optional
-	githubActor string,
+	githubRepo string,
 	// +optional
 	githubToken *dagger.Secret,
 ) error {
 	oci := []string{}
-	if githubToken != nil && githubActor != "" {
-		oci = append(oci, fmt.Sprintf("ghcr.io/%s/barge/charts/test", githubActor))
+	if githubToken != nil && githubRepo != "" {
+		oci = append(oci, fmt.Sprintf("ghcr.io/%s/charts/test", githubRepo))
 	}
-	test, err := m.Test(ctx, oci, githubActor, githubToken)
+
+	test, err := m.Test(ctx, oci, githubToken)
 	if err != nil {
 		return err
 	}
