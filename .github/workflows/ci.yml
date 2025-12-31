@@ -18,4 +18,11 @@ jobs:
         with:
           repository: dagger/dagger
           version: v0.19.8
-      - run: dagger checks
+      - env:
+          ENV_CONTENTS: |
+            bargeDev_testsPass_githubToken=env://GITHUB_TOKEN
+            bargeDev_testsPass_githubActor=${{ github.actor }}
+        run: echo $ENV_CONTENTS > .env
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: dagger check

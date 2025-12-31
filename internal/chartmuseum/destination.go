@@ -28,6 +28,7 @@ type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
 	q := u.Query()
+	scheme := u.Scheme
 	if insecure, _ := strconv.ParseBool(q.Get("insecure")); insecure {
 		u.Scheme = "http"
 	} else {
@@ -56,9 +57,6 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 
-	user := u.User
-	u.User = nil
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.JoinPath("/api/charts").String(), buf)
 	if err != nil {
 		return err
@@ -66,19 +64,16 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 
-	if user != nil {
-		if password, ok := user.Password(); ok {
-			username := user.Username()
-			req.Header.Add(
-				"Authorization",
-				fmt.Sprintf(
-					"Basic %s",
-					base64.RawURLEncoding.EncodeToString(
-						[]byte(fmt.Sprintf("%s:%s", username, password)),
-					),
+	if username, password, ok := utils.UsernameAndPasswordForURLWithEnvFallback(u, utils.LocationSource, scheme); ok {
+		req.Header.Add(
+			"Authorization",
+			fmt.Sprintf(
+				"Basic %s",
+				base64.RawURLEncoding.EncodeToString(
+					[]byte(fmt.Sprintf("%s:%s", username, password)),
 				),
-			)
-		}
+			),
+		)
 	}
 
 	res, err := http.DefaultClient.Do(req)

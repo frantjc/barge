@@ -30,6 +30,7 @@ type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
 	q := u.Query()
+	scheme := u.Scheme
 	if insecure, _ := strconv.ParseBool(q.Get("insecure")); insecure {
 		u.Scheme = "http"
 	} else {
@@ -42,27 +43,21 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	}
 	defer rc.Close()
 
-	user := u.User
-	u.User = nil
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, u.JoinPath(fmt.Sprintf("%s-%s.tgz", c.Name(), c.Metadata.Version)).String(), rc)
 	if err != nil {
 		return err
 	}
 
-	if user != nil {
-		if password, ok := user.Password(); ok {
-			username := user.Username()
-			req.Header.Add(
-				"Authorization",
-				fmt.Sprintf(
-					"Basic %s",
-					base64.RawURLEncoding.EncodeToString(
-						[]byte(fmt.Sprintf("%s:%s", username, password)),
-					),
+	if username, password, ok := utils.UsernameAndPasswordForURLWithEnvFallback(u, utils.LocationSource, scheme); ok {
+		req.Header.Add(
+			"Authorization",
+			fmt.Sprintf(
+				"Basic %s",
+				base64.RawURLEncoding.EncodeToString(
+					[]byte(fmt.Sprintf("%s:%s", username, password)),
 				),
-			)
-		}
+			),
+		)
 	}
 
 	res, err := http.DefaultClient.Do(req)

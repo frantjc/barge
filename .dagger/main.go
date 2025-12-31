@@ -63,6 +63,10 @@ func (m *BargeDev) Test(
 	ctx context.Context,
 	// +optional
 	oci []string,
+	// +optional
+	githubActor string,
+	// +optional
+	githubToken *dagger.Secret,
 ) (*dagger.Container, error) {
 	chartmuseum := dag.Container().
 		From("ghcr.io/helm/chartmuseum:v0.16.3").
@@ -81,19 +85,21 @@ func (m *BargeDev) Test(
 		AsService()
 	registryAlias := "registry"
 
+	oci = append(oci,
+		fmt.Sprintf("%s:5000/test", registryAlias),
+		fmt.Sprintf("%s:5000/test:tag", registryAlias),
+	)
+
 	test := []string{
 		"go", "test", "-race", "-cover", "-test.v",
 		"-cm",
 		chartmuseumURL,
 		"-oci",
-		strings.Join([]string{
-			fmt.Sprintf("%s:5000/test", registryAlias),
-			fmt.Sprintf("%s:5000/test:tag", registryAlias),
-		}, ","),
+		strings.Join(oci, ","),
 		"-repo",
 		strings.Join([]string{
 			fmt.Sprintf("%s/test", chartmuseumRepo),
-			fmt.Sprintf("%s/test/0.2.0", chartmuseumRepo),
+			fmt.Sprintf("%s/test?version=0.2.0", chartmuseumRepo),
 		}, ","),
 		"-http",
 		fmt.Sprintf("%s/charts/test-0.2.0.tgz", chartmuseumURL),
@@ -105,6 +111,14 @@ func (m *BargeDev) Test(
 		AdditionalWolfiPackages: []string{"helm-4", "curl"},
 	}).
 		Container().
+		With(func(r *dagger.Container) *dagger.Container {
+			if githubToken != nil && githubActor != "" {
+				return r.
+					WithEnvVariable("GITHUB_ACTOR", githubActor).
+					WithSecretVariable("GITHUB_TOKEN", githubToken)
+			}
+			return r
+		}).
 		WithServiceBinding(chartmuseumAlias, chartmuseum).
 		WithExec([]string{"curl", "-X", "POST", "-F", "chart=@testdata/test-0.2.0.tgz", fmt.Sprintf("%s/api/charts", chartmuseumURL)}).
 		WithExec([]string{"helm", "repo", "add", chartmuseumRepo, chartmuseumURL}).

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/frantjc/barge"
+	"github.com/frantjc/barge/internal/utils"
 	xslices "github.com/frantjc/x/slices"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -46,10 +47,8 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		return nil, err
 	}
 
-	chart, version, _ := strings.Cut(
-		strings.TrimPrefix(u.Path, "/"),
-		"/",
-	)
+	chart := strings.TrimPrefix(u.Path, "/")
+	version := u.Query().Get("version")
 
 	versions, ok := index.Entries[chart]
 	if !ok {
@@ -90,7 +89,13 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 			return nil, err
 		}
 
-		buf, err := g.Get(v)
+		opts := []getter.Option{}
+
+		if username, password, ok := utils.UsernameAndPasswordForURLWithEnvFallback(u, utils.LocationSource, scheme); ok {
+			opts = append(opts, getter.WithBasicAuth(username, password))
+		}
+
+		buf, err := g.Get(v, opts...)
 		if err != nil {
 			errs = errors.Join(errs, err)
 			continue

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/frantjc/barge/.dagger/internal/dagger"
 )
 
 // +check
@@ -20,9 +22,15 @@ func (m *BargeDev) IsFmted(ctx context.Context) error {
 func (m *BargeDev) TestsPass(
 	ctx context.Context,
 	// +optional
-	oci []string,
+	githubActor string,
+	// +optional
+	githubToken *dagger.Secret,
 ) error {
-	test, err := m.Test(ctx, oci)
+	oci := []string{}
+	if githubToken != nil && githubActor != "" {
+		oci = append(oci, fmt.Sprintf("ghcr.io/%s/barge/charts/test", githubActor))
+	}
+	test, err := m.Test(ctx, oci, githubActor, githubToken)
 	if err != nil {
 		return err
 	}
