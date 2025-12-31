@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/frantjc/barge"
-	"github.com/frantjc/barge/internal/utils"
+	"github.com/frantjc/barge/internal/util"
 	xslices "github.com/frantjc/x/slices"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -91,7 +91,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 
 		opts := []getter.Option{}
 
-		if username, password, ok := utils.UsernameAndPasswordForURLWithEnvFallback(u, utils.LocationSource, scheme); ok {
+		if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, scheme); ok {
 			opts = append(opts, getter.WithBasicAuth(username, password))
 		}
 

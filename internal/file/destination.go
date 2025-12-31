@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/frantjc/barge"
-	"github.com/frantjc/barge/internal/utils"
+	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 )
 
@@ -28,8 +28,8 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 			return err
 		}
 	} else if fi.IsDir() {
-		return utils.WriteChartToDirectory(c, name)
+		return util.WriteChartToDirectory(ctx, c, name)
 	}
 
-	return utils.WriteChartToFile(c, name)
+	return util.WriteChartToFile(c, name)
 }

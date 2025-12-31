@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	"context"
@@ -18,8 +18,8 @@ import (
 	orasauth "oras.land/oras-go/v2/registry/remote/auth"
 )
 
-func NewRegistryClientFromURL(u *url.URL) (*registry.Client, error) {
-	opts := []registry.ClientOption{registry.ClientOptWriter(os.Stdout)}
+func NewRegistryClientFromURL(ctx context.Context, u *url.URL) (*registry.Client, error) {
+	opts := []registry.ClientOption{registry.ClientOptWriter(StdoutFrom(ctx))}
 
 	if user := u.User; user != nil {
 		if password, ok := user.Password(); ok {

@@ -20,6 +20,18 @@ barge cp repo://chartmuseum/chartmuseum artifactory://example.com/artifactory/he
 - You want to save a one-off Helm release for re-use later.
 
 ```sh
-mkdir ./example
-barge cp release://example ./example
+barge cp release://example archive://example.tgz
+```
+
+- You want to inspect a Helm Chart archive's source code before using it.
+
+```sh
+mkdir ./test
+barge cp https://github.com/frantjc/barge/raw/refs/heads/main/testdata/test-0.1.0.tgz ./test
+```
+
+- You want to turn an OCI Helm Chart back into a regular archive.
+
+```sh
+barge cp oci://ghcr.io/frantjc/barge/charts/test ./test.tgz
 ```

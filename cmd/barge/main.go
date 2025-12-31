@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,6 +18,7 @@ import (
 	_ "github.com/frantjc/barge/internal/oci"
 	_ "github.com/frantjc/barge/internal/release"
 	_ "github.com/frantjc/barge/internal/repo"
+	"github.com/frantjc/barge/internal/util"
 	xerrors "github.com/frantjc/x/errors"
 	xos "github.com/frantjc/x/os"
 	"github.com/spf13/cobra"
@@ -35,12 +37,32 @@ func main() {
 }
 
 func newBarge() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:           "barge",
-		Version:       SemVer(),
-		SilenceErrors: true,
-		SilenceUsage:  true,
-	}
+	var (
+		slogConfig = new(util.SlogConfig)
+		cmd        = &cobra.Command{
+			Use:           "barge",
+			Version:       SemVer(),
+			SilenceErrors: true,
+			SilenceUsage:  true,
+			PersistentPreRun: func(cmd *cobra.Command, args []string) {
+				cmd.SetContext(
+					util.SloggerInto(
+						util.StdoutInto(
+							util.StderrInto(
+								cmd.Context(),
+								cmd.ErrOrStderr(),
+							),
+							cmd.OutOrStdout(),
+						),
+						slog.New(slog.NewJSONHandler(cmd.OutOrStdout(), &slog.HandlerOptions{
+							Level: slogConfig,
+						})),
+					),
+				)
+			},
+		}
+	)
+	slogConfig.AddFlags(cmd.PersistentFlags())
 	cmd.AddCommand(newCopy())
 	return cmd
 }

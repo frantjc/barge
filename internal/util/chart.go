@@ -1,8 +1,9 @@
-package utils
+package util
 
 import (
 	"archive/tar"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,13 +17,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// TODO(frantjc): Context propagation.
-
 // WriteChartToDirectory writes the contents of the given
 // Chart to dir.
-func WriteChartToDirectory(c *chart.Chart, dir string) error {
-	// TODO(frantjc): Is it worth doing this in parallel?
-	eg := new(errgroup.Group)
+func WriteChartToDirectory(ctx context.Context, c *chart.Chart, dir string) error {
+	eg, ctx := errgroup.WithContext(ctx)
 
 	if err := writeChart(c, func(data []byte, rel string) error {
 		eg.Go(func() error {

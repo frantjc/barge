@@ -12,7 +12,7 @@ import (
 	"strconv"
 
 	"github.com/frantjc/barge"
-	"github.com/frantjc/barge/internal/utils"
+	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 )
 
@@ -43,7 +43,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 
-	rc, err := utils.WriteChartToArchive(c)
+	rc, err := util.WriteChartToArchive(c)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 
-	if username, password, ok := utils.UsernameAndPasswordForURLWithEnvFallback(u, utils.LocationSource, scheme); ok {
+	if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, scheme); ok {
 		req.Header.Add(
 			"Authorization",
 			fmt.Sprintf(
