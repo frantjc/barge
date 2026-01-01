@@ -9,6 +9,7 @@ on:
       - main
 permissions:
   contents: read
+  packages: write
 jobs:
   ci:
     runs-on: ubuntu-latest

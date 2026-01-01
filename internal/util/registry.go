@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cli/cli/v2/api"
 	"github.com/cli/cli/v2/pkg/cmd/factory"
 	"github.com/fluxcd/pkg/auth"
 	"github.com/fluxcd/pkg/auth/aws"
@@ -19,7 +20,8 @@ import (
 )
 
 func NewRegistryClientFromURL(ctx context.Context, u *url.URL) (*registry.Client, error) {
-	opts := []registry.ClientOption{registry.ClientOptWriter(StdoutFrom(ctx))}
+	stdout := StdoutFrom(ctx)
+	opts := []registry.ClientOption{registry.ClientOptWriter(stdout)}
 
 	if user := u.User; user != nil {
 		if password, ok := user.Password(); ok {
@@ -29,13 +31,33 @@ func NewRegistryClientFromURL(ctx context.Context, u *url.URL) (*registry.Client
 	} else if provider := u.Query().Get("provider"); provider != "" {
 		opts = append(opts, cliOptForURLAndProvider(u, provider))
 	} else if hostname := u.Hostname(); hostname == "ghcr.io" {
-		if cfg, err := factory.New("v0.0.0-unknown").Config(); err == nil {
-			authCfg := cfg.Authentication()
-			if user, err := authCfg.ActiveUser("github.com"); err == nil {
-				token, _ := authCfg.ActiveToken("github.com")
-				opts = append(opts, registry.ClientOptBasicAuth(user, token))
+		cfg, err := factory.New("v0.0.0-unknown").Config()
+		if err != nil {
+			return nil, err
+		}
+
+		authCfg := cfg.Authentication()
+
+		httpClient, err := api.NewHTTPClient(api.HTTPClientOptions{
+			Config: authCfg,
+			Log:    stdout,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		username, err := authCfg.ActiveUser("github.com")
+		if err != nil {
+			var nerr error
+			username, nerr = api.CurrentLoginName(api.NewClientFromHTTP(httpClient), "github.com")
+			if nerr != nil {
+				return nil, fmt.Errorf("%v: %v", err, nerr)
 			}
 		}
+
+		password, _ := authCfg.ActiveToken("github.com")
+
+		opts = append(opts, registry.ClientOptBasicAuth(username, password))
 	} else if xslices.Some([]string{".azurecr.io", ".azurecr.us", ".azurecr.cn"}, func(suffix string, _ int) bool {
 		return strings.HasSuffix(hostname, suffix)
 	}) {
