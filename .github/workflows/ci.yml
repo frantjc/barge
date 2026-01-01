@@ -19,11 +19,6 @@ jobs:
         with:
           repository: dagger/dagger
           version: v0.19.8
-      - run: |
-          cat <<EOF > .env
-          bargeDev_testsPass_githubToken=env://GITHUB_TOKEN
-          bargeDev_testsPass_githubRepo=${{ github.repository }}
-          EOF
       - env:
           GITHUB_TOKEN: ${{ github.token }}
         run: dagger check
