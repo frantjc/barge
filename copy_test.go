@@ -113,3 +113,12 @@ func FuzzCopy(f *testing.F) {
 		assert.NoError(t, barge.Copy(t.Context(), src, dest))
 	})
 }
+
+func FuzzCopyError(f *testing.F) {
+	f.Add("foo://", f.TempDir())
+	f.Add(f.TempDir(), "bar://")
+
+	f.Fuzz(func(t *testing.T, src, dest string) {
+		assert.Error(t, barge.Copy(t.Context(), src, dest))
+	})
+}
