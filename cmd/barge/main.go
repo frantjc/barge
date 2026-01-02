@@ -62,6 +62,9 @@ func newBarge() *cobra.Command {
 			},
 		}
 	)
+	cmd.Flags().BoolP("help", "h", false, "Help for "+cmd.Name())
+	cmd.Flags().Bool("version", false, "Version for "+cmd.Name())
+	cmd.SetVersionTemplate("{{ .Name }}{{ .Version }}")
 	slogConfig.AddFlags(cmd.PersistentFlags())
 	cmd.AddCommand(newCopy())
 	return cmd
