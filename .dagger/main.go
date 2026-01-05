@@ -123,7 +123,11 @@ func (m *BargeDev) Test(
 		WithExec(test), nil
 }
 
-func (m *BargeDev) Release(ctx context.Context, githubToken *dagger.Secret) error {
+func (m *BargeDev) Release(
+	ctx context.Context,
+	githubRepo string,
+	githubToken *dagger.Secret,
+) error {
 	gitRef := m.Source.AsGit().LatestVersion()
 
 	ref, err := gitRef.Ref(ctx)
@@ -132,46 +136,21 @@ func (m *BargeDev) Release(ctx context.Context, githubToken *dagger.Secret) erro
 	}
 
 	tag := strings.TrimPrefix(ref, "refs/tags/")
+	opts := dagger.GhReleaseCreateOpts{
+		Assets: []*dagger.File{},
+	}
 
-	release := dag.Wolfi().
-		Container(dagger.WolfiContainerOpts{
-			Packages: []string{"gh"},
-		}).
-		WithSecretVariable("GITHUB_TOKEN", githubToken).
-		WithExec([]string{"gh", "release", "-R=frantjc/barge", "create", tag, "--generate-notes", "--draft"})
-
-	g0 := dag.Go(dagger.GoOpts{
-		Module: gitRef.Tree(),
-	})
+	m.Source = gitRef.Tree()
 
 	for _, goos := range []string{"darwin", "linux"} {
 		for _, goarch := range []string{"amd64", "arm64"} {
-			file := fmt.Sprintf("barge_%s_%s_%s", tag, goos, goarch)
-
-			release = release.
-				WithFile(
-					file,
-					g0.Build(dagger.GoBuildOpts{
-						Pkg:     "./cmd/barge",
-						Ldflags: "-s -w -X main.version=" + tag,
-						Goos:    goos,
-						Goarch:  goarch,
-					}),
-				).
-				WithExec([]string{
-					"gh", "release", "-R=frantjc/barge", "upload", tag, file,
-				})
+			opts.Assets = append(opts.Assets,
+				m.Binary(ctx, tag, goarch, goos).WithName(fmt.Sprintf("barge_%s_%s_%s", tag, goos, goarch)),
+			)
 		}
 	}
 
-	_, err = release.
-		WithExec([]string{"gh", "release", "-R=frantjc/barge", "edit", tag, "--latest", "--draft=false"}).
-		Sync(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return dag.Gh(githubToken).Release().Create(ctx, tag, githubRepo, opts)
 }
 
 func (m *BargeDev) Binary(

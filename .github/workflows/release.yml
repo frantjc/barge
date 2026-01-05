@@ -18,4 +18,4 @@ jobs:
           version: v0.19.8
       - env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: dagger call release --github-token env://GITHUB_TOKEN
+        run: dagger call release
