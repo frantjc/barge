@@ -8,7 +8,7 @@
     {
       "name": "gh",
       "source": "github.com/frantjc/daggerverse/gh@main",
-      "pin": "17e7dc4bb222388e5891b85b0ae5219cf54d521b"
+      "pin": "cc12338498f93fb157feb507d160eff22b235cd2"
     },
     {
       "name": "go",
