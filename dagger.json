@@ -6,14 +6,14 @@
   },
   "dependencies": [
     {
-      "name": "gh",
-      "source": "github.com/frantjc/daggerverse/gh@main",
-      "pin": "39e6c9266405b74030c337aa2ee242b73fbd0e72"
-    },
-    {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "20fda2ff7672c789fc919ff018abf03c1a447cfb"
+      "pin": "96a05dd29324b73c036c9fe842972ac5138fac31"
+    },
+    {
+      "name": "release",
+      "source": "github.com/frantjc/daggerverse/release@main",
+      "pin": "d769828a0500c32421447db823876565c2c80540"
     },
     {
       "name": "wolfi",

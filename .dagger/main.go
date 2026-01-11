@@ -123,6 +123,17 @@ func (m *BargeDev) Test(
 		WithExec(test), nil
 }
 
+func (m *BargeDev) Release(
+	ctx context.Context,
+	githubRepo string,
+	githubToken *dagger.Secret,
+) error {
+	return dag.Release(
+		m.Source.AsGit().LatestVersion(),
+	).
+		Create(ctx, githubToken, githubRepo, "./cmd/barge", dagger.ReleaseCreateOpts{Brew: true})
+}
+
 func (m *BargeDev) Binary(
 	ctx context.Context,
 	// +default=v0.0.0-unknown
