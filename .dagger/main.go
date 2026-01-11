@@ -123,36 +123,6 @@ func (m *BargeDev) Test(
 		WithExec(test), nil
 }
 
-func (m *BargeDev) Release(
-	ctx context.Context,
-	githubRepo string,
-	githubToken *dagger.Secret,
-) error {
-	gitRef := m.Source.AsGit().LatestVersion()
-
-	ref, err := gitRef.Ref(ctx)
-	if err != nil {
-		return err
-	}
-
-	tag := strings.TrimPrefix(ref, "refs/tags/")
-	opts := dagger.GhReleaseCreateOpts{
-		Assets: []*dagger.File{},
-	}
-
-	m.Source = gitRef.Tree()
-
-	for _, goos := range []string{"darwin", "linux"} {
-		for _, goarch := range []string{"amd64", "arm64"} {
-			opts.Assets = append(opts.Assets,
-				m.Binary(ctx, tag, goarch, goos).WithName(fmt.Sprintf("barge_%s_%s_%s", tag, goos, goarch)),
-			)
-		}
-	}
-
-	return dag.Gh(githubToken).Release().Create(ctx, tag, githubRepo, opts)
-}
-
 func (m *BargeDev) Binary(
 	ctx context.Context,
 	// +default=v0.0.0-unknown
