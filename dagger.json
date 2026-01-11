@@ -13,7 +13,7 @@
     {
       "name": "release",
       "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "d769828a0500c32421447db823876565c2c80540"
+      "pin": "1388aff57c40f1b332dc309fb31eba32b2b8051f"
     },
     {
       "name": "wolfi",
