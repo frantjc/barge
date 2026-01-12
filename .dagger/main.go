@@ -131,7 +131,7 @@ func (m *BargeDev) Release(
 	return dag.Release(
 		m.Source.AsGit().LatestVersion(),
 	).
-		Create(ctx, githubToken, githubRepo, "./cmd/barge", dagger.ReleaseCreateOpts{Brew: true})
+		Create(ctx, githubToken, githubRepo, "barge", dagger.ReleaseCreateOpts{Brew: true})
 }
 
 func (m *BargeDev) Binary(
