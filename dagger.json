@@ -8,12 +8,12 @@
     {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "96a05dd29324b73c036c9fe842972ac5138fac31"
+      "pin": "5f34ad7ef9054eae8227f93415e74f2ca686897f"
     },
     {
       "name": "release",
       "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "1388aff57c40f1b332dc309fb31eba32b2b8051f"
+      "pin": "5f34ad7ef9054eae8227f93415e74f2ca686897f"
     },
     {
       "name": "wolfi",
