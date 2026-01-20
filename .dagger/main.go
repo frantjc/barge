@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/frantjc/barge/.dagger/internal/dagger"
@@ -62,51 +61,11 @@ func (m *BargeDev) Fmt(ctx context.Context) *dagger.Changeset {
 func (m *BargeDev) Test(
 	ctx context.Context,
 	// +optional
-	oci []string,
-	// +optional
 	githubToken *dagger.Secret,
-) (*dagger.Container, error) {
-	chartmuseum := dag.Container().
-		From("ghcr.io/helm/chartmuseum:v0.16.3").
-		WithExposedPort(8080).
-		WithEnvVariable("DEBUG", "1").
-		WithEnvVariable("STORAGE", "local").
-		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
-		AsService()
-	chartmuseumAlias := "chartmuseum"
-	chartmuseumURL := fmt.Sprintf("http://%s:8080", chartmuseumAlias)
-	chartmuseumRepo := chartmuseumAlias
-
-	registry := dag.Container().
-		From("docker.io/distribution/distribution:3").
-		WithExposedPort(5000).
-		AsService()
-	registryAlias := "registry"
-
-	oci = append(oci,
-		fmt.Sprintf("%s:5000/test", registryAlias),
-		fmt.Sprintf("%s:5000/test:tag", registryAlias),
-	)
-
-	test := []string{
-		"go", "test", "-race", "-cover", "-test.v",
-		"-cm",
-		chartmuseumURL,
-		"-oci",
-		strings.Join(oci, ","),
-		"-repo",
-		strings.Join([]string{
-			fmt.Sprintf("%s/test", chartmuseumRepo),
-			fmt.Sprintf("%s/test?version=0.2.0", chartmuseumRepo),
-		}, ","),
-		"-http",
-		fmt.Sprintf("%s/charts/test-0.2.0.tgz", chartmuseumURL),
-	}
-	test = append(test, "./...")
-
+) (string, error) {
 	return dag.Go(dagger.GoOpts{
 		Module:                  m.Source,
-		AdditionalWolfiPackages: []string{"helm-4", "curl"},
+		AdditionalWolfiPackages: []string{"helm-4"},
 	}).
 		Container().
 		With(func(r *dagger.Container) *dagger.Container {
@@ -116,11 +75,8 @@ func (m *BargeDev) Test(
 			}
 			return r
 		}).
-		WithServiceBinding(chartmuseumAlias, chartmuseum).
-		WithExec([]string{"curl", "-X", "POST", "-F", "chart=@testdata/test-0.2.0.tgz", fmt.Sprintf("%s/api/charts", chartmuseumURL)}).
-		WithExec([]string{"helm", "repo", "add", chartmuseumRepo, chartmuseumURL}).
-		WithServiceBinding(registryAlias, registry).
-		WithExec(test), nil
+		WithExec([]string{"go", "test", "-race", "-cover", "-test.v", "./..."}, dagger.ContainerWithExecOpts{ExperimentalPrivilegedNesting: true}).
+		CombinedOutput(ctx)
 }
 
 func (m *BargeDev) Release(

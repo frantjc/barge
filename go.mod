@@ -3,6 +3,7 @@ module github.com/frantjc/barge
 go 1.25.4
 
 require (
+	dagger.io/dagger v0.19.10
 	github.com/cli/cli/v2 v2.83.2
 	github.com/fluxcd/pkg/auth v0.33.0
 	github.com/frantjc/x v0.0.0-20251203020658-a4e29ee5477f
@@ -13,6 +14,29 @@ require (
 	helm.sh/helm/v3 v3.19.4
 	oras.land/oras-go/v2 v2.6.0
 	sigs.k8s.io/yaml v1.6.0
+)
+
+require (
+	github.com/99designs/gqlgen v0.17.81 // indirect
+	github.com/Khan/genqlient v0.8.1 // indirect
+	github.com/adrg/xdg v0.5.3 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
+	github.com/sosodev/duration v1.3.1 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.30 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.14.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.14.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.38.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.38.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.38.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.38.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.38.0 // indirect
+	go.opentelemetry.io/otel/log v0.14.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
+	go.opentelemetry.io/otel/sdk/log v0.14.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v1.38.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.8.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251022142026-3a174f9686a8 // indirect
 )
 
 require (
