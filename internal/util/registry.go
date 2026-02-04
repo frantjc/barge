@@ -20,8 +20,6 @@ import (
 )
 
 func GetGitHubAuth(ctx context.Context) (string, string, error) {
-	stdout := StdoutFrom(ctx)
-
 	cfg, err := factory.New("v0.0.0-unknown").Config()
 	if err != nil {
 		return "", "", err
@@ -29,16 +27,18 @@ func GetGitHubAuth(ctx context.Context) (string, string, error) {
 
 	authCfg := cfg.Authentication()
 
-	httpClient, err := api.NewHTTPClient(api.HTTPClientOptions{
-		Config: authCfg,
-		Log:    stdout,
-	})
-	if err != nil {
-		return "", "", err
-	}
-
 	username, err := authCfg.ActiveUser("github.com")
 	if err != nil {
+		stdout := StdoutFrom(ctx)
+
+		httpClient, err := api.NewHTTPClient(api.HTTPClientOptions{
+			Config: authCfg,
+			Log:    stdout,
+		})
+		if err != nil {
+			return "", "", err
+		}
+
 		var nerr error
 		username, nerr = api.CurrentLoginName(api.NewClientFromHTTP(httpClient), "github.com")
 		if nerr != nil {
@@ -89,7 +89,11 @@ func RefFromURL(u *url.URL) string {
 	if strings.Contains(u.Path, ":") {
 		return ref
 	}
-	return fmt.Sprintf("%s:latest", ref)
+	tag := u.Query().Get("version")
+	if tag == "" {
+		tag = "latest"
+	}
+	return fmt.Sprintf("%s:%s", ref, tag)
 }
 
 func cliOptForURLAndProvider(u *url.URL, provider string) registry.ClientOption {

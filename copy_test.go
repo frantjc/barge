@@ -6,19 +6,16 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
 
 	"dagger.io/dagger"
 	"github.com/frantjc/barge"
 	_ "github.com/frantjc/barge/internal/archive"
-	_ "github.com/frantjc/barge/internal/artifactory"
 	_ "github.com/frantjc/barge/internal/chartmuseum"
 	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/http"
 	_ "github.com/frantjc/barge/internal/oci"
-	_ "github.com/frantjc/barge/internal/release"
 	_ "github.com/frantjc/barge/internal/repo"
 	"github.com/frantjc/barge/internal/util"
 	"github.com/frantjc/barge/testdata"
@@ -35,16 +32,65 @@ func Command(t testing.TB, name string, arg ...string) *exec.Cmd {
 	return cmd
 }
 
+func Context(t testing.TB) context.Context {
+	t.Helper()
+	return util.StdoutInto(util.StderrInto(t.Context(), t.Output()), t.Output())
+}
+
+func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
+	t.Helper()
+	ctx := t.Context()
+	chartmuseum, err := dag.Container().
+		From("ghcr.io/helm/chartmuseum:v0.16.3").
+		WithExposedPort(8080).
+		WithEnvVariable("DEBUG", "1").
+		WithEnvVariable("STORAGE", "local").
+		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
+		AsService().
+		Start(ctx)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, err = chartmuseum.Stop(context.WithoutCancel(ctx))
+		assert.NoError(t, err)
+	})
+	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum"})
+	require.NoError(t, err)
+	chartmuseumURL, err := url.Parse(rawChartmuseumURL)
+	chartmuseumURL.RawQuery = "insecure=1"
+	require.NoError(t, err)
+
+	return chartmuseumURL
+}
+
+func Registry(t testing.TB, dag *dagger.Client) *url.URL {
+	t.Helper()
+	ctx := t.Context()
+	registry, err := dag.Container().
+		From("docker.io/distribution/distribution:3").
+		WithExposedPort(5000).
+		AsService().
+		Start(ctx)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, err = registry.Stop(context.WithoutCancel(ctx))
+		assert.NoError(t, err)
+	})
+	rawRegistryURL, err := registry.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
+	require.NoError(t, err)
+	registryURL, err := url.Parse(rawRegistryURL)
+	require.NoError(t, err)
+
+	return registryURL
+}
+
 func FuzzCopy(f *testing.F) {
-	ctx := util.StdoutInto(util.StderrInto(f.Context(), f.Output()), f.Output())
+	ctx := Context(f)
 
 	tmp, err := os.CreateTemp(f.TempDir(), "test-0.1.0.tgz")
 	require.NoError(f, err)
 	_, err = tmp.Write(testdata.ChartArchive)
 	require.NoError(f, err)
-	f.Cleanup(func() {
-		assert.NoError(f, tmp.Close())
-	})
+	require.NoError(f, tmp.Close())
 	chart, err := loader.LoadFile(tmp.Name())
 	require.NoError(f, err)
 	archive := fmt.Sprintf("archive://%s", tmp.Name())
@@ -61,25 +107,8 @@ func FuzzCopy(f *testing.F) {
 			assert.NoError(f, dag.Close())
 		})
 
-		chartmuseum, err := dag.Container().
-			From("ghcr.io/helm/chartmuseum:v0.16.3").
-			WithExposedPort(8080).
-			WithEnvVariable("DEBUG", "1").
-			WithEnvVariable("STORAGE", "local").
-			WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
-			AsService().
-			Start(ctx)
-		require.NoError(f, err)
-		f.Cleanup(func() {
-			_, err = chartmuseum.Stop(context.WithoutCancel(ctx))
-			assert.NoError(f, err)
-		})
-		rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum"})
-		require.NoError(f, err)
-		chartmuseumURL, err := url.Parse(rawChartmuseumURL)
-		chartmuseumURL.RawQuery = "insecure=1"
-		require.NoError(f, err)
-		f.Add(archive, chartmuseumURL.String())
+		chartmuseumURL := Chartmuseum(f, dag)
+		require.NoError(f, barge.Copy(ctx, archive, chartmuseumURL.String()))
 
 		if helm, err := exec.LookPath("helm"); assert.NoError(f, err) {
 			repo := "chartmuseum"
@@ -101,32 +130,17 @@ func FuzzCopy(f *testing.F) {
 		}
 		f.Add(httpURL.String(), f.TempDir())
 
-		registry, err := dag.Container().
-			From("docker.io/distribution/distribution:3").
-			WithExposedPort(5000).
-			AsService().
-			Start(ctx)
-		require.NoError(f, err)
-		f.Cleanup(func() {
-			_, err = registry.Stop(context.WithoutCancel(ctx))
-			assert.NoError(f, err)
-		})
-		rawRegistryURL, err := registry.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
-		require.NoError(f, err)
-		registryURL, err := url.Parse(rawRegistryURL)
-		require.NoError(f, err)
-
+		registryURL := Registry(f, dag)
 		oci := registryURL.JoinPath("test")
 		f.Add(archive, oci.String())
 		f.Add(oci.String(), f.TempDir())
-
 		ociWithTag := registryURL.JoinPath("test:tag")
 		f.Add(archive, ociWithTag.String())
 		f.Add(ociWithTag.String(), f.TempDir())
 	}
 
-	if username, _, err := util.GetGitHubAuth(ctx); assert.NoError(f, err) {
-		ghcr := fmt.Sprintf("oci://ghcr.io/%s/barge/charts/%s", username, chart.Name())
+	if githubRepository := os.Getenv("GITHUB_REPOSITORY"); githubRepository != "" {
+		ghcr := fmt.Sprintf("oci://ghcr.io/%s/charts/%s", githubRepository, chart.Name())
 		ghcrWithTag := fmt.Sprintf("%s:%s", ghcr, chart.Metadata.Version)
 		f.Add(archive, ghcr)
 		f.Add(ghcr, f.TempDir())
@@ -135,13 +149,6 @@ func FuzzCopy(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, src, dest string) {
-		if strings.HasPrefix(src, "repo://") {
-			if helm, err := exec.LookPath("helm"); assert.NoError(f, err) {
-				update := Command(t, helm, "repo", "update")
-				require.NoError(t, update.Run())
-			}
-		}
-
 		require.NoError(t, barge.Copy(t.Context(), src, dest))
 	})
 }

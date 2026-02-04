@@ -2,6 +2,7 @@ package directory
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"path/filepath"
 
@@ -22,4 +23,8 @@ type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
 	return util.WriteChartToDirectory(ctx, c, filepath.Join(u.Host, u.Path))
+}
+
+func (d *destination) Sync(ctx context.Context, u *url.URL, c *chart.Chart) error {
+	return util.WriteChartToFile(c, filepath.Join(u.Host, u.Path, fmt.Sprintf("%s-%s.tgz", c.Name(), c.Metadata.Version)))
 }

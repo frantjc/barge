@@ -23,8 +23,10 @@ func (m *BargeDev) TestsPass(
 	ctx context.Context,
 	// +optional
 	githubToken *dagger.Secret,
+	// +optional
+	githubRepo string,
 ) error {
-	if _, err := m.Test(ctx, githubToken); err != nil {
+	if _, err := m.Test(ctx, githubToken, githubRepo); err != nil {
 		return err
 	}
 

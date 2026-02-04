@@ -4,6 +4,7 @@ go 1.25.4
 
 require (
 	dagger.io/dagger v0.19.10
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/cli/cli/v2 v2.83.2
 	github.com/fluxcd/pkg/auth v0.33.0
 	github.com/frantjc/x v0.0.0-20251203020658-a4e29ee5477f
@@ -56,7 +57,6 @@ require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Masterminds/squirrel v1.5.4 // indirect
 	github.com/alecthomas/chroma/v2 v2.19.0 // indirect

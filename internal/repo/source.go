@@ -106,3 +106,33 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 
 	return nil, fmt.Errorf("could not get chart from urls: %w", errs)
 }
+
+func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]string, error) {
+	settings := barge.HelmSettings()
+
+	repos, err := repo.LoadFile(settings.RepositoryConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	entry := repos.Get(u.Host)
+	if entry == nil {
+		return nil, fmt.Errorf("unknown repo %s", u.Host)
+	}
+
+	index, err := repo.LoadIndexFile(
+		filepath.Join(settings.RepositoryCache, helmpath.CacheIndexFile(u.Host)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	versions, ok := index.Entries[name]
+	if !ok {
+		return nil, fmt.Errorf("chart %s not found in repo %s", name, u.Host)
+	}
+
+	return xslices.Map(versions, func(v *repo.ChartVersion, _ int) string {
+		return v.Version
+	}), nil
+}

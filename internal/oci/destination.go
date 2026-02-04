@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/url"
+	"strings"
 
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/util"
@@ -44,4 +45,13 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	}
 
 	return nil
+}
+
+func (d *destination) Sync(ctx context.Context, u *url.URL, c *chart.Chart) error {
+	v := u.JoinPath()
+	v.Path, _, _ = strings.Cut(v.Path, ":")
+	q := v.Query()
+	q.Set("version", c.Metadata.Version)
+	v.RawQuery = q.Encode()
+	return d.Write(ctx, v.JoinPath(c.Name()), c)
 }
