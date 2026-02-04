@@ -62,6 +62,8 @@ func (m *BargeDev) Test(
 	ctx context.Context,
 	// +optional
 	githubToken *dagger.Secret,
+	// +optional
+	githubRepo string,
 ) (string, error) {
 	return dag.Go(dagger.GoOpts{
 		Module:                  m.Source,
@@ -70,8 +72,12 @@ func (m *BargeDev) Test(
 		Container().
 		With(func(r *dagger.Container) *dagger.Container {
 			if githubToken != nil {
-				return r.
+				r = r.
 					WithSecretVariable("GITHUB_TOKEN", githubToken)
+			}
+			if githubRepo != "" {
+				r = r.
+					WithEnvVariable("GITHUB_REPOSITORY", githubRepo)
 			}
 			return r
 		}).

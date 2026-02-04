@@ -139,8 +139,8 @@ func FuzzCopy(f *testing.F) {
 		f.Add(ociWithTag.String(), f.TempDir())
 	}
 
-	if username, _, err := util.GetGitHubAuth(ctx); assert.NoError(f, err) {
-		ghcr := fmt.Sprintf("oci://ghcr.io/%s/barge/charts/%s", username, chart.Name())
+	if githubRepository := os.Getenv("GITHUB_REPOSITORY"); githubRepository != "" {
+		ghcr := fmt.Sprintf("oci://ghcr.io/%s/charts/%s", githubRepository, chart.Name())
 		ghcrWithTag := fmt.Sprintf("%s:%s", ghcr, chart.Metadata.Version)
 		f.Add(archive, ghcr)
 		f.Add(ghcr, f.TempDir())
