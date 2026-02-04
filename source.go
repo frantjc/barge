@@ -29,3 +29,7 @@ func RegisterSource(o Source, scheme string, schemes ...string) {
 		srcMux[s] = o
 	}
 }
+
+type QueryableSource interface {
+	Versions(context.Context, *url.URL, string) ([]string, error)
+}

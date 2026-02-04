@@ -44,7 +44,7 @@ func newBarge() *cobra.Command {
 			Version:       SemVer(),
 			SilenceErrors: true,
 			SilenceUsage:  true,
-			PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 				cmd.SetContext(
 					util.SloggerInto(
 						util.StdoutInto(
@@ -62,17 +62,17 @@ func newBarge() *cobra.Command {
 			},
 		}
 	)
-	cmd.Flags().BoolP("help", "h", false, "Help for "+cmd.Name())
+	cmd.PersistentFlags().BoolP("help", "h", false, "Help for "+cmd.Name())
 	cmd.Flags().Bool("version", false, "Version for "+cmd.Name())
 	cmd.SetVersionTemplate("{{ .Name }}{{ .Version }}")
 	slogConfig.AddFlags(cmd.PersistentFlags())
-	cmd.AddCommand(newCopy())
+	cmd.AddCommand(newCopy(), newSync())
 	return cmd
 }
 
 func newCopy() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           "copy",
+		Use:           "copy src dest",
 		Aliases:       []string{"cp"},
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -81,6 +81,24 @@ func newCopy() *cobra.Command {
 			return barge.Copy(cmd.Context(), args[0], args[1])
 		},
 	}
+	barge.AddFlags(cmd.Flags())
+	return cmd
+}
+
+func newSync() *cobra.Command {
+	var (
+		syncOpts = new(barge.SyncOpts)
+		cmd      = &cobra.Command{
+			Use:           "sync config dest",
+			SilenceErrors: true,
+			SilenceUsage:  true,
+			Args:          cobra.ExactArgs(2),
+			RunE: func(cmd *cobra.Command, args []string) error {
+				return barge.Sync(cmd.Context(), args[0], args[1])
+			},
+		}
+	)
+	cmd.Flags().BoolVar(&syncOpts.FailFast, "fail-fast", false, "Exit when the first source fails to sync")
 	barge.AddFlags(cmd.Flags())
 	return cmd
 }

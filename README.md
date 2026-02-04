@@ -35,3 +35,21 @@ barge cp https://github.com/frantjc/barge/raw/refs/heads/main/testdata/test-0.1.
 ```sh
 barge cp oci://ghcr.io/frantjc/barge/charts/test ./test.tgz
 ```
+
+- You want to do all of the above at once where `barge-sync.yml` looks like:
+
+```yml
+---
+sources:
+  - url: repo://chartmuseum
+    charts:
+      chartmuseum:
+        - 3.9.0
+    chartsBySemver:
+      chartmuseum: ">= 3.10"
+```
+
+```sh
+helm repo add chartmuseum https://chartmuseum.github.io/charts
+barge sync barge-sync.yml oci://example.io
+```

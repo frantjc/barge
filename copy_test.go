@@ -1,116 +1,155 @@
 package barge_test
 
 import (
-	"flag"
+	"context"
 	"fmt"
 	"net/url"
 	"os"
-	"path"
-	"strings"
+	"os/exec"
 	"testing"
 
+	"dagger.io/dagger"
 	"github.com/frantjc/barge"
 	_ "github.com/frantjc/barge/internal/archive"
-	_ "github.com/frantjc/barge/internal/artifactory"
 	_ "github.com/frantjc/barge/internal/chartmuseum"
 	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/http"
 	_ "github.com/frantjc/barge/internal/oci"
-	_ "github.com/frantjc/barge/internal/release"
 	_ "github.com/frantjc/barge/internal/repo"
+	"github.com/frantjc/barge/internal/util"
 	"github.com/frantjc/barge/testdata"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
-var (
-	oci         string
-	chartmuseum string
-	repo        string
-	http        string
-)
+func Command(t testing.TB, name string, arg ...string) *exec.Cmd {
+	t.Helper()
+	cmd := exec.CommandContext(t.Context(), name, arg...)
+	cmd.Stdout = t.Output()
+	cmd.Stderr = t.Output()
+	return cmd
+}
 
-func init() {
-	flag.StringVar(&oci, "oci", "", "run copy tests against these comma-delimited registries")
-	flag.StringVar(&chartmuseum, "cm", "", "run copy tests against these comma-delimited urls")
-	flag.StringVar(&repo, "repo", "", "run copy tests against these comma-delimited repos")
-	flag.StringVar(&http, "http", "", "run copy tests against these comma-delimited http(s)")
+func Context(t testing.TB) context.Context {
+	t.Helper()
+	return util.StdoutInto(util.StderrInto(t.Context(), t.Output()), t.Output())
+}
+
+func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
+	t.Helper()
+	ctx := t.Context()
+	chartmuseum, err := dag.Container().
+		From("ghcr.io/helm/chartmuseum:v0.16.3").
+		WithExposedPort(8080).
+		WithEnvVariable("DEBUG", "1").
+		WithEnvVariable("STORAGE", "local").
+		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
+		AsService().
+		Start(ctx)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, err = chartmuseum.Stop(context.WithoutCancel(ctx))
+		assert.NoError(t, err)
+	})
+	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum"})
+	require.NoError(t, err)
+	chartmuseumURL, err := url.Parse(rawChartmuseumURL)
+	chartmuseumURL.RawQuery = "insecure=1"
+	require.NoError(t, err)
+
+	return chartmuseumURL
+}
+
+func Registry(t testing.TB, dag *dagger.Client) *url.URL {
+	t.Helper()
+	ctx := t.Context()
+	registry, err := dag.Container().
+		From("docker.io/distribution/distribution:3").
+		WithExposedPort(5000).
+		AsService().
+		Start(ctx)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, err = registry.Stop(context.WithoutCancel(ctx))
+		assert.NoError(t, err)
+	})
+	rawRegistryURL, err := registry.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
+	require.NoError(t, err)
+	registryURL, err := url.Parse(rawRegistryURL)
+	require.NoError(t, err)
+
+	return registryURL
 }
 
 func FuzzCopy(f *testing.F) {
+	ctx := Context(f)
+
 	tmp, err := os.CreateTemp(f.TempDir(), "test-0.1.0.tgz")
-	assert.NoError(f, err)
+	require.NoError(f, err)
 	_, err = tmp.Write(testdata.ChartArchive)
-	assert.NoError(f, err)
-	assert.NoError(f, tmp.Close())
+	require.NoError(f, err)
+	require.NoError(f, tmp.Close())
+	chart, err := loader.LoadFile(tmp.Name())
+	require.NoError(f, err)
 	archive := fmt.Sprintf("archive://%s", tmp.Name())
 	directory := fmt.Sprintf("directory://%s", f.TempDir())
-	file := f.TempDir()
-
 	f.Add(archive, directory)
-	f.Add(directory, archive)
+	f.Add(directory, f.TempDir())
+
+	file := f.TempDir()
 	f.Add(archive, file)
-	f.Add(file, archive)
+	f.Add(file, f.TempDir())
 
-	for _, o := range strings.Split(oci, ",") {
-		if o == "" {
-			continue
-		} else if !strings.Contains(o, "://") {
-			o = fmt.Sprintf("oci://%s", o)
+	if dag, err := dagger.Connect(ctx); assert.NoError(f, err) {
+		f.Cleanup(func() {
+			assert.NoError(f, dag.Close())
+		})
+
+		chartmuseumURL := Chartmuseum(f, dag)
+		require.NoError(f, barge.Copy(ctx, archive, chartmuseumURL.String()))
+
+		if helm, err := exec.LookPath("helm"); assert.NoError(f, err) {
+			repo := "chartmuseum"
+			repoURL := url.URL{
+				Scheme: "http",
+				Host:   chartmuseumURL.Host,
+			}
+			add := Command(f, helm, "repo", "add", repo, repoURL.String())
+			require.NoError(f, add.Run())
+
+			f.Add(fmt.Sprintf("repo://%s/%s", repo, chart.Name()), f.TempDir())
+			f.Add(fmt.Sprintf("repo://%s/%s?version=%s", repo, chart.Name(), chart.Metadata.Version), f.TempDir())
 		}
-		u, err := url.Parse(o)
-		assert.NoError(f, err)
-		oci := fmt.Sprintf("oci://%s", path.Join(u.Host, u.Path))
-		f.Add(archive, oci)
-		f.Add(oci, archive)
+
+		httpURL := &url.URL{
+			Scheme: "http",
+			Host:   chartmuseumURL.Host,
+			Path:   chartmuseumURL.JoinPath("charts/test-0.1.0.tgz").Path,
+		}
+		f.Add(httpURL.String(), f.TempDir())
+
+		registryURL := Registry(f, dag)
+		oci := registryURL.JoinPath("test")
+		f.Add(archive, oci.String())
+		f.Add(oci.String(), f.TempDir())
+		ociWithTag := registryURL.JoinPath("test:tag")
+		f.Add(archive, ociWithTag.String())
+		f.Add(ociWithTag.String(), f.TempDir())
 	}
 
-	for _, c := range strings.Split(chartmuseum, ",") {
-		if c == "" {
-			continue
-		}
-		u, err := url.Parse(c)
-		assert.NoError(f, err)
-		switch u.Scheme {
-		case "cm", "chartmuseum":
-		case "http":
-			u.Scheme = "chartmuseum"
-			q := u.Query()
-			q.Set("insecure", "1")
-			u.RawQuery = q.Encode()
-		case "https":
-			u.Scheme = "chartmuseum"
-		default:
-			f.Fatalf("unknown scheme in -cm=%s", c)
-		}
-		chartmuseum := u.String()
-		f.Add(archive, chartmuseum)
-	}
-
-	for _, r := range strings.Split(repo, ",") {
-		if r == "" {
-			continue
-		} else if !strings.Contains(r, "://") {
-			r = fmt.Sprintf("repo://%s", r)
-		}
-		u, err := url.Parse(r)
-		assert.NoError(f, err)
-		repo := u.String()
-		f.Add(repo, archive)
-	}
-
-	for _, h := range strings.Split(http, ",") {
-		if h == "" {
-			continue
-		}
-		u, err := url.Parse(h)
-		assert.NoError(f, err)
-		http := u.String()
-		f.Add(http, archive)
+	if username, _, err := util.GetGitHubAuth(ctx); assert.NoError(f, err) {
+		ghcr := fmt.Sprintf("oci://ghcr.io/%s/barge/charts/%s", username, chart.Name())
+		ghcrWithTag := fmt.Sprintf("%s:%s", ghcr, chart.Metadata.Version)
+		f.Add(archive, ghcr)
+		f.Add(ghcr, f.TempDir())
+		f.Add(archive, ghcrWithTag)
+		f.Add(ghcrWithTag, f.TempDir())
 	}
 
 	f.Fuzz(func(t *testing.T, src, dest string) {
-		assert.NoError(t, barge.Copy(t.Context(), src, dest))
+		require.NoError(t, barge.Copy(t.Context(), src, dest))
 	})
 }
 
@@ -119,6 +158,6 @@ func FuzzCopyError(f *testing.F) {
 	f.Add(f.TempDir(), "bar://")
 
 	f.Fuzz(func(t *testing.T, src, dest string) {
-		assert.Error(t, barge.Copy(t.Context(), src, dest))
+		require.Error(t, barge.Copy(t.Context(), src, dest))
 	})
 }

@@ -29,3 +29,7 @@ func RegisterDestination(o Destination, scheme string, schemes ...string) {
 		destMux[s] = o
 	}
 }
+
+type SyncableDestination interface {
+	Sync(context.Context, *url.URL, *chart.Chart) error
+}
