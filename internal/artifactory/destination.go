@@ -73,6 +73,6 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	return nil
 }
 
-func (d *destination) Sync(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	return d.Write(ctx, u, c)
+func (d *destination) Sync(ctx context.Context, u *url.URL, namespace string, c *chart.Chart) error {
+	return d.Write(ctx, u.JoinPath(namespace), c)
 }

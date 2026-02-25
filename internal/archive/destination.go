@@ -16,6 +16,7 @@ func init() {
 		"archive",
 		"tar",
 		"tarball",
+		"tgz",
 		"package",
 		"pkg",
 	)

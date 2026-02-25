@@ -89,6 +89,10 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	return nil
 }
 
-func (d *destination) Sync(ctx context.Context, u *url.URL, c *chart.Chart) error {
+func (d *destination) Sync(ctx context.Context, u *url.URL, namespace string, c *chart.Chart) error {
+	if namespace != "" {
+		return fmt.Errorf("namespace is not supported for chartmuseum destination")
+	}
+
 	return d.Write(ctx, u, c)
 }

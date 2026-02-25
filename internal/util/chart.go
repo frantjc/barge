@@ -19,8 +19,8 @@ import (
 
 // WriteChartToDirectory writes the contents of the given
 // Chart to dir.
-func WriteChartToDirectory(ctx context.Context, c *chart.Chart, dir string) error {
-	eg, ctx := errgroup.WithContext(ctx)
+func WriteChartToDirectory(_ context.Context, c *chart.Chart, dir string) error {
+	eg := new(errgroup.Group)
 
 	if err := writeChart(c, func(data []byte, rel string) error {
 		eg.Go(func() error {

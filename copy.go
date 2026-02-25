@@ -7,14 +7,6 @@ import (
 )
 
 func Copy(ctx context.Context, src, dest string) error {
-	if err := cp(ctx, src, dest); err != nil {
-		return fmt.Errorf("barge: %v", err)
-	}
-
-	return nil
-}
-
-func cp(ctx context.Context, src, dest string) error {
 	s, err := url.Parse(src)
 	if err != nil {
 		return err

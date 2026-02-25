@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/util"
 	xslices "github.com/frantjc/x/slices"
@@ -50,12 +51,12 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 	chart := strings.TrimPrefix(u.Path, "/")
 	version := u.Query().Get("version")
 
-	versions, ok := index.Entries[chart]
+	chartEntry, ok := index.Entries[chart]
 	if !ok {
 		return nil, fmt.Errorf("chart %s not found in repo %s", chart, u.Host)
 	}
 
-	chartVersion := xslices.Find(versions, func(cv *repo.ChartVersion, _ int) bool {
+	chartVersion := xslices.Find(chartEntry, func(cv *repo.ChartVersion, _ int) bool {
 		if version == "" {
 			return true
 		}
@@ -73,16 +74,16 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 
 	var errs error
 
-	for _, v := range chartVersion.URLs {
-		if !strings.Contains(v, "://") {
+	for _, rawURLOrPath := range chartVersion.URLs {
+		if !strings.Contains(rawURLOrPath, "://") {
 			w, err := url.Parse(entry.URL)
 			if err != nil {
 				return nil, err
 			}
-			v = w.JoinPath(v).String()
+			rawURLOrPath = w.JoinPath(rawURLOrPath).String()
 		}
 
-		scheme, _, _ := strings.Cut(v, "://")
+		scheme, _, _ := strings.Cut(rawURLOrPath, "://")
 
 		g, err := getter.All(settings).ByScheme(scheme)
 		if err != nil {
@@ -95,7 +96,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 			opts = append(opts, getter.WithBasicAuth(username, password))
 		}
 
-		buf, err := g.Get(v, opts...)
+		buf, err := g.Get(rawURLOrPath, opts...)
 		if err != nil {
 			errs = errors.Join(errs, err)
 			continue
@@ -107,7 +108,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 	return nil, fmt.Errorf("could not get chart from urls: %w", errs)
 }
 
-func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]string, error) {
+func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]barge.SyncableVersion, error) {
 	settings := barge.HelmSettings()
 
 	repos, err := repo.LoadFile(settings.RepositoryConfig)
@@ -132,7 +133,26 @@ func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]strin
 		return nil, fmt.Errorf("chart %s not found in repo %s", name, u.Host)
 	}
 
-	return xslices.Map(versions, func(v *repo.ChartVersion, _ int) string {
-		return v.Version
-	}), nil
+	res := []barge.SyncableVersion{}
+	for _, chartVersion := range versions {
+		version, err := semver.NewVersion(chartVersion.Version)
+		if err != nil {
+			continue
+		}
+
+		t := u.JoinPath(name)
+		q := t.Query()
+		q.Set("version", chartVersion.Version)
+		t.RawQuery = q.Encode()
+
+		w := barge.URL(*t)
+		v := barge.Version(*version)
+
+		res = append(res, barge.SyncableVersion{
+			URL:     &w,
+			Version: &v,
+		})
+	}
+
+	return res, nil
 }

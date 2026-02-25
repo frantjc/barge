@@ -74,10 +74,15 @@ func (j Constraints) String() string {
 	return semver.Constraints(j).String()
 }
 
+func (j Constraints) Check(version *Version) bool {
+	v := semver.Version(*version)
+	return semver.Constraints(j).Check(&v)
+}
+
 type SourceConfig struct {
-	URL            URL                    `json:"url"`
-	Charts         map[string][]string    `json:"charts,omitempty"`
-	ChartsBySemver map[string]Constraints `json:"chartsBySemver,omitempty"`
+	URL       URL                    `json:"url"`
+	Namespace string                 `json:"namespace,omitempty"`
+	Charts    map[string]Constraints `json:"charts,omitempty"`
 }
 
 type SyncConfig struct {
@@ -96,8 +101,6 @@ func (s *SyncOpts) Apply(opts *SyncOpts) {
 	if s != nil {
 		if opts != nil {
 			opts.FailFast = s.FailFast
-		} else {
-			opts = s
 		}
 	}
 }
@@ -137,6 +140,8 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpts) er
 
 	for _, src := range s.Sources {
 		eg.Go(func() error {
+			namespace := src.Namespace
+
 			s, err := url.Parse(os.ExpandEnv(src.URL.String()))
 			if err != nil {
 				return err
@@ -151,60 +156,39 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpts) er
 				return fmt.Errorf("no source registered for scheme: %s", s.Scheme)
 			}
 
-			if len(src.Charts) > 0 || len(src.ChartsBySemver) > 0 {
-				for name, versions := range src.Charts {
-					for _, version := range versions {
-						t := s.JoinPath(name)
-						q := t.Query()
-						q.Set("version", version)
-						t.RawQuery = q.Encode()
-
-						chart, err := source.Open(ctx, t)
-						if err != nil {
-							return err
-						}
-
-						eg.Go(func() error {
-							return syncableDestination.Sync(ctx, d, chart)
-						})
-					}
+			if len(src.Charts) > 0 {
+				syncableSource, ok := source.(SyncableSource)
+				if !ok {
+					return fmt.Errorf("not a queryable source scheme: %s", s.Scheme)
 				}
 
-				if len(src.ChartsBySemver) > 0 {
-					queryableSource, ok := source.(QueryableSource)
-					if !ok {
-						return fmt.Errorf("not a queryable source scheme: %s", s.Scheme)
+				for name, constraints := range src.Charts {
+					syncableVersions, err := syncableSource.Versions(ctx, s, name)
+					if err != nil {
+						return err
 					}
 
-					for name, constraints := range src.ChartsBySemver {
-						versions, err := queryableSource.Versions(ctx, s, name)
-						if err != nil {
-							return err
-						}
+					for _, syncableVersion := range syncableVersions {
+						if constraints.Check(syncableVersion.Version) {
+							eg.Go(func() error {
+								syncSource := source
 
-						for _, version := range versions {
-							v, err := semver.NewVersion(version)
-							if err != nil {
-								log.Debug("skipping invalid semver")
-								continue
-							}
+								if syncableVersion.URL.Scheme != s.Scheme {
+									syncSource, ok = srcMux[syncableVersion.URL.Scheme]
+									if !ok {
+										return fmt.Errorf("no source registered for scheme: %s", syncableVersion.URL.Scheme)
+									}
+								}
 
-							t := s.JoinPath(name)
-							q := t.Query()
-							q.Set("version", version)
-							t.RawQuery = q.Encode()
+								chart, err := syncSource.Open(ctx, (*url.URL)(syncableVersion.URL))
+								if err != nil {
+									return err
+								}
 
-							chart, err := source.Open(ctx, t)
-							if err != nil {
-								return err
-							}
+								log.Info("syncing", "chart", chart.Name(), "version", chart.Metadata.Version, "destination", d.String(), "namespace", namespace)
 
-							if semver.Constraints(constraints).Check(v) {
-								eg.Go(func() error {
-									log.Info("syncing", "chart", chart.Name(), "version", chart.Metadata.Version, "destination", d.String())
-									return syncableDestination.Sync(ctx, d, chart)
-								})
-							}
+								return syncableDestination.Sync(ctx, d, namespace, chart)
+							})
 						}
 					}
 				}
@@ -217,7 +201,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpts) er
 				return err
 			}
 
-			return syncableDestination.Sync(ctx, d, chart)
+			return syncableDestination.Sync(ctx, d, namespace, chart)
 		})
 	}
 
@@ -225,6 +209,10 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpts) er
 }
 
 func Sync(ctx context.Context, cfg, dest string) error {
+	if cfg == "-" {
+		cfg = "/dev/stdin"
+	}
+
 	b, err := os.ReadFile(cfg)
 	if err != nil {
 		return err

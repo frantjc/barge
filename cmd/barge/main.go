@@ -54,7 +54,7 @@ func newBarge() *cobra.Command {
 							),
 							cmd.OutOrStdout(),
 						),
-						slog.New(slog.NewJSONHandler(cmd.OutOrStdout(), &slog.HandlerOptions{
+						slog.New(slog.NewTextHandler(cmd.OutOrStdout(), &slog.HandlerOptions{
 							Level: slogConfig,
 						})),
 					),

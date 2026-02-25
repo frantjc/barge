@@ -39,7 +39,7 @@ func sloggerFromStdout(ctx context.Context) *slog.Logger {
 
 	switch v := v.(type) {
 	case io.Writer:
-		return slog.New(slog.NewJSONHandler(v, &slog.HandlerOptions{Level: new(SlogConfig)}))
+		return slog.New(slog.NewTextHandler(v, &slog.HandlerOptions{Level: new(SlogConfig)}))
 	default:
 		return slog.New(slog.DiscardHandler)
 	}

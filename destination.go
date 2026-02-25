@@ -31,5 +31,5 @@ func RegisterDestination(o Destination, scheme string, schemes ...string) {
 }
 
 type SyncableDestination interface {
-	Sync(context.Context, *url.URL, *chart.Chart) error
+	Sync(context.Context, *url.URL, string, *chart.Chart) error
 }

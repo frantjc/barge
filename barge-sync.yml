@@ -1,0 +1,13 @@
+# An example config file for `barge sync`.
+# Use: `barge sync barge-sync.yml ./`.
+---
+sources:
+  - url: https://chartmuseum.github.io/charts
+    namespace: https
+    charts:
+      chartmuseum: 3.9.0
+  # To prepare for this, run `helm repo add chartmuseum https://chartmuseum.github.io/charts`.
+  - url: repo://chartmuseum
+    namespace: repo
+    charts:
+      chartmuseum: ">= 3.10"
