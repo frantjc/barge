@@ -3,7 +3,7 @@ module github.com/frantjc/barge
 go 1.25.6
 
 require (
-	dagger.io/dagger v0.19.10
+	dagger.io/dagger v0.19.11
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/cli/cli/v2 v2.83.2
 	github.com/fluxcd/pkg/auth v0.33.0
