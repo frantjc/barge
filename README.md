@@ -36,7 +36,7 @@ barge cp https://github.com/frantjc/barge/raw/refs/heads/main/testdata/test-0.1.
 barge cp oci://ghcr.io/frantjc/barge/charts/test ./test.tgz
 ```
 
-- You want to do all of the above at once (see [`barge-sync.yml`](barge-sync.yml))).
+- [**You want to do all of the above at once.**](barge-sync.yml)
 
 ```sh
 helm repo add chartmuseum https://chartmuseum.github.io/charts
