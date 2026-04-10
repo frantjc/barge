@@ -94,7 +94,7 @@ func newSync() *cobra.Command {
 			SilenceUsage:  true,
 			Args:          cobra.ExactArgs(2),
 			RunE: func(cmd *cobra.Command, args []string) error {
-				return barge.Sync(cmd.Context(), args[0], args[1])
+				return barge.Sync(cmd.Context(), args[0], args[1], syncOpts)
 			},
 		}
 	)

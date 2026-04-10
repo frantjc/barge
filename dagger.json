@@ -1,6 +1,6 @@
 {
   "name": "barge-dev",
-  "engineVersion": "v0.19.11",
+  "engineVersion": "v0.20.1",
   "sdk": {
     "source": "go"
   },
@@ -32,8 +32,8 @@
     },
     {
       "name": "wolfi",
-      "source": "github.com/dagger/dagger/modules/wolfi@v0.19.11",
-      "pin": "d8811256e5e901e6760f7011431080fedd61fc47"
+      "source": "github.com/dagger/dagger/modules/wolfi@v0.20.1",
+      "pin": "04727b5af8fa5d399f3bf87df4ff918c1f157685"
     }
   ],
   "source": ".dagger",

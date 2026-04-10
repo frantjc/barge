@@ -59,7 +59,7 @@ func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]barge
 		q := t.Query()
 		q.Set("version", tag)
 		t.RawQuery = q.Encode()
-	
+
 		w := barge.URL(*t)
 		v := barge.Version(*version)
 

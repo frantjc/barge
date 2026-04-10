@@ -105,7 +105,7 @@ func (s *SyncOpts) Apply(opts *SyncOpts) {
 	}
 }
 
-func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpts) error {
+func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) error {
 	o := &SyncOpts{}
 
 	for _, opt := range opts {
@@ -208,7 +208,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpts) er
 	return eg.Wait()
 }
 
-func Sync(ctx context.Context, cfg, dest string) error {
+func Sync(ctx context.Context, cfg, dest string, opts ...SyncOpt) error {
 	if cfg == "-" {
 		cfg = "/dev/stdin"
 	}
@@ -223,5 +223,5 @@ func Sync(ctx context.Context, cfg, dest string) error {
 		return err
 	}
 
-	return s.Sync(ctx, dest)
+	return s.Sync(ctx, dest, opts...)
 }
