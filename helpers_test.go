@@ -45,10 +45,9 @@ func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
 		_, err = chartmuseum.Stop(context.WithoutCancel(ctx))
 		assert.NoError(t, err)
 	})
-	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum"})
+	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum+http"})
 	require.NoError(t, err)
 	chartmuseumURL, err := url.Parse(rawChartmuseumURL)
-	chartmuseumURL.RawQuery = "insecure=1"
 	require.NoError(t, err)
 	return chartmuseumURL
 }

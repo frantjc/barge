@@ -14,6 +14,7 @@ import (
 	_ "github.com/frantjc/barge/internal/chartmuseum"
 	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
+	_ "github.com/frantjc/barge/internal/git"
 	_ "github.com/frantjc/barge/internal/http"
 	_ "github.com/frantjc/barge/internal/oci"
 	_ "github.com/frantjc/barge/internal/release"

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/cli/cli/v2/api"
@@ -77,7 +76,7 @@ func NewRegistryClientFromURL(ctx context.Context, u *url.URL) (*registry.Client
 		opts = append(opts, cliOptForURLAndProvider(u, aws.ProviderName))
 	}
 
-	if insecure, _ := strconv.ParseBool(u.Query().Get("insecure")); insecure {
+	if strings.HasSuffix(u.Scheme, "+http") {
 		opts = append(opts, registry.ClientOptPlainHTTP())
 	}
 

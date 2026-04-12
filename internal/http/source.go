@@ -29,7 +29,7 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	log := util.SloggerFrom(ctx)
+	_ = util.SloggerFrom(ctx)
 	settings := barge.HelmSettings()
 	scheme := u.Scheme
 
@@ -46,7 +46,6 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 
 	w := u.JoinPath()
 	name := path.Base(w.Path)
-	log.Info("opening", "url", w.String(), "ext", path.Ext(name))
 	if version := u.Query().Get("version"); version != "" {
 		if ext := path.Ext(name); ext == "" {
 			w.Path = path.Join("/", path.Dir(u.Path), "index.yaml")

@@ -22,7 +22,7 @@ func UsernameAndPasswordForURLWithEnvFallback(u *url.URL, location, scheme strin
 		}
 	}
 
-	locSchm := strings.ToUpper(fmt.Sprintf("%s_%s", scheme, location))
+	locSchm := strings.ReplaceAll(strings.ToUpper(fmt.Sprintf("%s_%s", scheme, location)), "+", "_")
 	if password := os.Getenv(fmt.Sprintf("BARGE_%s_PASSWORD", locSchm)); password != "" {
 		return os.Getenv(fmt.Sprintf("BARGE_%s_USERNAME", locSchm)), password, true
 	}

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/util"
@@ -23,19 +22,28 @@ func init() {
 		Scheme,
 		"rt",
 		"jfrog",
+		Scheme+"+https",
+		"rt+https",
+		"jfrog+https",
+	)
+	barge.RegisterDestination(
+		&destination{"http"},
+		Scheme+"+http",
+		"rt+http",
+		"jfrog+http",
 	)
 }
 
-type destination struct{}
+type destination struct {
+	Scheme string
+}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	q := u.Query()
 	scheme := u.Scheme
-	if insecure, _ := strconv.ParseBool(q.Get("insecure")); insecure {
-		u.Scheme = "http"
-	} else {
-		u.Scheme = "https"
+	if d.Scheme == "" {
+		d.Scheme = "https"
 	}
+	u.Scheme = d.Scheme
 
 	rc, err := util.WriteChartToArchive(c)
 	if err != nil {

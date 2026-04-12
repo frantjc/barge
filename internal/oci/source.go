@@ -16,6 +16,8 @@ func init() {
 	barge.RegisterSource(
 		new(source),
 		"oci",
+		"oci+https",
+		"oci+http",
 	)
 }
 
