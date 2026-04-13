@@ -8,7 +8,7 @@
     {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "aaac84bef0a3b1eee3e0a8a171affae759fc18fa",
+      "pin": "e30aa6ef4b9204ce17adf4b76b7a638addf95b01",
       "ignoreChecks": [
         "test"
       ]
@@ -16,14 +16,14 @@
     {
       "name": "dagger-module",
       "source": "github.com/frantjc/daggerverse/dagger-module@main",
-      "pin": "aaac84bef0a3b1eee3e0a8a171affae759fc18fa"
+      "pin": "e30aa6ef4b9204ce17adf4b76b7a638addf95b01"
     }
   ],
   "dependencies": [
     {
       "name": "release",
       "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "aaac84bef0a3b1eee3e0a8a171affae759fc18fa"
+      "pin": "e30aa6ef4b9204ce17adf4b76b7a638addf95b01"
     },
     {
       "name": "wolfi",
