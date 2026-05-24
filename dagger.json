@@ -1,6 +1,6 @@
 {
   "name": "barge-dev",
-  "engineVersion": "v0.20.3",
+  "engineVersion": "v0.20.8",
   "sdk": {
     "source": "go"
   },
@@ -8,27 +8,38 @@
     {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "e30aa6ef4b9204ce17adf4b76b7a638addf95b01",
+      "pin": "382d2a0f8aa4fdd0ba466d77fc3e2aea6eb5b245",
       "ignoreChecks": [
-        "test"
+        "test",
+        "vulncheck"
       ]
     },
     {
       "name": "dagger-module",
       "source": "github.com/frantjc/daggerverse/dagger-module@main",
-      "pin": "e30aa6ef4b9204ce17adf4b76b7a638addf95b01"
+      "pin": "382d2a0f8aa4fdd0ba466d77fc3e2aea6eb5b245"
     }
   ],
   "dependencies": [
     {
+      "name": "kwok",
+      "source": "github.com/frantjc/daggerverse/kwok@main",
+      "pin": "382d2a0f8aa4fdd0ba466d77fc3e2aea6eb5b245"
+    },
+    {
+      "name": "mise",
+      "source": "github.com/frantjc/daggerverse/mise@main",
+      "pin": "382d2a0f8aa4fdd0ba466d77fc3e2aea6eb5b245"
+    },
+    {
       "name": "release",
       "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "e30aa6ef4b9204ce17adf4b76b7a638addf95b01"
+      "pin": "382d2a0f8aa4fdd0ba466d77fc3e2aea6eb5b245"
     },
     {
       "name": "wolfi",
-      "source": "github.com/dagger/dagger/modules/wolfi@v0.20.3",
-      "pin": "478a15799474f15a772960563235ed5106c1db65"
+      "source": "github.com/dagger/dagger/modules/wolfi@v0.20.8",
+      "pin": "74bff7d10fd78dd6935c60c4514558598f216451"
     }
   ],
   "source": ".dagger"

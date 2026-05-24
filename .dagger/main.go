@@ -29,11 +29,14 @@ func (m *BargeDev) Test(
 	// +optional
 	githubRepo string,
 ) error {
-	if _, err := dag.Go(dagger.GoOpts{
+	return dag.Go(dagger.GoOpts{
 		Source:                  m.Source,
-		AdditionalWolfiPackages: []string{"helm-4"},
+		Container: dag.Mise(dagger.MiseOpts{
+		Source: m.Source,
 	}).
-		Container().
+		Container(dagger.MiseContainerOpts{
+			Tools: []string{"go", "helm"},
+		}).
 		With(func(r *dagger.Container) *dagger.Container {
 			if githubToken != nil {
 				r = r.
@@ -44,13 +47,11 @@ func (m *BargeDev) Test(
 					WithEnvVariable("GITHUB_REPOSITORY", githubRepo)
 			}
 			return r
-		}).
-		WithExec([]string{"go", "test", "-race", "-cover", "-test.v", "./..."}, dagger.ContainerWithExecOpts{ExperimentalPrivilegedNesting: true}).
-		Sync(ctx); err != nil {
-		return err
-	}
-
-	return nil
+		}),
+	}).
+		Test(ctx, dagger.GoTestOpts{
+			Race: true,
+		})
 }
 
 func (m *BargeDev) Release(
@@ -64,6 +65,7 @@ func (m *BargeDev) Release(
 		Create(ctx, githubToken, githubRepo, "barge", dagger.ReleaseCreateOpts{Brew: true})
 }
 
+// +check
 func (m *BargeDev) Binary(
 	ctx context.Context,
 	// +default=v0.0.0-unknown
