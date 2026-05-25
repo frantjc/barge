@@ -29,28 +29,37 @@ func (m *BargeDev) Test(
 	// +optional
 	githubRepo string,
 ) error {
+	cluster := dag.Kwok().Cluster()
+	alias := "kwok"
+	tags := []string{"dagger", "integration", "kubernetes"}
 	return dag.Go(dagger.GoOpts{
 		Source:                  m.Source,
 		Container: dag.Mise(dagger.MiseOpts{
-		Source: m.Source,
-	}).
-		Container(dagger.MiseContainerOpts{
-			Tools: []string{"go", "helm"},
+			Source: m.Source,
 		}).
-		With(func(r *dagger.Container) *dagger.Container {
-			if githubToken != nil {
-				r = r.
-					WithSecretVariable("GITHUB_TOKEN", githubToken)
-			}
-			if githubRepo != "" {
-				r = r.
-					WithEnvVariable("GITHUB_REPOSITORY", githubRepo)
-			}
-			return r
-		}),
+			Container(dagger.MiseContainerOpts{
+				Tools: []string{"go", "helm"},
+			}).
+			With(func(r *dagger.Container) *dagger.Container {
+				if githubToken != nil && githubRepo != "" {
+					tags = append(tags, "github")
+					return r.
+						WithSecretVariable("GITHUB_TOKEN", githubToken).
+						WithEnvVariable("GITHUB_REPOSITORY", githubRepo)
+				}
+				return r
+			}).
+			WithServiceBinding(alias, cluster.Container().AsService()).
+			WithEnvVariable("KUBECONFIG", "$HOME/.kube/config", dagger.ContainerWithEnvVariableOpts{
+				Expand: true,
+			}).
+			WithFile("$KUBECONFIG", cluster.KubeConfig(dagger.KwokClusterKubeConfigOpts{Alias: alias}), dagger.ContainerWithFileOpts{
+				Expand: true,
+			}),
 	}).
 		Test(ctx, dagger.GoTestOpts{
 			Race: true,
+			Tags: tags,
 		})
 }
 

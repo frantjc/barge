@@ -2,16 +2,37 @@ package barge_test
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
-	"net/url"
+	"os"
 	"os/exec"
 	"testing"
 
-	"dagger.io/dagger"
 	"github.com/frantjc/barge/internal/util"
-	"github.com/stretchr/testify/assert"
+	"github.com/frantjc/barge/testdata"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
 )
+
+func Archive(t testing.TB) (*chart.Chart, string) {
+	t.Helper()
+
+	tmp, err := os.CreateTemp(t.TempDir(), "test-0.1.0.tgz")
+	require.NoError(t, err)
+
+	_, err = tmp.Write(testdata.ChartArchive)
+	require.NoError(t, err)
+	require.NoError(t, tmp.Close())
+
+	testChartURL := fmt.Sprintf("archive://%s", tmp.Name())
+	testChart, err := loader.LoadFile(tmp.Name())
+	require.NoError(t, err)
+
+	require.NotNil(t, testChart)
+
+	return testChart, testChartURL
+}
 
 func Command(t testing.TB, name string, arg ...string) *exec.Cmd {
 	t.Helper()
@@ -27,47 +48,4 @@ func Context(t testing.TB) context.Context {
 		util.StdoutInto(util.StderrInto(t.Context(), t.Output()), t.Output()),
 		slog.New(slog.NewTextHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
 	)
-}
-
-func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
-	t.Helper()
-	ctx := t.Context()
-	chartmuseum, err := dag.Container().
-		From("ghcr.io/helm/chartmuseum:v0.16.3").
-		WithExposedPort(8080).
-		WithEnvVariable("DEBUG", "1").
-		WithEnvVariable("STORAGE", "local").
-		WithEnvVariable("STORAGE_LOCAL_ROOTDIR", "/tmp").
-		AsService().
-		Start(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		_, err = chartmuseum.Stop(context.WithoutCancel(ctx))
-		assert.NoError(t, err)
-	})
-	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum+http"})
-	require.NoError(t, err)
-	chartmuseumURL, err := url.Parse(rawChartmuseumURL)
-	require.NoError(t, err)
-	return chartmuseumURL
-}
-
-func Registry(t testing.TB, dag *dagger.Client) *url.URL {
-	t.Helper()
-	ctx := t.Context()
-	registry, err := dag.Container().
-		From("docker.io/distribution/distribution:3").
-		WithExposedPort(5000).
-		AsService().
-		Start(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		_, err = registry.Stop(context.WithoutCancel(ctx))
-		assert.NoError(t, err)
-	})
-	rawRegistryURL, err := registry.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
-	require.NoError(t, err)
-	registryURL, err := url.Parse(rawRegistryURL)
-	require.NoError(t, err)
-	return registryURL
 }

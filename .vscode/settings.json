@@ -1,0 +1,3 @@
+{
+  "go.buildTags": "dagger,github,integration,kubernetes"
+}
