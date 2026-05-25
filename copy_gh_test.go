@@ -1,4 +1,4 @@
-//go:build github
+//go:build ghcr
 
 package barge_test
 
@@ -21,13 +21,13 @@ func TestCopyGHCR(t *testing.T) {
 	githubRepository := os.Getenv("GITHUB_REPOSITORY")
 	require.NotEmpty(t, githubRepository)
 
-	archiveChart, archive := Archive(t)
+	archiveChart, archiveURL := Archive(t)
 
 	ghcr := fmt.Sprintf("oci://ghcr.io/%s/charts/%s", githubRepository, archiveChart.Name())
 	ghcrWithTag := fmt.Sprintf("%s:%s", ghcr, archiveChart.Metadata.Version)
 
-	require.NoError(t, barge.Copy(ctx, archive, ghcr))
+	require.NoError(t, barge.Copy(ctx, archiveURL.String(), ghcr))
 	require.NoError(t, barge.Copy(ctx, ghcr, t.TempDir()))
-	require.NoError(t, barge.Copy(ctx, archive, ghcrWithTag))
+	require.NoError(t, barge.Copy(ctx, archiveURL.String(), ghcrWithTag))
 	require.NoError(t, barge.Copy(ctx, ghcrWithTag, t.TempDir()))
 }

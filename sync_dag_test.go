@@ -3,7 +3,6 @@
 package barge_test
 
 import (
-	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,7 +21,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func TestSyncOCI(t *testing.T) {
+func TestSyncDistribution(t *testing.T) {
 	ctx := Context(t)
 
 	dag, err := dagger.Connect(ctx)
@@ -31,12 +30,10 @@ func TestSyncOCI(t *testing.T) {
 		require.NoError(t, dag.Close())
 	})
 
-	archiveChart, archive := Archive(t)
-	archiveURL, err := url.Parse(archive)
-	require.NoError(t, err)
+	archiveChart, archiveURL := Archive(t)
 
 	namespace := uuid.NewString()
-	registryURL := Registry(t, dag)
+	distrubutionURL := Distrubition(t, dag)
 
 	// Sync from archive into OCI registry.
 	archiveSyncCfg, err := os.CreateTemp(t.TempDir(), "archive.yml")
@@ -57,7 +54,7 @@ func TestSyncOCI(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, archiveSyncCfg.Close())
 
-	require.NoError(t, barge.Sync(ctx, archiveSyncCfg.Name(), registryURL.String()))
+	require.NoError(t, barge.Sync(ctx, archiveSyncCfg.Name(), distrubutionURL.String()))
 
 	// Sync from OCI registry into a directory.
 	constraints, err := semver.NewConstraint(archiveChart.Metadata.Version)
@@ -68,13 +65,13 @@ func TestSyncOCI(t *testing.T) {
 	b, err = yaml.Marshal(&barge.SyncConfig{
 		Sources: []barge.SourceConfig{
 			{
-				URL: barge.URL(*registryURL),
+				URL: barge.URL(*distrubutionURL),
 				Charts: map[string]barge.Constraints{
 					archiveChart.Name(): barge.Constraints(*constraints),
 				},
 			},
 			{
-				URL: barge.URL(*registryURL.JoinPath(namespace)),
+				URL: barge.URL(*distrubutionURL.JoinPath(namespace)),
 				Charts: map[string]barge.Constraints{
 					archiveChart.Name(): barge.Constraints(*constraints),
 				},
@@ -98,9 +95,7 @@ func TestSyncChartmuseum(t *testing.T) {
 		require.NoError(t, dag.Close())
 	})
 
-	_, archive := Archive(t)
-	archiveURL, err := url.Parse(archive)
-	require.NoError(t, err)
+	_, archiveURL := Archive(t)
 
 	archiveSyncCfg, err := os.CreateTemp(t.TempDir(), "archive.yml")
 	require.NoError(t, err)
@@ -130,6 +125,6 @@ func TestSyncErrorMissingConfig(t *testing.T) {
 		require.NoError(t, dag.Close())
 	})
 
-	registryURL := Registry(t, dag)
-	require.Error(t, barge.Sync(ctx, filepath.Join(t.TempDir(), "does-not-exist.yaml"), registryURL.String()))
+	distrubutionURL := Distrubition(t, dag)
+	require.Error(t, barge.Sync(ctx, filepath.Join(t.TempDir(), "does-not-exist.yaml"), distrubutionURL.String()))
 }

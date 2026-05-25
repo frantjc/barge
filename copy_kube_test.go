@@ -5,8 +5,7 @@ package barge_test
 import (
 	"context"
 	"fmt"
-	"os/exec"
-	"strings"
+	"path/filepath"
 	"testing"
 
 	"github.com/frantjc/barge"
@@ -33,18 +32,16 @@ func TestCopyRelease(t *testing.T) {
 	cli, err := kubernetes.NewForConfig(restCfg)
 	require.NoError(t, err)
 
-	helm, err := exec.LookPath("helm")
-	require.NoError(t, err)
+	_, archiveURL := Archive(t)
+	chart := filepath.Join(archiveURL.Host, archiveURL.Path)
+	release := "r" + uuid.NewString()
+	namespace := "r" + uuid.NewString()
 
-	chart, archive := Archive(t)
-	releaseName := chart.Name()
-	namespace := uuid.NewString()
-
-	create := Command(t, helm, "upgrade", "--install", releaseName, strings.TrimPrefix(archive, "archive://"), "--namespace", namespace, "--create-namespace")
+	create := Command(t, "helm", "upgrade", "--install", release, chart, "--namespace", namespace, "--create-namespace")
 	require.NoError(t, create.Run())
 	t.Cleanup(func() {
 		require.NoError(t, cli.CoreV1().Namespaces().Delete(context.WithoutCancel(ctx), namespace, metav1.DeleteOptions{}))
 	})
 
-	require.NoError(t, barge.Copy(ctx, fmt.Sprintf("release://%s?namespace=%s", releaseName, namespace), t.TempDir()))
+	require.NoError(t, barge.Copy(ctx, fmt.Sprintf("release://%s?namespace=%s", release, namespace), t.TempDir()))
 }

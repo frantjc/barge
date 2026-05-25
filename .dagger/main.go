@@ -31,9 +31,9 @@ func (m *BargeDev) Test(
 ) error {
 	cluster := dag.Kwok().Cluster()
 	alias := "kwok"
-	tags := []string{"dagger", "integration", "kubernetes"}
+	tags := []string{"dagger", "examples", "kubernetes"}
 	return dag.Go(dagger.GoOpts{
-		Source:                  m.Source,
+		Source: m.Source,
 		Container: dag.Mise(dagger.MiseOpts{
 			Source: m.Source,
 		}).
@@ -42,7 +42,7 @@ func (m *BargeDev) Test(
 			}).
 			With(func(r *dagger.Container) *dagger.Container {
 				if githubToken != nil && githubRepo != "" {
-					tags = append(tags, "github")
+					tags = append(tags, "ghcr")
 					return r.
 						WithSecretVariable("GITHUB_TOKEN", githubToken).
 						WithEnvVariable("GITHUB_REPOSITORY", githubRepo)

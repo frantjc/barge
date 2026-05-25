@@ -34,22 +34,22 @@ func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
 	return chartmuseumURL
 }
 
-func Registry(t testing.TB, dag *dagger.Client) *url.URL {
+func Distrubition(t testing.TB, dag *dagger.Client) *url.URL {
 	t.Helper()
 	ctx := t.Context()
-	registry, err := dag.Container().
+	distribution, err := dag.Container().
 		From("docker.io/distribution/distribution:3").
 		WithExposedPort(5000).
 		AsService().
 		Start(ctx)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, err = registry.Stop(context.WithoutCancel(ctx))
+		_, err = distribution.Stop(context.WithoutCancel(ctx))
 		require.NoError(t, err)
 	})
-	rawRegistryURL, err := registry.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
+	rawDistributionURL, err := distribution.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
 	require.NoError(t, err)
-	registryURL, err := url.Parse(rawRegistryURL)
+	distributionURL, err := url.Parse(rawDistributionURL)
 	require.NoError(t, err)
-	return registryURL
+	return distributionURL
 }

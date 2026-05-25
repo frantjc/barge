@@ -5,7 +5,6 @@ package barge_test
 import (
 	"fmt"
 	"net/url"
-	"os/exec"
 	"testing"
 
 	"dagger.io/dagger"
@@ -28,19 +27,18 @@ func TestCopyChartmuseum(t *testing.T) {
 		require.NoError(t, dag.Close())
 	})
 
-	archiveChart, archive := Archive(t)
+	archiveChart, archiveURL := Archive(t)
 
 	chartmuseumURL := Chartmuseum(t, dag)
-	require.NoError(t, barge.Copy(ctx, archive, chartmuseumURL.String()))
+	require.NoError(t, barge.Copy(ctx, archiveURL.String(), chartmuseumURL.String()))
 
-	helm, err := exec.LookPath("helm")
 	require.NoError(t, err)
 	repo := "chartmuseum"
 	repoURL := url.URL{
 		Scheme: "http",
 		Host:   chartmuseumURL.Host,
 	}
-	add := Command(t, helm, "repo", "add", repo, repoURL.String())
+	add := Command(t, "helm", "repo", "add", repo, repoURL.String())
 	require.NoError(t, add.Run())
 
 	require.NoError(t, barge.Copy(ctx, fmt.Sprintf("repo://%s/%s", repo, archiveChart.Name()), t.TempDir()))
@@ -54,7 +52,7 @@ func TestCopyChartmuseum(t *testing.T) {
 	require.NoError(t, barge.Copy(ctx, httpURL.String(), t.TempDir()))
 }
 
-func TestCopyOCI(t *testing.T) {
+func TestCopyDistribution(t *testing.T) {
 	ctx := Context(t)
 
 	dag, err := dagger.Connect(ctx)
@@ -63,14 +61,13 @@ func TestCopyOCI(t *testing.T) {
 		require.NoError(t, dag.Close())
 	})
 
-	_, archive := Archive(t)
+	_, archiveURL := Archive(t)
 
-	registryURL := Registry(t, dag)
-	oci := registryURL.JoinPath("test")
-	require.NoError(t, barge.Copy(ctx, archive, oci.String()))
+	oci := Distrubition(t, dag).JoinPath("test")
+	require.NoError(t, barge.Copy(ctx, archiveURL.String(), oci.String()))
 	require.NoError(t, barge.Copy(ctx, oci.String(), t.TempDir()))
 
-	ociWithTag := registryURL.JoinPath("test:tag")
-	require.NoError(t, barge.Copy(ctx, archive, ociWithTag.String()))
-	require.NoError(t, barge.Copy(ctx, ociWithTag.String(), t.TempDir()))
+	ociWithTag := fmt.Sprintf("%s:tag", oci)
+	require.NoError(t, barge.Copy(ctx, archiveURL.String(), ociWithTag))
+	require.NoError(t, barge.Copy(ctx, ociWithTag, t.TempDir()))
 }
