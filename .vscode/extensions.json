@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "bufbuild.vscode-buf",
     "golang.go",
     "hverlin.mise-vscode",
     "tamasfe.even-better-toml"
