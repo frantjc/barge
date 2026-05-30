@@ -44,14 +44,23 @@ func TestCopyFile(t *testing.T) {
 	require.NoError(t, barge.Copy(ctx, fileDir, t.TempDir()))
 }
 
+func TestCopyDefault(t *testing.T) {
+	ctx := Context(t)
+	archiveChart, archive := Archive(t)
+	file := fmt.Sprintf("%s/%s-%s.tgz", t.TempDir(), archiveChart.Name(), archiveChart.Metadata.Version)
+	require.NoError(t, barge.Copy(ctx, archive.String(), file))
+	require.NoError(t, barge.Copy(ctx, file, t.TempDir()))
+	fileDir := fmt.Sprintf("%s", t.TempDir())
+	require.NoError(t, barge.Copy(ctx, archive.String(), fileDir))
+	require.NoError(t, barge.Copy(ctx, fileDir, t.TempDir()))
+}
+
 func TestCopyHTTP(t *testing.T) {
 	ctx := Context(t)
-
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(testdata.ChartArchive)
 	}))
 	t.Cleanup(srv.Close)
-
 	archiveChart, _ := Archive(t)
 	chartURL := fmt.Sprintf("%s/%s-%s.tgz", srv.URL, archiveChart.Name(), archiveChart.Metadata.Version)
 	require.NoError(t, barge.Copy(ctx, chartURL, t.TempDir()))
@@ -73,8 +82,9 @@ func TestCopyOCI(t *testing.T) {
 }
 
 func TestCopyErrorUnknownScheme(t *testing.T) {
-	require.Error(t, barge.Copy(t.Context(), "foo://", t.TempDir()))
-	require.Error(t, barge.Copy(t.Context(), fmt.Sprintf("file://%s", t.TempDir()), "bar://"))
+	ctx := Context(t)
+	require.Error(t, barge.Copy(ctx, "foo://", t.TempDir()))
+	require.Error(t, barge.Copy(ctx, fmt.Sprintf("file://%s", t.TempDir()), "bar://"))
 }
 
 func TestCopyErrorInvalid(t *testing.T) {

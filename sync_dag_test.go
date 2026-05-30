@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"dagger.io/dagger"
 	"github.com/Masterminds/semver/v3"
 	"github.com/frantjc/barge"
 	_ "github.com/frantjc/barge/internal/archive"
@@ -24,18 +23,12 @@ import (
 func TestSyncDistribution(t *testing.T) {
 	ctx := Context(t)
 
-	dag, err := dagger.Connect(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, dag.Close())
-	})
-
-	archiveChart, archiveURL := Archive(t)
-
 	namespace := uuid.NewString()
+	dag := Dag(t)
 	distributionURL := Distribution(t, dag)
 
 	// Sync from archive into OCI registry.
+	archiveChart, archiveURL := Archive(t)
 	archiveSyncCfg, err := os.CreateTemp(t.TempDir(), "archive.yml")
 	require.NoError(t, err)
 	b, err := yaml.Marshal(&barge.SyncConfig{
@@ -89,14 +82,7 @@ func TestSyncDistribution(t *testing.T) {
 func TestSyncChartmuseum(t *testing.T) {
 	ctx := Context(t)
 
-	dag, err := dagger.Connect(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, dag.Close())
-	})
-
 	_, archiveURL := Archive(t)
-
 	archiveSyncCfg, err := os.CreateTemp(t.TempDir(), "archive.yml")
 	require.NoError(t, err)
 	b, err := yaml.Marshal(&barge.SyncConfig{
@@ -111,6 +97,7 @@ func TestSyncChartmuseum(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, archiveSyncCfg.Close())
 
+	dag := Dag(t)
 	chartmuseumURL := Chartmuseum(t, dag)
 
 	require.NoError(t, barge.Sync(ctx, archiveSyncCfg.Name(), chartmuseumURL.String()))
@@ -118,13 +105,7 @@ func TestSyncChartmuseum(t *testing.T) {
 
 func TestSyncErrorMissingConfig(t *testing.T) {
 	ctx := Context(t)
-
-	dag, err := dagger.Connect(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, dag.Close())
-	})
-
+	dag := Dag(t)
 	distributionURL := Distribution(t, dag)
 	require.Error(t, barge.Sync(ctx, filepath.Join(t.TempDir(), "does-not-exist.yaml"), distributionURL.String()))
 }

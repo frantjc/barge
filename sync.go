@@ -105,8 +105,8 @@ func (s *SyncOpts) Apply(opts *SyncOpts) {
 	}
 }
 
-func WithFailFast(opts *SyncOpts) {
-	(&SyncOpts{FailFast: true}).Apply(opts)
+func WithFailFast() SyncOpt {
+	return &SyncOpts{FailFast: true}
 }
 
 func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) error {

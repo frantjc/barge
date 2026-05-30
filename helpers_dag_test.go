@@ -53,3 +53,13 @@ func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
 	require.NoError(t, err)
 	return distributionURL
 }
+
+func Dag(t testing.TB) *dagger.Client {
+	ctx := Context(t)
+	dag, err := dagger.Connect(ctx)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, dag.Close())
+	})
+	return dag
+}

@@ -11,6 +11,7 @@ import (
 	_ "github.com/frantjc/barge/internal/archive"
 	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
+	_ "github.com/frantjc/barge/internal/git"
 	_ "github.com/frantjc/barge/internal/oci"
 	"github.com/stretchr/testify/require"
 )
@@ -30,4 +31,12 @@ func TestCopyGHCR(t *testing.T) {
 	require.NoError(t, barge.Copy(ctx, ghcr, t.TempDir()))
 	require.NoError(t, barge.Copy(ctx, archiveURL.String(), ghcrWithTag))
 	require.NoError(t, barge.Copy(ctx, ghcrWithTag, t.TempDir()))
+}
+
+func TestCopyGitHub(t *testing.T) {
+	ctx := Context(t)
+	git := fmt.Sprintf("git://github.com/chartmuseum/charts/src/chartmuseum")
+	tmp := t.TempDir()
+	require.NoError(t, barge.Copy(ctx, git, tmp))
+	require.NoError(t, barge.Copy(ctx, tmp, t.TempDir()))
 }

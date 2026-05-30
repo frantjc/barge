@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/frantjc/barge/internal/util"
@@ -58,7 +59,10 @@ func Context(t testing.TB) context.Context {
 func Repo(t testing.TB, chart *chart.Chart) (string, *url.URL) {
 	t.Helper()
 
-	chartURLRel := fmt.Sprintf("/%s-%s.tgz", chart.Name(), chart.Metadata.Version)
+	rootPath := "/"
+	chartPath := filepath.Join(rootPath, fmt.Sprintf("%s-%s.tgz", chart.Name(), chart.Metadata.Version))
+	chartRelPath, err := filepath.Rel(rootPath, chartPath)
+	require.NoError(t, err)
 	indexYAML, err := yaml.Marshal(map[string]any{
 		"apiVersion": "v1",
 		"entries": map[string]any{
@@ -66,7 +70,7 @@ func Repo(t testing.TB, chart *chart.Chart) (string, *url.URL) {
 				{
 					"name":    chart.Name(),
 					"version": chart.Metadata.Version,
-					"urls":    []string{chartURLRel},
+					"urls":    []string{chartRelPath},
 				},
 			},
 		},
@@ -77,7 +81,7 @@ func Repo(t testing.TB, chart *chart.Chart) (string, *url.URL) {
 		switch r.URL.Path {
 		case "/index.yaml":
 			_, _ = w.Write(indexYAML)
-		case chartURLRel:
+		case chartPath:
 			_, _ = w.Write(testdata.ChartArchive)
 		}
 	}))

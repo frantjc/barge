@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"testing"
 
-	"dagger.io/dagger"
 	"github.com/frantjc/barge"
 	_ "github.com/frantjc/barge/internal/archive"
 	_ "github.com/frantjc/barge/internal/chartmuseum"
@@ -21,18 +20,11 @@ import (
 func TestCopyChartmuseum(t *testing.T) {
 	ctx := Context(t)
 
-	dag, err := dagger.Connect(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, dag.Close())
-	})
-
+	dag := Dag(t)
 	archiveChart, archiveURL := Archive(t)
-
 	chartmuseumURL := Chartmuseum(t, dag)
 	require.NoError(t, barge.Copy(ctx, archiveURL.String(), chartmuseumURL.String()))
 
-	require.NoError(t, err)
 	repo := "chartmuseum"
 	repoURL := url.URL{
 		Scheme: "http",
@@ -55,15 +47,9 @@ func TestCopyChartmuseum(t *testing.T) {
 func TestCopyDistribution(t *testing.T) {
 	ctx := Context(t)
 
-	dag, err := dagger.Connect(ctx)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, dag.Close())
-	})
-
-	_, archiveURL := Archive(t)
-
+	dag := Dag(t)
 	oci := Distribution(t, dag).JoinPath("test")
+	_, archiveURL := Archive(t)
 	require.NoError(t, barge.Copy(ctx, archiveURL.String(), oci.String()))
 	require.NoError(t, barge.Copy(ctx, oci.String(), t.TempDir()))
 
