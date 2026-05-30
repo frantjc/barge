@@ -63,7 +63,7 @@ func TestCopyDistribution(t *testing.T) {
 
 	_, archiveURL := Archive(t)
 
-	oci := Distrubition(t, dag).JoinPath("test")
+	oci := Distribution(t, dag).JoinPath("test")
 	require.NoError(t, barge.Copy(ctx, archiveURL.String(), oci.String()))
 	require.NoError(t, barge.Copy(ctx, oci.String(), t.TempDir()))
 

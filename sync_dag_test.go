@@ -33,7 +33,7 @@ func TestSyncDistribution(t *testing.T) {
 	archiveChart, archiveURL := Archive(t)
 
 	namespace := uuid.NewString()
-	distrubutionURL := Distrubition(t, dag)
+	distributionURL := Distribution(t, dag)
 
 	// Sync from archive into OCI registry.
 	archiveSyncCfg, err := os.CreateTemp(t.TempDir(), "archive.yml")
@@ -54,7 +54,7 @@ func TestSyncDistribution(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, archiveSyncCfg.Close())
 
-	require.NoError(t, barge.Sync(ctx, archiveSyncCfg.Name(), distrubutionURL.String()))
+	require.NoError(t, barge.Sync(ctx, archiveSyncCfg.Name(), distributionURL.String()))
 
 	// Sync from OCI registry into a directory.
 	constraints, err := semver.NewConstraint(archiveChart.Metadata.Version)
@@ -65,13 +65,13 @@ func TestSyncDistribution(t *testing.T) {
 	b, err = yaml.Marshal(&barge.SyncConfig{
 		Sources: []barge.SourceConfig{
 			{
-				URL: barge.URL(*distrubutionURL),
+				URL: barge.URL(*distributionURL),
 				Charts: map[string]barge.Constraints{
 					archiveChart.Name(): barge.Constraints(*constraints),
 				},
 			},
 			{
-				URL: barge.URL(*distrubutionURL.JoinPath(namespace)),
+				URL: barge.URL(*distributionURL.JoinPath(namespace)),
 				Charts: map[string]barge.Constraints{
 					archiveChart.Name(): barge.Constraints(*constraints),
 				},
@@ -125,6 +125,6 @@ func TestSyncErrorMissingConfig(t *testing.T) {
 		require.NoError(t, dag.Close())
 	})
 
-	distrubutionURL := Distrubition(t, dag)
-	require.Error(t, barge.Sync(ctx, filepath.Join(t.TempDir(), "does-not-exist.yaml"), distrubutionURL.String()))
+	distributionURL := Distribution(t, dag)
+	require.Error(t, barge.Sync(ctx, filepath.Join(t.TempDir(), "does-not-exist.yaml"), distributionURL.String()))
 }

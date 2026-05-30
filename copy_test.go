@@ -35,7 +35,10 @@ func TestCopyDirectory(t *testing.T) {
 
 func TestCopyFile(t *testing.T) {
 	ctx := Context(t)
-	_, archive := Archive(t)
+	archiveChart, archive := Archive(t)
+	file := fmt.Sprintf("file://%s/%s-%s.tgz", t.TempDir(), archiveChart.Name(), archiveChart.Metadata.Version)
+	require.NoError(t, barge.Copy(ctx, archive.String(), file))
+	require.NoError(t, barge.Copy(ctx, file, t.TempDir()))
 	fileDir := fmt.Sprintf("file://%s", t.TempDir())
 	require.NoError(t, barge.Copy(ctx, archive.String(), fileDir))
 	require.NoError(t, barge.Copy(ctx, fileDir, t.TempDir()))

@@ -34,7 +34,7 @@ func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
 	return chartmuseumURL
 }
 
-func Distrubition(t testing.TB, dag *dagger.Client) *url.URL {
+func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
 	t.Helper()
 	ctx := t.Context()
 	distribution, err := dag.Container().

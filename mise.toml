@@ -1,4 +1,4 @@
 [tools]
-dagger = "0.20.8"
+dagger = "0.21.3"
 go = "1.26.3"
 helm = "4.2.0"
