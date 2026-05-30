@@ -50,7 +50,7 @@ func TestCopyDefault(t *testing.T) {
 	file := fmt.Sprintf("%s/%s-%s.tgz", t.TempDir(), archiveChart.Name(), archiveChart.Metadata.Version)
 	require.NoError(t, barge.Copy(ctx, archive.String(), file))
 	require.NoError(t, barge.Copy(ctx, file, t.TempDir()))
-	fileDir := fmt.Sprintf("%s", t.TempDir())
+	fileDir := t.TempDir()
 	require.NoError(t, barge.Copy(ctx, archive.String(), fileDir))
 	require.NoError(t, barge.Copy(ctx, fileDir, t.TempDir()))
 }
