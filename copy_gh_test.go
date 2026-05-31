@@ -35,7 +35,7 @@ func TestCopyGHCR(t *testing.T) {
 
 func TestCopyGitHub(t *testing.T) {
 	ctx := Context(t)
-	git := fmt.Sprintf("git://github.com/chartmuseum/charts/src/chartmuseum")
+	git := "git://github.com/chartmuseum/charts/src/chartmuseum"
 	tmp := t.TempDir()
 	require.NoError(t, barge.Copy(ctx, git, tmp))
 	require.NoError(t, barge.Copy(ctx, tmp, t.TempDir()))
