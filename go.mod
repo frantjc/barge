@@ -3,7 +3,7 @@ module github.com/frantjc/barge
 go 1.26.2
 
 require (
-	dagger.io/dagger v0.20.8
+	dagger.io/dagger v0.21.7
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/cli/cli/v2 v2.83.2
 	github.com/fluxcd/pkg/auth v0.33.0
@@ -28,6 +28,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
+	github.com/dagger/querybuilder v0.0.0-20260402040506-574a5e81cb59 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
