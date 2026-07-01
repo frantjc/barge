@@ -6,24 +6,12 @@ import (
 	"github.com/frantjc/barge/.dagger/internal/dagger"
 )
 
-type BargeDev struct {
-	Source *dagger.Directory
-}
-
-func New(
-	ctx context.Context,
-	// +optional
-	// +defaultPath="."
-	src *dagger.Directory,
-) (*BargeDev, error) {
-	return &BargeDev{
-		Source: src,
-	}, nil
-}
+type BargeDev struct{}
 
 // +check
 func (m *BargeDev) Test(
 	ctx context.Context,
+	workspace *dagger.Workspace,
 	// +optional
 	githubToken *dagger.Secret,
 	// +optional
@@ -33,9 +21,9 @@ func (m *BargeDev) Test(
 	alias := "kwok"
 	tags := []string{"dagger", "examples", "kubernetes"}
 	return dag.Go(dagger.GoOpts{
-		Source: m.Source,
+		Workspace: workspace,
 		Container: dag.Mise(dagger.MiseOpts{
-			Source: m.Source,
+			Workspace: workspace,
 		}).
 			Container(dagger.MiseContainerOpts{
 				Tools: []string{"go", "helm"},
@@ -65,32 +53,12 @@ func (m *BargeDev) Test(
 
 func (m *BargeDev) Release(
 	ctx context.Context,
+	workspace *dagger.Workspace,
 	githubRepo string,
 	githubToken *dagger.Secret,
 ) error {
 	return dag.Release(
-		m.Source.AsGit().LatestVersion(),
+		workspace.Directory(".").AsGit().LatestVersion(),
 	).
 		Create(ctx, githubToken, githubRepo, "barge", dagger.ReleaseCreateOpts{Brew: true})
-}
-
-// +check
-func (m *BargeDev) Binary(
-	ctx context.Context,
-	// +default=v0.0.0-unknown
-	version string,
-	// +optional
-	goarch string,
-	// +optional
-	goos string,
-) *dagger.File {
-	return dag.Go(dagger.GoOpts{
-		Source: m.Source,
-	}).
-		Build(dagger.GoBuildOpts{
-			Pkg:     "./cmd/barge",
-			Ldflags: "-s -w -X main.version=" + version,
-			Goos:    goos,
-			Goarch:  goarch,
-		})
 }

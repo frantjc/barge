@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"dagger.io/dagger"
+	"github.com/frantjc/barge/internal/dagger"
 	"github.com/stretchr/testify/require"
 )
 

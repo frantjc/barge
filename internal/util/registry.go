@@ -7,8 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/cli/cli/v2/api"
-	"github.com/cli/cli/v2/pkg/cmd/factory"
+	ghauth "github.com/cli/go-gh/v2/pkg/auth"
 	"github.com/fluxcd/pkg/auth"
 	"github.com/fluxcd/pkg/auth/aws"
 	"github.com/fluxcd/pkg/auth/azure"
@@ -19,35 +18,11 @@ import (
 )
 
 func GetGitHubAuth(ctx context.Context) (string, string, error) {
-	cfg, err := factory.New("v0.0.0-unknown").Config()
-	if err != nil {
-		return "", "", err
+	host, _ := ghauth.DefaultHost()
+	if token, _ := ghauth.TokenForHost(host); token != "" {
+		return "x-access-token", token, nil
 	}
-
-	authCfg := cfg.Authentication()
-
-	username, err := authCfg.ActiveUser("github.com")
-	if err != nil {
-		stdout := StdoutFrom(ctx)
-
-		httpClient, err := api.NewHTTPClient(api.HTTPClientOptions{
-			Config: authCfg,
-			Log:    stdout,
-		})
-		if err != nil {
-			return "", "", err
-		}
-
-		var nerr error
-		username, nerr = api.CurrentLoginName(api.NewClientFromHTTP(httpClient), "github.com")
-		if nerr != nil {
-			return "", "", fmt.Errorf("%v: %v", err, nerr)
-		}
-	}
-
-	password, _ := authCfg.ActiveToken("github.com")
-
-	return username, password, nil
+	return "", "", fmt.Errorf("no github token configured")
 }
 
 func NewRegistryClientFromURL(ctx context.Context, u *url.URL) (*registry.Client, error) {
