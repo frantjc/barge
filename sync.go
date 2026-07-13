@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"runtime"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/frantjc/barge/internal/util"
@@ -90,7 +91,8 @@ type SyncConfig struct {
 }
 
 type SyncOpts struct {
-	FailFast bool
+	FailFast    bool
+	Concurrency int
 }
 
 type SyncOpt interface {
@@ -101,6 +103,9 @@ func (s *SyncOpts) Apply(opts *SyncOpts) {
 	if s != nil {
 		if opts != nil {
 			opts.FailFast = s.FailFast
+			if s.Concurrency > 0 {
+				opts.Concurrency = s.Concurrency
+			}
 		}
 	}
 }
@@ -109,8 +114,14 @@ func WithFailFast() SyncOpt {
 	return &SyncOpts{FailFast: true}
 }
 
+func WithConcurrency(n int) SyncOpt {
+	return &SyncOpts{Concurrency: n}
+}
+
 func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) error {
-	o := &SyncOpts{}
+	o := &SyncOpts{
+		Concurrency: runtime.NumCPU(),
+	}
 
 	for _, opt := range opts {
 		opt.Apply(o)
@@ -140,6 +151,10 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 	eg := new(errgroup.Group)
 	if o.FailFast {
 		eg, ctx = errgroup.WithContext(ctx)
+	}
+
+	if o.Concurrency > 0 {
+		eg.SetLimit(o.Concurrency)
 	}
 
 	for _, src := range s.Sources {

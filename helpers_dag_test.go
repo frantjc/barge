@@ -8,14 +8,19 @@ import (
 	"testing"
 
 	"github.com/frantjc/barge/internal/dagger"
+	"github.com/frantjc/barge/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
 func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
 	t.Helper()
 	ctx := t.Context()
-	chartmuseum, err := dag.Container().
-		From("ghcr.io/helm/chartmuseum:v0.16.3").
+	container := dag.Container()
+	if username, password, err := util.GetGitHubAuth(ctx); err == nil {
+		container = container.WithRegistryAuth("ghcr.io", username, dag.SetSecret("github-password", password))
+	}
+	chartmuseum, err := container.
+		From("ghcr.io/helm/chartmuseum:v0.16.5").
 		WithExposedPort(8080).
 		WithEnvVariable("DEBUG", "1").
 		WithEnvVariable("STORAGE", "local").

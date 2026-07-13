@@ -100,6 +100,7 @@ func newSync() *cobra.Command {
 		}
 	)
 	cmd.Flags().BoolVar(&syncOpts.FailFast, "fail-fast", false, "Exit when the first source fails to sync")
+	cmd.Flags().IntVarP(&syncOpts.Concurrency, "concurrency", "c", 0, "Max number of concurrent syncs")
 	barge.AddFlags(cmd.Flags())
 	return cmd
 }
