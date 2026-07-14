@@ -63,12 +63,6 @@ func (m *BargeDev) Binary(
 ) *dagger.File {
 	return dag.Go(dagger.GoOpts{
 		Workspace: workspace,
-		Container: dag.Mise(dagger.MiseOpts{
-			Workspace: workspace,
-		}).
-			Container(dagger.MiseContainerOpts{
-				Tools: []string{"go"},
-			}),
 	}).
 		Build(dagger.GoBuildOpts{
 			Pkg:     "./cmd/barge",

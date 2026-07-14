@@ -26,7 +26,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	return util.WriteChartToDirectory(ctx, c, filepath.Join(u.Host, u.Path))
 }
 
-func (d *destination) Sync(ctx context.Context, u *url.URL, namespace string, c *chart.Chart) error {
+func (d *destination) Sync(ctx context.Context, u *url.URL, namespace, _ string, c *chart.Chart) error {
 	root := filepath.Join(u.Host, u.Path)
 	if fi, err := os.Stat(root); err != nil {
 		return err

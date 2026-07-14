@@ -35,7 +35,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	return util.WriteChartToFile(c, name)
 }
 
-func (d *destination) Sync(ctx context.Context, u *url.URL, namespace string, c *chart.Chart) error {
+func (d *destination) Sync(ctx context.Context, u *url.URL, namespace, _ string, c *chart.Chart) error {
 	name := filepath.Join(u.Host, u.Path)
 
 	if fi, err := os.Stat(name); err != nil {

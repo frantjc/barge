@@ -62,7 +62,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 			fmt.Sprintf(
 				"Basic %s",
 				base64.RawURLEncoding.EncodeToString(
-					[]byte(fmt.Sprintf("%s:%s", username, password)),
+					fmt.Appendf(nil, "%s:%s", username, password),
 				),
 			),
 		)
@@ -81,6 +81,6 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	return nil
 }
 
-func (d *destination) Sync(ctx context.Context, u *url.URL, namespace string, c *chart.Chart) error {
+func (d *destination) Sync(ctx context.Context, u *url.URL, namespace, _ string, c *chart.Chart) error {
 	return d.Write(ctx, u.JoinPath(namespace), c)
 }

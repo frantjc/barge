@@ -210,7 +210,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 
 								log.Info("syncing", "chart", chart.Name(), "version", chart.Metadata.Version, "destination", d.String(), "namespace", namespace)
 
-								return syncableDestination.Sync(ctx, d, namespace, chart)
+								return syncableDestination.Sync(ctx, d, namespace, name, chart)
 							})
 						}
 					}
@@ -224,7 +224,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 				return err
 			}
 
-			return syncableDestination.Sync(ctx, d, namespace, chart)
+			return syncableDestination.Sync(ctx, d, namespace, "", chart)
 		})
 	}
 
