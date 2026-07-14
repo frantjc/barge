@@ -72,11 +72,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 
 					for _, rawURLOrPath := range chartVersion.URLs {
 						if !strings.Contains(rawURLOrPath, "://") {
-							w, err := url.Parse(rawURLOrPath)
-							if err != nil {
-								return nil, err
-							}
-							rawURLOrPath = w.JoinPath(rawURLOrPath).String()
+							rawURLOrPath = u.JoinPath(rawURLOrPath).String()
 						}
 
 						scheme, _, _ := strings.Cut(rawURLOrPath, "://")
@@ -159,7 +155,7 @@ func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]barge
 			}
 
 			if !t.IsAbs() {
-				t = u.ResolveReference(t)
+				t = u.JoinPath(rawURLOrPath)
 			}
 
 			w := barge.URL(*t)

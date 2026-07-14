@@ -78,7 +78,7 @@ func cliOptForURLAndProvider(u *url.URL, provider string) registry.ClientOption 
 
 	return registry.ClientOptAuthorizer(orasauth.Client{
 		Credential: func(ctx context.Context, _ string) (orasauth.Credential, error) {
-			authenticator, err := authutils.GetArtifactRegistryCredentials(ctx, provider, fmt.Sprintf("oci://%s", RefFromURL(u)), authOpts...)
+			authenticator, err := authutils.GetArtifactRegistryCredentials(ctx, provider, RefFromURL(u), authOpts...)
 			if err != nil {
 				return orasauth.EmptyCredential, err
 			}

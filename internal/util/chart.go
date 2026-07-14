@@ -175,7 +175,7 @@ func writeChart(c *chart.Chart, callback func(data []byte, rel string) error) er
 	}
 
 	for _, d := range c.Dependencies() {
-		rc, err := WriteChartToArchive(c)
+		rc, err := WriteChartToArchive(d)
 		if err != nil {
 			return err
 		}

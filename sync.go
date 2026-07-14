@@ -3,6 +3,7 @@ package barge
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -148,17 +149,20 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 		return fmt.Errorf("not a syncable destination scheme: %s", d.Scheme)
 	}
 
-	eg := new(errgroup.Group)
+	egv := new(errgroup.Group)
+	egs := new(errgroup.Group)
 	if o.FailFast {
-		eg, ctx = errgroup.WithContext(ctx)
+		egv, ctx = errgroup.WithContext(ctx)
+		egs, ctx = errgroup.WithContext(ctx)
 	}
 
-	if o.Concurrency > 0 {
-		eg.SetLimit(o.Concurrency)
+	if o.Concurrency != 0 {
+		egv.SetLimit(o.Concurrency)
+		egs.SetLimit(o.Concurrency)
 	}
 
 	for _, src := range s.Sources {
-		eg.Go(func() error {
+		egv.Go(func() error {
 			namespace := src.Namespace
 
 			s, err := url.Parse(os.ExpandEnv(src.URL.String()))
@@ -189,7 +193,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 
 					for _, syncableVersion := range syncableVersions {
 						if constraints.Check(syncableVersion.Version) {
-							eg.Go(func() error {
+							egs.Go(func() error {
 								syncSource := source
 
 								if syncableVersion.URL.Scheme != s.Scheme {
@@ -224,7 +228,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 		})
 	}
 
-	return eg.Wait()
+	return errors.Join(egv.Wait(), egs.Wait())
 }
 
 func Sync(ctx context.Context, cfg, dest string, opts ...SyncOpt) error {

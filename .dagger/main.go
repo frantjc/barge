@@ -51,6 +51,33 @@ func (m *BargeDev) Test(
 		})
 }
 
+func (m *BargeDev) Binary(
+	ctx context.Context,
+	workspace *dagger.Workspace,
+	// +default=v0.0.0-unknown
+	version,
+	// +optional
+	goarch,
+	// +optional
+	goos string,
+) *dagger.File {
+	return dag.Go(dagger.GoOpts{
+		Workspace: workspace,
+		Container: dag.Mise(dagger.MiseOpts{
+			Workspace: workspace,
+		}).
+			Container(dagger.MiseContainerOpts{
+				Tools: []string{"go"},
+			}),
+	}).
+		Build(dagger.GoBuildOpts{
+			Pkg:     "./cmd/barge",
+			Ldflags: "-s -w -X main.version=" + version,
+			Goos:    goos,
+			Goarch:  goarch,
+		})
+}
+
 func (m *BargeDev) Release(
 	ctx context.Context,
 	workspace *dagger.Workspace,
@@ -60,5 +87,5 @@ func (m *BargeDev) Release(
 	return dag.Release(
 		workspace.Directory(".").AsGit().LatestVersion(),
 	).
-		Create(ctx, githubToken, githubRepo, "barge", dagger.ReleaseCreateOpts{Brew: true})
+		Create(ctx, githubToken, githubRepo, "barge")
 }
