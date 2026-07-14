@@ -52,7 +52,7 @@ func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
 		_, err = distribution.Stop(context.WithoutCancel(ctx))
 		require.NoError(t, err)
 	})
-	rawDistributionURL, err := distribution.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci"})
+	rawDistributionURL, err := distribution.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci+http"})
 	require.NoError(t, err)
 	distributionURL, err := url.Parse(rawDistributionURL)
 	require.NoError(t, err)
@@ -60,6 +60,7 @@ func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
 }
 
 func Dag(t testing.TB) *dagger.Client {
+	t.Helper()
 	ctx := Context(t)
 	dag, err := dagger.Connect(ctx)
 	require.NoError(t, err)

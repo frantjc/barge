@@ -109,7 +109,7 @@ func OCI(t testing.TB) *url.URL {
 	t.Cleanup(reg.Close)
 
 	return &url.URL{
-		Scheme: "oci",
+		Scheme: "oci+http",
 		Host:   reg.Listener.Addr().String(),
 	}
 }

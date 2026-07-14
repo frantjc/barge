@@ -16,6 +16,8 @@ func init() {
 	barge.RegisterDestination(
 		new(destination),
 		"oci",
+		"oci+https",
+		"oci+http",
 	)
 }
 
