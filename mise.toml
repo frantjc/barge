@@ -1,4 +1,5 @@
 [tools]
+azure-cli = { version = "2.88.0", uvx_args = "--prerelease=allow" }
 dagger = "0.21.7"
 go = "1.26.5"
 helm = "4.2.0"

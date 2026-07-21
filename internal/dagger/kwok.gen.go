@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Kwok
-func (r *Binding) AsKwok() *Kwok { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L16)
+func (r *Binding) AsKwok() *Kwok { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L16)
 	q := r.query.Select("asKwok")
 
 	return &Kwok{
@@ -19,7 +19,7 @@ func (r *Binding) AsKwok() *Kwok { // kwok (https://github.com/frantjc/daggerver
 }
 
 // Retrieve the binding value, as type KwokCluster
-func (r *Binding) AsKwokCluster() *KwokCluster { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L218)
+func (r *Binding) AsKwokCluster() *KwokCluster { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L218)
 	q := r.query.Select("asKwokCluster")
 
 	return &KwokCluster{
@@ -28,7 +28,7 @@ func (r *Binding) AsKwokCluster() *KwokCluster { // kwok (https://github.com/fra
 }
 
 // Create or update a binding of type KwokCluster in the environment
-func (r *Env) WithKwokClusterInput(name string, value *KwokCluster, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L218)
+func (r *Env) WithKwokClusterInput(name string, value *KwokCluster, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L218)
 	assertNotNil("value", value)
 	q := r.query.Select("withKwokClusterInput")
 	q = q.Arg("name", name)
@@ -41,7 +41,7 @@ func (r *Env) WithKwokClusterInput(name string, value *KwokCluster, description 
 }
 
 // Declare a desired KwokCluster output to be assigned in the environment
-func (r *Env) WithKwokClusterOutput(name string, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L218)
+func (r *Env) WithKwokClusterOutput(name string, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L218)
 	q := r.query.Select("withKwokClusterOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -52,7 +52,7 @@ func (r *Env) WithKwokClusterOutput(name string, description string) *Env { // k
 }
 
 // Create or update a binding of type Kwok in the environment
-func (r *Env) WithKwokInput(name string, value *Kwok, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L16)
+func (r *Env) WithKwokInput(name string, value *Kwok, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L16)
 	assertNotNil("value", value)
 	q := r.query.Select("withKwokInput")
 	q = q.Arg("name", name)
@@ -65,7 +65,7 @@ func (r *Env) WithKwokInput(name string, value *Kwok, description string) *Env {
 }
 
 // Declare a desired Kwok output to be assigned in the environment
-func (r *Env) WithKwokOutput(name string, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L16)
+func (r *Env) WithKwokOutput(name string, description string) *Env { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L16)
 	q := r.query.Select("withKwokOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -75,7 +75,7 @@ func (r *Env) WithKwokOutput(name string, description string) *Env { // kwok (ht
 	}
 }
 
-type Kwok struct { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L16)
+type Kwok struct { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L16)
 	query *querybuilder.Selection
 
 	id *ID
@@ -89,43 +89,43 @@ func (r *Kwok) WithGraphQLQuery(q *querybuilder.Selection) *Kwok {
 
 // KwokClusterOpts contains options for Kwok.Cluster
 type KwokClusterOpts struct {
-	Container *Container // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L59)
+	Container *Container // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L59)
 
-	Components []string // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L61)
+	Components []string // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L61)
 
-	ControllerPort int // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L63)
+	ControllerPort int // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L63)
 
-	Disable []string // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L65)
+	Disable []string // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L65)
 
-	DisableQpslimits bool // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L67)
+	DisableQpslimits bool // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L67)
 
-	Enable []string // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L69)
+	Enable []string // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L69)
 
-	EnableCrds []string // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L71)
+	EnableCrds []string // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L71)
 
 	// Default: 8080
-	KubeApiserverInsecurePort int // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L74)
+	KubeApiserverInsecurePort int // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L74)
 
-	KubeAuditPolicy *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L76)
+	KubeAuditPolicy *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L76)
 
-	Etcd *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L78)
+	Etcd *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L78)
 
-	Jaeger *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L80)
+	Jaeger *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L80)
 
-	KubeApiserver *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L82)
+	KubeApiserver *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L82)
 
-	KubeScheduler *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L84)
+	KubeScheduler *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L84)
 
-	KubeControllerManager *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L86)
+	KubeControllerManager *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L86)
 
-	KwokController *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L88)
+	KwokController *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L88)
 
-	MetricsServer *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L90)
+	MetricsServer *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L90)
 
-	Prometheus *File // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L92)
+	Prometheus *File // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L92)
 }
 
-func (r *Kwok) Cluster(opts ...KwokClusterOpts) *KwokCluster { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L55)
+func (r *Kwok) Cluster(opts ...KwokClusterOpts) *KwokCluster { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L55)
 	q := r.query.Select("cluster")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `container` optional argument
@@ -251,7 +251,7 @@ func (r *Kwok) AsNode() Node {
 	}
 }
 
-type KwokCluster struct { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L218)
+type KwokCluster struct { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L218)
 	query *querybuilder.Selection
 
 	id *ID
@@ -263,7 +263,7 @@ func (r *KwokCluster) WithGraphQLQuery(q *querybuilder.Selection) *KwokCluster {
 	}
 }
 
-func (r *KwokCluster) Container() *Container { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L219)
+func (r *KwokCluster) Container() *Container { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L219)
 	q := r.query.Select("container")
 
 	return &Container{
@@ -315,10 +315,10 @@ func (r *KwokCluster) MarshalJSON() ([]byte, error) {
 type KwokClusterKubeConfigOpts struct {
 
 	// Default: "kwok"
-	Alias string // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L228)
+	Alias string // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L228)
 }
 
-func (r *KwokCluster) KubeConfig(opts ...KwokClusterKubeConfigOpts) *File { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L224)
+func (r *KwokCluster) KubeConfig(opts ...KwokClusterKubeConfigOpts) *File { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L224)
 	q := r.query.Select("kubeConfig")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `alias` optional argument
@@ -340,7 +340,7 @@ func (r *KwokCluster) AsNode() Node {
 	}
 }
 
-func (r *Query) Kwok() *Kwok { // kwok (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/kwok/main.go#L16)
+func (r *Query) Kwok() *Kwok { // kwok (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/kwok/main.go#L16)
 	q := r.query.Select("kwok")
 
 	return &Kwok{

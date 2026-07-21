@@ -2,6 +2,7 @@ package barge_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/frantjc/barge/internal/util"
 	"github.com/frantjc/barge/testdata"
@@ -39,7 +41,8 @@ func Archive(t testing.TB) (*chart.Chart, *url.URL) {
 
 func Command(t testing.TB, name string, arg ...string) *exec.Cmd {
 	t.Helper()
-	cmd := exec.CommandContext(t.Context(), name, arg...)
+	ctx := Context(t)
+	cmd := exec.CommandContext(ctx, name, arg...)
 	cmd.Stdout = t.Output()
 	cmd.Stderr = t.Output()
 	return cmd
@@ -47,8 +50,15 @@ func Command(t testing.TB, name string, arg ...string) *exec.Cmd {
 
 func Context(t testing.TB) context.Context {
 	t.Helper()
+	ctx := t.Context()
+	if errors.Is(ctx.Err(), context.Canceled) {
+		// We're in a cleanup function; give 30s.
+		var cancel func()
+		ctx, cancel = context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+		t.Cleanup(cancel)
+	}
 	return util.SloggerInto(
-		util.StdoutInto(util.StderrInto(t.Context(), t.Output()), t.Output()),
+		util.StdoutInto(util.StderrInto(ctx, t.Output()), t.Output()),
 		slog.New(slog.NewTextHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
 	)
 }
@@ -94,7 +104,7 @@ func Repo(t testing.TB, chart *chart.Chart) (string, *url.URL) {
 	add := Command(t, "helm", "repo", "add", repoName, srv.URL)
 	require.NoError(t, add.Run())
 	t.Cleanup(func() {
-		remove := exec.Command("helm", "repo", "remove", repoName)
+		remove := Command(t, "helm", "repo", "remove", repoName)
 		require.NoError(t, remove.Run())
 	})
 

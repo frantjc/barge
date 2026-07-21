@@ -9,8 +9,6 @@ import (
 
 	"github.com/frantjc/barge"
 	_ "github.com/frantjc/barge/internal/archive"
-	_ "github.com/frantjc/barge/internal/chartmuseum"
-	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/oci"
 	_ "github.com/frantjc/barge/internal/repo"

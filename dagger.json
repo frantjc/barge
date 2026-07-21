@@ -8,7 +8,7 @@
     {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a",
+      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0",
       "ignoreChecks": [
         "test",
         "vulncheck"
@@ -19,17 +19,17 @@
     {
       "name": "kwok",
       "source": "github.com/frantjc/daggerverse/kwok@main",
-      "pin": "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a"
+      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0"
     },
     {
       "name": "mise",
       "source": "github.com/frantjc/daggerverse/mise@main",
-      "pin": "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a"
+      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0"
     },
     {
       "name": "release",
       "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a"
+      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0"
     },
     {
       "name": "wolfi",

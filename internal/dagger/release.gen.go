@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Release
-func (r *Binding) AsRelease() *Release { // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L16)
+func (r *Binding) AsRelease() *Release { // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L16)
 	q := r.query.Select("asRelease")
 
 	return &Release{
@@ -19,7 +19,7 @@ func (r *Binding) AsRelease() *Release { // release (https://github.com/frantjc/
 }
 
 // Create or update a binding of type Release in the environment
-func (r *Env) WithReleaseInput(name string, value *Release, description string) *Env { // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L16)
+func (r *Env) WithReleaseInput(name string, value *Release, description string) *Env { // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L16)
 	assertNotNil("value", value)
 	q := r.query.Select("withReleaseInput")
 	q = q.Arg("name", name)
@@ -32,7 +32,7 @@ func (r *Env) WithReleaseInput(name string, value *Release, description string) 
 }
 
 // Declare a desired Release output to be assigned in the environment
-func (r *Env) WithReleaseOutput(name string, description string) *Env { // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L16)
+func (r *Env) WithReleaseOutput(name string, description string) *Env { // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L16)
 	q := r.query.Select("withReleaseOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -42,7 +42,7 @@ func (r *Env) WithReleaseOutput(name string, description string) *Env { // relea
 	}
 }
 
-type Release struct { // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L16)
+type Release struct { // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L16)
 	query *querybuilder.Selection
 
 	create *Void
@@ -57,18 +57,18 @@ func (r *Release) WithGraphQLQuery(q *querybuilder.Selection) *Release {
 
 // ReleaseCreateOpts contains options for Release.Create
 type ReleaseCreateOpts struct {
-	Cgo bool // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L48)
+	Cgo bool // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L48)
 
 	// Default: ["linux","darwin"]
-	Goos []string // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L53)
+	Goos []string // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L53)
 
 	// Default: ["amd64","arm64"]
-	Goarch []string // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L58)
+	Goarch []string // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L58)
 
-	Brew bool // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L60)
+	Brew bool // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L60)
 }
 
-func (r *Release) Create(ctx context.Context, githubToken *Secret, githubRepo string, name string, opts ...ReleaseCreateOpts) error { // release (https://github.com/frantjc/daggerverse/tree/f22c1fc85dfa656d4216ea5a5086dee4eabefd5a/release/main.go#L42)
+func (r *Release) Create(ctx context.Context, githubToken *Secret, githubRepo string, name string, opts ...ReleaseCreateOpts) error { // release (https://github.com/frantjc/daggerverse/tree/87c8a58601e9790008fc0f941e33ddb45cac36d0/release/main.go#L42)
 	assertNotNil("githubToken", githubToken)
 	if r.create != nil {
 		return nil

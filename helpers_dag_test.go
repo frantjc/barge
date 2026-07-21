@@ -3,7 +3,6 @@
 package barge_test
 
 import (
-	"context"
 	"net/url"
 	"testing"
 
@@ -29,7 +28,7 @@ func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
 		Start(ctx)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, err = chartmuseum.Stop(context.WithoutCancel(ctx))
+		_, err = chartmuseum.Stop(Context(t))
 		require.NoError(t, err)
 	})
 	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum+http"})
@@ -49,7 +48,7 @@ func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
 		Start(ctx)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, err = distribution.Stop(context.WithoutCancel(ctx))
+		_, err = distribution.Stop(Context(t))
 		require.NoError(t, err)
 	})
 	rawDistributionURL, err := distribution.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci+http"})

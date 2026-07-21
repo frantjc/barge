@@ -15,22 +15,41 @@ func (m *BargeDev) Test(
 	// +optional
 	githubToken *dagger.Secret,
 	// +optional
-	githubRepo string,
+	githubRepo,
+	// +optional
+	acrName string,
+	// +optional
+	azureConfig *dagger.Directory,
 ) error {
 	cluster := dag.Kwok().Cluster()
 	alias := "kwok"
 	tags := []string{"dagger", "examples", "kubernetes"}
+	tools := []string{"go", "helm"}
+	if azureConfig != nil && acrName != "" {
+		tools = append(tools, "azure-cli")
+	}
 	return dag.Go(dagger.GoOpts{
 		Workspace: workspace,
 		Container: dag.Mise(dagger.MiseOpts{
 			Workspace: workspace,
 		}).
 			Container(dagger.MiseContainerOpts{
-				Tools: []string{"go", "helm"},
+				Tools: tools,
+			}).
+			With(func(r *dagger.Container) *dagger.Container {
+				if azureConfig != nil && acrName != "" {
+					tags = append(tags, "acr")
+					return r.
+						WithEnvVariable("ACR_NAME", acrName).
+						WithMountedDirectory("$HOME/.azure", azureConfig, dagger.ContainerWithMountedDirectoryOpts{
+							Expand: true,
+						})
+				}
+				return r
 			}).
 			With(func(r *dagger.Container) *dagger.Container {
 				if githubToken != nil && githubRepo != "" {
-					tags = append(tags, "ghcr")
+					tags = append(tags, "ghcr", "github")
 					return r.
 						WithSecretVariable("GITHUB_TOKEN", githubToken).
 						WithEnvVariable("GITHUB_REPOSITORY", githubRepo)

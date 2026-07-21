@@ -53,6 +53,11 @@ func Address(value string) *dagger.Address {
 	return client.Address(value)
 }
 
+func Binary(opts ...dagger.BinaryOpts) *dagger.File {
+	client := initClient()
+	return client.Binary(opts...)
+}
+
 // Constructs a cache volume for a given cache key.
 func CacheVolume(key string, opts ...dagger.CacheVolumeOpts) *dagger.CacheVolume {
 	client := initClient()

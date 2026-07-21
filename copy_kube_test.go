@@ -3,14 +3,12 @@
 package barge_test
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
 
 	"github.com/frantjc/barge"
 	_ "github.com/frantjc/barge/internal/archive"
-	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/release"
 	"github.com/google/uuid"
@@ -40,7 +38,7 @@ func TestCopyRelease(t *testing.T) {
 	create := Command(t, "helm", "upgrade", "--install", release, chart, "--namespace", namespace, "--create-namespace")
 	require.NoError(t, create.Run())
 	t.Cleanup(func() {
-		require.NoError(t, cli.CoreV1().Namespaces().Delete(context.WithoutCancel(ctx), namespace, metav1.DeleteOptions{}))
+		require.NoError(t, cli.CoreV1().Namespaces().Delete(Context(t), namespace, metav1.DeleteOptions{}))
 	})
 
 	require.NoError(t, barge.Copy(ctx, fmt.Sprintf("release://%s?namespace=%s", release, namespace), t.TempDir()))

@@ -11,10 +11,16 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
         with:
           install_args: dagger
+      - name: Set github* .env
+        run: |
+          cat << EOF > .env
+          bargeDev_release_githubToken=env://GITHUB_TOKEN
+          bargeDev_release_githubRepo=${{ github.repository }}
+          EOF
       - env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: dagger call release

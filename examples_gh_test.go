@@ -1,4 +1,4 @@
-//go:build examples
+//go:build examples && github
 
 package barge_test
 
@@ -10,11 +10,8 @@ import (
 	"testing"
 
 	"github.com/frantjc/barge"
-	_ "github.com/frantjc/barge/internal/archive"
-	_ "github.com/frantjc/barge/internal/directory"
 	_ "github.com/frantjc/barge/internal/file"
 	_ "github.com/frantjc/barge/internal/http"
-	_ "github.com/frantjc/barge/internal/oci"
 	_ "github.com/frantjc/barge/internal/repo"
 	"github.com/frantjc/barge/testdata"
 	"github.com/stretchr/testify/require"
@@ -29,14 +26,14 @@ func TestExampleHTTP(t *testing.T) {
 	require.NoError(t, barge.Copy(ctx, "https://github.com/frantjc/barge/raw/refs/heads/main/testdata/test-0.1.0.tgz", t.TempDir()))
 }
 
-func TestExampleOCI(t *testing.T) {
-	ctx := Context(t)
-	require.NoError(t, barge.Copy(ctx, "oci://ghcr.io/frantjc/barge/charts/test", t.TempDir()))
-}
-
 func TestExampleSync(t *testing.T) {
 	ctx := Context(t)
-	add := Command(t, "helm", "repo", "add", "--force-update", "chartmuseum", "https://chartmuseum.github.io/charts")
+	repoName := "chartmuseum"
+	add := Command(t, "helm", "repo", "add", "--force-update", repoName, "https://chartmuseum.github.io/charts")
+	t.Cleanup(func() {
+		remove := Command(t, "helm", "repo", "remove", repoName)
+		require.NoError(t, remove.Run())
+	})
 	require.NoError(t, add.Run())
 	_, file, _, ok := runtime.Caller(0)
 	require.True(t, ok)

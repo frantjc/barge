@@ -17757,7 +17757,7 @@ func (c *Client) Do(ctx context.Context, req *Request, resp *Response) error {
 func serveModuleDependencies(ctx context.Context, client *Client) error {
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/kwok@main",
-		ModuleSourceOpts{RefPin: "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a"},
+		ModuleSourceOpts{RefPin: "87c8a58601e9790008fc0f941e33ddb45cac36d0"},
 	).
 		WithName("kwok").
 		AsModule().
@@ -17767,7 +17767,7 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/mise@main",
-		ModuleSourceOpts{RefPin: "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a"},
+		ModuleSourceOpts{RefPin: "87c8a58601e9790008fc0f941e33ddb45cac36d0"},
 	).
 		WithName("mise").
 		AsModule().
@@ -17777,7 +17777,7 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/release@main",
-		ModuleSourceOpts{RefPin: "f22c1fc85dfa656d4216ea5a5086dee4eabefd5a"},
+		ModuleSourceOpts{RefPin: "87c8a58601e9790008fc0f941e33ddb45cac36d0"},
 	).
 		WithName("release").
 		AsModule().

@@ -23,6 +23,44 @@ func (r *BargeDev) WithGraphQLQuery(q *querybuilder.Selection) *BargeDev {
 	}
 }
 
+// BargeDevBinaryOpts contains options for BargeDev.Binary
+type BargeDevBinaryOpts struct {
+	Workspace *Workspace // barge-dev (../../.dagger/main.go:75:2)
+
+	// Default: "v0.0.0-unknown"
+	Version string // barge-dev (../../.dagger/main.go:77:2)
+
+	Goarch string // barge-dev (../../.dagger/main.go:79:2)
+
+	Goos string // barge-dev (../../.dagger/main.go:81:2)
+}
+
+func (r *BargeDev) Binary(opts ...BargeDevBinaryOpts) *File { // barge-dev (../../.dagger/main.go:73:1)
+	q := r.query.Select("binary")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `workspace` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Workspace) {
+			q = q.Arg("workspace", opts[i].Workspace)
+		}
+		// `version` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Version) {
+			q = q.Arg("version", opts[i].Version)
+		}
+		// `goarch` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Goarch) {
+			q = q.Arg("goarch", opts[i].Goarch)
+		}
+		// `goos` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Goos) {
+			q = q.Arg("goos", opts[i].Goos)
+		}
+	}
+
+	return &File{
+		query: q,
+	}
+}
+
 // A unique identifier for this BargeDev.
 func (r *BargeDev) ID(ctx context.Context) (ID, error) {
 	if r.id != nil {
@@ -65,23 +103,23 @@ func (r *BargeDev) MarshalJSON() ([]byte, error) {
 
 // BargeDevReleaseOpts contains options for BargeDev.Release
 type BargeDevReleaseOpts struct {
-	Ws *Workspace // barge-dev (../../.dagger/main.go:55:2)
+	Workspace *Workspace // barge-dev (../../.dagger/main.go:96:2)
 
 	// Default: "frantjc/barge"
-	GithubRepo string // barge-dev (../../.dagger/main.go:56:2)
+	GithubRepo string // barge-dev (../../.dagger/main.go:97:2)
 
-	GithubToken *Secret // barge-dev (../../.dagger/main.go:57:2)
+	GithubToken *Secret // barge-dev (../../.dagger/main.go:98:2)
 }
 
-func (r *BargeDev) Release(ctx context.Context, opts ...BargeDevReleaseOpts) error { // barge-dev (../../.dagger/main.go:53:1)
+func (r *BargeDev) Release(ctx context.Context, opts ...BargeDevReleaseOpts) error { // barge-dev (../../.dagger/main.go:94:1)
 	if r.release != nil {
 		return nil
 	}
 	q := r.query.Select("release")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `ws` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Ws) {
-			q = q.Arg("ws", opts[i].Ws)
+		// `workspace` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Workspace) {
+			q = q.Arg("workspace", opts[i].Workspace)
 		}
 		// `githubRepo` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubRepo) {
@@ -98,12 +136,17 @@ func (r *BargeDev) Release(ctx context.Context, opts ...BargeDevReleaseOpts) err
 
 // BargeDevTestOpts contains options for BargeDev.Test
 type BargeDevTestOpts struct {
-	Ws *Workspace // barge-dev (../../.dagger/main.go:14:2)
+	Workspace *Workspace // barge-dev (../../.dagger/main.go:14:2)
 
 	GithubToken *Secret // barge-dev (../../.dagger/main.go:16:2)
 
 	// Default: "frantjc/barge"
 	GithubRepo string // barge-dev (../../.dagger/main.go:18:2)
+
+	// Default: "frantjc"
+	AcrName string // barge-dev (../../.dagger/main.go:20:2)
+
+	AzureConfig *Directory // barge-dev (../../.dagger/main.go:22:2)
 }
 
 func (r *BargeDev) Test(ctx context.Context, opts ...BargeDevTestOpts) error { // barge-dev (../../.dagger/main.go:12:1)
@@ -112,9 +155,9 @@ func (r *BargeDev) Test(ctx context.Context, opts ...BargeDevTestOpts) error { /
 	}
 	q := r.query.Select("test")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `ws` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Ws) {
-			q = q.Arg("ws", opts[i].Ws)
+		// `workspace` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Workspace) {
+			q = q.Arg("workspace", opts[i].Workspace)
 		}
 		// `githubToken` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubToken) {
@@ -123,6 +166,14 @@ func (r *BargeDev) Test(ctx context.Context, opts ...BargeDevTestOpts) error { /
 		// `githubRepo` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubRepo) {
 			q = q.Arg("githubRepo", opts[i].GithubRepo)
+		}
+		// `acrName` optional argument
+		if !querybuilder.IsZeroValue(opts[i].AcrName) {
+			q = q.Arg("acrName", opts[i].AcrName)
+		}
+		// `azureConfig` optional argument
+		if !querybuilder.IsZeroValue(opts[i].AzureConfig) {
+			q = q.Arg("azureConfig", opts[i].AzureConfig)
 		}
 	}
 
@@ -170,22 +221,60 @@ func (r *Env) WithBargeDevOutput(name string, description string) *Env { // barg
 	}
 }
 
-// ReleaseOpts contains options for Query.Release
-type ReleaseOpts struct {
-	Ws *Workspace // barge-dev (../../.dagger/main.go:55:2)
+// BinaryOpts contains options for Query.Binary
+type BinaryOpts struct {
+	Workspace *Workspace // barge-dev (../../.dagger/main.go:75:2)
 
-	// Default: "frantjc/barge"
-	GithubRepo string // barge-dev (../../.dagger/main.go:56:2)
+	// Default: "v0.0.0-unknown"
+	Version string // barge-dev (../../.dagger/main.go:77:2)
 
-	GithubToken *Secret // barge-dev (../../.dagger/main.go:57:2)
+	Goarch string // barge-dev (../../.dagger/main.go:79:2)
+
+	Goos string // barge-dev (../../.dagger/main.go:81:2)
 }
 
-func (r *Query) Release(ctx context.Context, opts ...ReleaseOpts) error { // barge-dev (../../.dagger/main.go:53:1)
+func (r *Query) Binary(opts ...BinaryOpts) *File { // barge-dev (../../.dagger/main.go:73:1)
+	q := r.query.Select("binary")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `workspace` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Workspace) {
+			q = q.Arg("workspace", opts[i].Workspace)
+		}
+		// `version` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Version) {
+			q = q.Arg("version", opts[i].Version)
+		}
+		// `goarch` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Goarch) {
+			q = q.Arg("goarch", opts[i].Goarch)
+		}
+		// `goos` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Goos) {
+			q = q.Arg("goos", opts[i].Goos)
+		}
+	}
+
+	return &File{
+		query: q,
+	}
+}
+
+// ReleaseOpts contains options for Query.Release
+type ReleaseOpts struct {
+	Workspace *Workspace // barge-dev (../../.dagger/main.go:96:2)
+
+	// Default: "frantjc/barge"
+	GithubRepo string // barge-dev (../../.dagger/main.go:97:2)
+
+	GithubToken *Secret // barge-dev (../../.dagger/main.go:98:2)
+}
+
+func (r *Query) Release(ctx context.Context, opts ...ReleaseOpts) error { // barge-dev (../../.dagger/main.go:94:1)
 	q := r.query.Select("release")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `ws` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Ws) {
-			q = q.Arg("ws", opts[i].Ws)
+		// `workspace` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Workspace) {
+			q = q.Arg("workspace", opts[i].Workspace)
 		}
 		// `githubRepo` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubRepo) {
@@ -202,20 +291,25 @@ func (r *Query) Release(ctx context.Context, opts ...ReleaseOpts) error { // bar
 
 // TestOpts contains options for Query.Test
 type TestOpts struct {
-	Ws *Workspace // barge-dev (../../.dagger/main.go:14:2)
+	Workspace *Workspace // barge-dev (../../.dagger/main.go:14:2)
 
 	GithubToken *Secret // barge-dev (../../.dagger/main.go:16:2)
 
 	// Default: "frantjc/barge"
 	GithubRepo string // barge-dev (../../.dagger/main.go:18:2)
+
+	// Default: "frantjc"
+	AcrName string // barge-dev (../../.dagger/main.go:20:2)
+
+	AzureConfig *Directory // barge-dev (../../.dagger/main.go:22:2)
 }
 
 func (r *Query) Test(ctx context.Context, opts ...TestOpts) error { // barge-dev (../../.dagger/main.go:12:1)
 	q := r.query.Select("test")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `ws` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Ws) {
-			q = q.Arg("ws", opts[i].Ws)
+		// `workspace` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Workspace) {
+			q = q.Arg("workspace", opts[i].Workspace)
 		}
 		// `githubToken` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubToken) {
@@ -224,6 +318,14 @@ func (r *Query) Test(ctx context.Context, opts ...TestOpts) error { // barge-dev
 		// `githubRepo` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubRepo) {
 			q = q.Arg("githubRepo", opts[i].GithubRepo)
+		}
+		// `acrName` optional argument
+		if !querybuilder.IsZeroValue(opts[i].AcrName) {
+			q = q.Arg("acrName", opts[i].AcrName)
+		}
+		// `azureConfig` optional argument
+		if !querybuilder.IsZeroValue(opts[i].AzureConfig) {
+			q = q.Arg("azureConfig", opts[i].AzureConfig)
 		}
 	}
 
