@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -157,7 +156,7 @@ func writeChart(c *chart.Chart, callback func(data []byte, rel string) error) er
 	}
 
 	if c.Schema != nil {
-		if err := marshallCallback(json.Marshal, c.Schema, chartutil.SchemafileName); err != nil {
+		if err := callback(c.Schema, chartutil.SchemafileName); err != nil {
 			return err
 		}
 	}

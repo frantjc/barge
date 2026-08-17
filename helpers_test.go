@@ -123,3 +123,26 @@ func OCI(t testing.TB) *url.URL {
 		Host:   reg.Listener.Addr().String(),
 	}
 }
+
+func ChartsEqual(t testing.TB, expected, actual *chart.Chart, msgAndArgs ...interface{}) {
+	t.Helper()
+	require.Equal(t, expected.Lock, actual.Lock, msgAndArgs...)
+	require.Equal(t, expected.Metadata, actual.Metadata, msgAndArgs...)
+	require.Equal(t, expected.Schema, actual.Schema, msgAndArgs...)
+	require.Equal(t, expected.Values, actual.Values, msgAndArgs...)
+	for _, f := range actual.Files {
+		require.Contains(t, expected.Files, f)
+	}
+	for _, f := range actual.Raw {
+		require.Contains(t, expected.Raw, f)
+	}
+	for _, f := range actual.Templates {
+		require.Contains(t, expected.Templates, f)
+	}
+	for _, c := range actual.CRDObjects() {
+		require.Contains(t, expected.CRDObjects(), c)
+	}
+	for _, c := range actual.CRDs() {
+		require.Contains(t, expected.CRDs(), c)
+	}
+}

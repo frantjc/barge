@@ -1,10 +1,13 @@
 package barge_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/frantjc/barge"
@@ -16,6 +19,7 @@ import (
 	_ "github.com/frantjc/barge/internal/repo"
 	"github.com/frantjc/barge/testdata"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
 func TestCopyArchive(t *testing.T) {
@@ -92,4 +96,31 @@ func TestCopyErrorInvalid(t *testing.T) {
 	_, archive := Archive(t)
 	ociURL := &url.URL{Scheme: "oci", Host: "does-not-exist"}
 	require.Error(t, barge.Copy(ctx, archive.String(), ociURL.String()))
+}
+
+func TestCopyBeforeEqualToAfter(t *testing.T) {
+	ctx := Context(t)
+	expected, archive := Archive(t)
+	tmp := t.TempDir()
+	directory := fmt.Sprintf("directory://%s", tmp)
+	require.NoError(t, barge.Copy(ctx, archive.String(), directory))
+	actual, err := loader.LoadDir(tmp)
+	require.NoError(t, err)
+	ChartsEqual(t, expected, actual)
+}
+
+func TestCopyPreservesSchema(t *testing.T) {
+	ctx := Context(t)
+	chart, archive := Archive(t)
+	expected := map[string]any{}
+	require.NoError(t, json.Unmarshal(chart.Schema, &expected))
+	tmp := t.TempDir()
+	directory := fmt.Sprintf("directory://%s", tmp)
+	require.NoError(t, barge.Copy(ctx, archive.String(), directory))
+	rawValuesSchemaJSON, err := os.ReadFile(filepath.Join(tmp, "values.schema.json"))
+	require.NoError(t, err)
+	actual := map[string]any{}
+	require.NoError(t, json.Unmarshal(rawValuesSchemaJSON, &actual))
+	require.Equal(t, expected, actual)
+	require.Equal(t, chart.Schema, rawValuesSchemaJSON)
 }
