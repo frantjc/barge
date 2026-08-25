@@ -186,7 +186,6 @@ func Git(url string, opts ...dagger.GitOpts) *dagger.GitRepository {
 	return client.Git(url, opts...)
 }
 
-// A generated module for Go functions
 func Go(opts ...dagger.GoOpts) *dagger.Go {
 	client := initClient()
 	return client.Go(opts...)
@@ -690,9 +689,9 @@ func Node(id dagger.ID) dagger.Node {
 	return client.Node(id)
 }
 
-func Release(ctx context.Context, opts ...dagger.ReleaseOpts) error {
+func Release(ctx context.Context, githubRepo string, githubToken *dagger.Secret, opts ...dagger.ReleaseOpts) error {
 	client := initClient()
-	return client.Release(ctx, opts...)
+	return client.Release(ctx, githubRepo, githubToken, opts...)
 }
 
 // Creates a new secret.
