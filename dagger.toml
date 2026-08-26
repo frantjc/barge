@@ -1,0 +1,19 @@
+[modules.barge-dev]
+source = "."
+entrypoint = true
+
+[modules.dagger-go-sdk]
+source = "github.com/dagger/go-sdk"
+
+[modules.go]
+legacy-default-path = true
+source = "github.com/frantjc/daggerverse/go@bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+
+[modules.go.check]
+skip = ["test", "vulncheck"]
+
+[modules.dagger-go-sdk.as-sdk]
+name = "go"
+
+[[modules.dagger-go-sdk.as-sdk.modules]]
+path = "."

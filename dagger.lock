@@ -1,0 +1,5 @@
+[["version","2"]]
+["","container.from",["docker.io/library/busybox:latest","linux/amd64"],"sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616"]
+["","container.from",["docker.io/library/golang:1.26.5","linux/amd64"],"sha256:705e964a93a2fd2e75c7d59bb7d781b57e30f12293ffde5175c69229e18fb678"]
+["","container.from",["registry.k8s.io/kwok/cluster:v0.7.0-k8s.v1.33.0","linux/amd64"],"sha256:c2cbb68659b0ece25694a0520415e24be09a617b70086971bc18e60b9f43c12f"]
+["","git.ref",["https://github.com/dagger/go-sdk","HEAD"],{"ref":"refs/heads/main","sha":"902440e3e097a42cf16354e5eba6b2f0b86194e3"}]

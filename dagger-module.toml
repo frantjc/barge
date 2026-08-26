@@ -1,0 +1,35 @@
+name = "barge-dev"
+engineVersion = "v0.21.7"
+source = ".dagger"
+
+[runtime]
+  source = "go"
+
+[[dependencies]]
+  name = "go"
+  source = "github.com/frantjc/daggerverse/go@main"
+  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+
+[[dependencies]]
+  name = "kwok"
+  source = "github.com/frantjc/daggerverse/kwok@main"
+  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+
+[[dependencies]]
+  name = "mise"
+  source = "github.com/frantjc/daggerverse/mise@main"
+  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+
+[[dependencies]]
+  name = "release"
+  source = "github.com/frantjc/daggerverse/release@main"
+  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+
+[[dependencies]]
+  name = "wolfi"
+  source = "github.com/dagger/dagger/modules/wolfi@v0.21.7"
+  pin = "054f94b2d86c0ac00bef11ac4550816973c4aeef"
+
+[[clients]]
+  generator = "go"
+  directory = "./internal/dagger"

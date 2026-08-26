@@ -53,9 +53,9 @@ func Address(value string) *dagger.Address {
 	return client.Address(value)
 }
 
-func Binary(opts ...dagger.BinaryOpts) *dagger.File {
+func BargeDev() *dagger.BargeDev {
 	client := initClient()
-	return client.Binary(opts...)
+	return client.BargeDev()
 }
 
 // Constructs a cache volume for a given cache key.
@@ -82,18 +82,6 @@ func Cloud() *dagger.Cloud {
 func Container(opts ...dagger.ContainerOpts) *dagger.Container {
 	client := initClient()
 	return client.Container(opts...)
-}
-
-// Returns the current environment
-//
-// When called from a function invoked via an LLM tool call, this will be the LLM's current environment, including any modifications made through calling tools. Env values returned by functions become the new environment for subsequent calls, and Changeset values returned by functions are applied to the environment's workspace.
-//
-// When called from a module function outside of an LLM, this returns an Env with the current module installed, and with the current module's source directory as its workspace.
-//
-// Experimental: Programmatic env access is speculative and might be replaced.
-func CurrentEnv() *dagger.Env {
-	client := initClient()
-	return client.CurrentEnv()
 }
 
 // The FunctionCall context that the SDK caller is currently executing in.
@@ -142,14 +130,6 @@ func Engine() *dagger.Engine {
 	return client.Engine()
 }
 
-// Initializes a new environment
-//
-// Experimental: Environments are not yet stabilized
-func Env(opts ...dagger.EnvOpts) *dagger.Env {
-	client := initClient()
-	return client.Env(opts...)
-}
-
 // Initialize an environment file
 func EnvFile(opts ...dagger.EnvFileOpts) *dagger.EnvFile {
 	client := initClient()
@@ -186,11 +166,6 @@ func Git(url string, opts ...dagger.GitOpts) *dagger.GitRepository {
 	return client.Git(url, opts...)
 }
 
-func Go(opts ...dagger.GoOpts) *dagger.Go {
-	client := initClient()
-	return client.Go(opts...)
-}
-
 // Queries the host environment.
 func Host() *dagger.Host {
 	client := initClient()
@@ -215,12 +190,7 @@ func JSON() *dagger.JSONValue {
 	return client.JSON()
 }
 
-func Kwok() *dagger.Kwok {
-	client := initClient()
-	return client.Kwok()
-}
-
-// Initialize a Large Language Model (LLM)
+// Initialize a new LLM conversation.
 //
 // Experimental: LLM support is not yet stabilized
 func LLM(opts ...dagger.LLMOpts) *dagger.LLM {
@@ -238,12 +208,6 @@ func LoadAddressFromID(id dagger.AddressID) *dagger.Address {
 func LoadBargeDevFromID(id dagger.BargeDevID) *dagger.BargeDev {
 	client := initClient()
 	return client.LoadBargeDevFromID(id)
-}
-
-// Load a Binding from its ID.
-func LoadBindingFromID(id dagger.BindingID) *dagger.Binding {
-	client := initClient()
-	return client.LoadBindingFromID(id)
 }
 
 // Load a CacheVolume from its ID.
@@ -348,12 +312,6 @@ func LoadEnvFileFromID(id dagger.EnvFileID) *dagger.EnvFile {
 	return client.LoadEnvFileFromID(id)
 }
 
-// Load a Env from its ID.
-func LoadEnvFromID(id dagger.EnvID) *dagger.Env {
-	client := initClient()
-	return client.LoadEnvFromID(id)
-}
-
 // Load a EnvVariable from its ID.
 func LoadEnvVariableFromID(id dagger.EnvVariableID) *dagger.EnvVariable {
 	client := initClient()
@@ -444,12 +402,6 @@ func LoadGitRepositoryFromID(id dagger.GitRepositoryID) *dagger.GitRepository {
 	return client.LoadGitRepositoryFromID(id)
 }
 
-// Load a Go from its ID.
-func LoadGoFromID(id dagger.GoID) *dagger.Go {
-	client := initClient()
-	return client.LoadGoFromID(id)
-}
-
 // Load a HTTPState from its ID.
 func LoadHTTPStateFromID(id dagger.HTTPStateID) *dagger.HTTPState {
 	client := initClient()
@@ -486,18 +438,6 @@ func LoadJSONValueFromID(id dagger.JSONValueID) *dagger.JSONValue {
 	return client.LoadJSONValueFromID(id)
 }
 
-// Load a KwokCluster from its ID.
-func LoadKwokClusterFromID(id dagger.KwokClusterID) *dagger.KwokCluster {
-	client := initClient()
-	return client.LoadKwokClusterFromID(id)
-}
-
-// Load a Kwok from its ID.
-func LoadKwokFromID(id dagger.KwokID) *dagger.Kwok {
-	client := initClient()
-	return client.LoadKwokFromID(id)
-}
-
 // Load a LLM from its ID.
 func LoadLLMFromID(id dagger.LLMID) *dagger.LLM {
 	client := initClient()
@@ -520,12 +460,6 @@ func LoadLabelFromID(id dagger.LabelID) *dagger.Label {
 func LoadListTypeDefFromID(id dagger.ListTypeDefID) *dagger.ListTypeDef {
 	client := initClient()
 	return client.LoadListTypeDefFromID(id)
-}
-
-// Load a Mise from its ID.
-func LoadMiseFromID(id dagger.MiseID) *dagger.Mise {
-	client := initClient()
-	return client.LoadMiseFromID(id)
 }
 
 // Load a ModuleConfigClient from its ID.
@@ -556,12 +490,6 @@ func LoadObjectTypeDefFromID(id dagger.ObjectTypeDefID) *dagger.ObjectTypeDef {
 func LoadPortFromID(id dagger.PortID) *dagger.Port {
 	client := initClient()
 	return client.LoadPortFromID(id)
-}
-
-// Load a Release from its ID.
-func LoadReleaseFromID(id dagger.ReleaseID) *dagger.Release {
-	client := initClient()
-	return client.LoadReleaseFromID(id)
 }
 
 // Load a RemoteGitMirror from its ID.
@@ -654,21 +582,10 @@ func LoadUpGroupFromID(id dagger.UpGroupID) *dagger.UpGroup {
 	return client.LoadUpGroupFromID(id)
 }
 
-// Load a Wolfi from its ID.
-func LoadWolfiFromID(id dagger.WolfiID) *dagger.Wolfi {
-	client := initClient()
-	return client.LoadWolfiFromID(id)
-}
-
 // Load a Workspace from its ID.
 func LoadWorkspaceFromID(id dagger.WorkspaceID) *dagger.Workspace {
 	client := initClient()
 	return client.LoadWorkspaceFromID(id)
-}
-
-func Mise(opts ...dagger.MiseOpts) *dagger.Mise {
-	client := initClient()
-	return client.Mise(opts...)
 }
 
 // Create a new module.
@@ -687,11 +604,6 @@ func ModuleSource(refString string, opts ...dagger.ModuleSourceOpts) *dagger.Mod
 func Node(id dagger.ID) dagger.Node {
 	client := initClient()
 	return client.Node(id)
-}
-
-func Release(ctx context.Context, githubRepo string, githubToken *dagger.Secret, opts ...dagger.ReleaseOpts) error {
-	client := initClient()
-	return client.Release(ctx, githubRepo, githubToken, opts...)
 }
 
 // Creates a new secret.
@@ -714,11 +626,6 @@ func SourceMap(filename string, line int, column int) *dagger.SourceMap {
 	return client.SourceMap(filename, line, column)
 }
 
-func Test(ctx context.Context, opts ...dagger.TestOpts) error {
-	client := initClient()
-	return client.Test(ctx, opts...)
-}
-
 // Create a new TypeDef.
 func TypeDef() *dagger.TypeDef {
 	client := initClient()
@@ -729,10 +636,4 @@ func TypeDef() *dagger.TypeDef {
 func Version(ctx context.Context) (string, error) {
 	client := initClient()
 	return client.Version(ctx)
-}
-
-// A Wolfi Linux configuration
-func Wolfi() *dagger.Wolfi {
-	client := initClient()
-	return client.Wolfi()
 }

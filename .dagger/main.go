@@ -28,12 +28,9 @@ func (m *BargeDev) Test(
 	if azureConfig != nil && acrName != "" {
 		tools = append(tools, "azure-cli")
 	}
-	return dag.Go(dagger.GoOpts{
-		Workspace: workspace,
-		Container: dag.Mise(dagger.MiseOpts{
-			Workspace: workspace,
-		}).
-			Container(dagger.MiseContainerOpts{
+	return dag.Go(workspace, dagger.GoOpts{
+		Container: dag.Mise(workspace).
+			Container(workspace, dagger.MiseContainerOpts{
 				Tools: tools,
 			}).
 			With(func(r *dagger.Container) *dagger.Container {
@@ -64,7 +61,7 @@ func (m *BargeDev) Test(
 				Expand: true,
 			}),
 	}).
-		Test(ctx, dagger.GoTestOpts{
+		Test(ctx, workspace, dagger.GoTestOpts{
 			Race: true,
 			Tags: tags,
 		})
@@ -80,10 +77,8 @@ func (m *BargeDev) Binary(
 	// +optional
 	goos string,
 ) *dagger.File {
-	return dag.Go(dagger.GoOpts{
-		Workspace: workspace,
-	}).
-		Build(dagger.GoBuildOpts{
+	return dag.Go(workspace).
+		Build(workspace, dagger.GoBuildOpts{
 			Pkg:     "./cmd/barge",
 			Ldflags: "-s -w -X main.version=" + version,
 			Goos:    goos,

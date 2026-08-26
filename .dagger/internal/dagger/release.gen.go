@@ -9,40 +9,17 @@ import (
 	"github.com/dagger/querybuilder"
 )
 
-// Retrieve the binding value, as type Release
-func (r *Binding) AsRelease() *Release { // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L16)
-	q := r.query.Select("asRelease")
+func (r *Query) Release(src *GitRef) *Release { // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L21)
+	assertNotNil("src", src)
+	q := r.query.Select("release")
+	q = q.Arg("src", src)
 
 	return &Release{
 		query: q,
 	}
 }
 
-// Create or update a binding of type Release in the environment
-func (r *Env) WithReleaseInput(name string, value *Release, description string) *Env { // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L16)
-	assertNotNil("value", value)
-	q := r.query.Select("withReleaseInput")
-	q = q.Arg("name", name)
-	q = q.Arg("value", value)
-	q = q.Arg("description", description)
-
-	return &Env{
-		query: q,
-	}
-}
-
-// Declare a desired Release output to be assigned in the environment
-func (r *Env) WithReleaseOutput(name string, description string) *Env { // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L16)
-	q := r.query.Select("withReleaseOutput")
-	q = q.Arg("name", name)
-	q = q.Arg("description", description)
-
-	return &Env{
-		query: q,
-	}
-}
-
-type Release struct { // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L16)
+type Release struct { // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L16)
 	query *querybuilder.Selection
 
 	create *Void
@@ -57,18 +34,18 @@ func (r *Release) WithGraphQLQuery(q *querybuilder.Selection) *Release {
 
 // ReleaseCreateOpts contains options for Release.Create
 type ReleaseCreateOpts struct {
-	Cgo bool // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L48)
+	Cgo bool // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L48)
 
 	// Default: ["linux","darwin"]
-	Goos []string // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L53)
+	Goos []string // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L53)
 
 	// Default: ["amd64","arm64"]
-	Goarch []string // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L58)
+	Goarch []string // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L58)
 
-	Brew bool // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L60)
+	Brew bool // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L60)
 }
 
-func (r *Release) Create(ctx context.Context, githubToken *Secret, githubRepo string, name string, opts ...ReleaseCreateOpts) error { // release (https://github.com/frantjc/daggerverse/tree/9327000f1aff6944a315d3531ecbd4477c2e9c58/release/main.go#L42)
+func (r *Release) Create(ctx context.Context, githubToken *Secret, githubRepo string, name string, opts ...ReleaseCreateOpts) error { // release (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/release/main.go#L42)
 	assertNotNil("githubToken", githubToken)
 	if r.create != nil {
 		return nil
@@ -137,6 +114,15 @@ func (r *Release) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 	return json.Marshal(id)
+}
+func (r *Release) UnmarshalJSON(bs []byte) error {
+	var id string
+	err := json.Unmarshal(bs, &id)
+	if err != nil {
+		return err
+	}
+	*r = Release{query: selectNode(dag.query, id, "Release")}
+	return nil
 }
 
 // AsNode returns this Release as a Node.

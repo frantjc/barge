@@ -9,39 +9,6 @@ import (
 	"github.com/dagger/querybuilder"
 )
 
-// Retrieve the binding value, as type Wolfi
-func (r *Binding) AsWolfi() *Wolfi { // wolfi (https://github.com/dagger/dagger/tree/054f94b2d86c0ac00bef11ac4550816973c4aeef/modules/wolfi/main.go#L10)
-	q := r.query.Select("asWolfi")
-
-	return &Wolfi{
-		query: q,
-	}
-}
-
-// Create or update a binding of type Wolfi in the environment
-func (r *Env) WithWolfiInput(name string, value *Wolfi, description string) *Env { // wolfi (https://github.com/dagger/dagger/tree/054f94b2d86c0ac00bef11ac4550816973c4aeef/modules/wolfi/main.go#L10)
-	assertNotNil("value", value)
-	q := r.query.Select("withWolfiInput")
-	q = q.Arg("name", name)
-	q = q.Arg("value", value)
-	q = q.Arg("description", description)
-
-	return &Env{
-		query: q,
-	}
-}
-
-// Declare a desired Wolfi output to be assigned in the environment
-func (r *Env) WithWolfiOutput(name string, description string) *Env { // wolfi (https://github.com/dagger/dagger/tree/054f94b2d86c0ac00bef11ac4550816973c4aeef/modules/wolfi/main.go#L10)
-	q := r.query.Select("withWolfiOutput")
-	q = q.Arg("name", name)
-	q = q.Arg("description", description)
-
-	return &Env{
-		query: q,
-	}
-}
-
 // A Wolfi Linux configuration
 func (r *Query) Wolfi() *Wolfi { // wolfi (https://github.com/dagger/dagger/tree/054f94b2d86c0ac00bef11ac4550816973c4aeef/modules/wolfi/main.go#L10)
 	q := r.query.Select("wolfi")
@@ -158,6 +125,15 @@ func (r *Wolfi) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 	return json.Marshal(id)
+}
+func (r *Wolfi) UnmarshalJSON(bs []byte) error {
+	var id string
+	err := json.Unmarshal(bs, &id)
+	if err != nil {
+		return err
+	}
+	*r = Wolfi{query: selectNode(dag.query, id, "Wolfi")}
+	return nil
 }
 
 // AsNode returns this Wolfi as a Node.

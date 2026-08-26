@@ -9,7 +9,7 @@ import (
 	"github.com/dagger/querybuilder"
 )
 
-type BargeDev struct { // barge-dev (../../.dagger/main.go:9:6)
+type BargeDev struct { // barge-dev (../../../:0:0)
 	query *querybuilder.Selection
 
 	id      *ID
@@ -27,14 +27,14 @@ func (r *BargeDev) WithGraphQLQuery(q *querybuilder.Selection) *BargeDev {
 type BargeDevBinaryOpts struct {
 
 	// Default: "v0.0.0-unknown"
-	Version string // barge-dev (../../.dagger/main.go:74:2)
+	Version string
 
-	Goarch string // barge-dev (../../.dagger/main.go:76:2)
+	Goarch string
 
-	Goos string // barge-dev (../../.dagger/main.go:78:2)
+	Goos string
 }
 
-func (r *BargeDev) Binary(workspace *Workspace, opts ...BargeDevBinaryOpts) *File { // barge-dev (../../.dagger/main.go:70:1)
+func (r *BargeDev) Binary(workspace *Workspace, opts ...BargeDevBinaryOpts) *File {
 	assertNotNil("workspace", workspace)
 	q := r.query.Select("binary")
 	for i := len(opts) - 1; i >= 0; i-- {
@@ -97,8 +97,17 @@ func (r *BargeDev) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(id)
 }
+func (r *BargeDev) UnmarshalJSON(bs []byte) error {
+	var id string
+	err := json.Unmarshal(bs, &id)
+	if err != nil {
+		return err
+	}
+	*r = BargeDev{query: selectNode(dag.query, id, "BargeDev")}
+	return nil
+}
 
-func (r *BargeDev) Release(ctx context.Context, workspace *Workspace, githubRepo string, githubToken *Secret) error { // barge-dev (../../.dagger/main.go:89:1)
+func (r *BargeDev) Release(ctx context.Context, workspace *Workspace, githubRepo string, githubToken *Secret) error {
 	assertNotNil("workspace", workspace)
 	assertNotNil("githubToken", githubToken)
 	if r.release != nil {
@@ -114,16 +123,16 @@ func (r *BargeDev) Release(ctx context.Context, workspace *Workspace, githubRepo
 
 // BargeDevTestOpts contains options for BargeDev.Test
 type BargeDevTestOpts struct {
-	GithubToken *Secret // barge-dev (../../.dagger/main.go:16:2)
+	GithubToken *Secret
 
-	GithubRepo string // barge-dev (../../.dagger/main.go:18:2)
+	GithubRepo string
 
-	AcrName string // barge-dev (../../.dagger/main.go:20:2)
+	AcrName string
 
-	AzureConfig *Directory // barge-dev (../../.dagger/main.go:22:2)
+	AzureConfig *Directory
 }
 
-func (r *BargeDev) Test(ctx context.Context, workspace *Workspace, opts ...BargeDevTestOpts) error { // barge-dev (../../.dagger/main.go:12:1)
+func (r *BargeDev) Test(ctx context.Context, workspace *Workspace, opts ...BargeDevTestOpts) error {
 	assertNotNil("workspace", workspace)
 	if r.test != nil {
 		return nil
@@ -152,15 +161,7 @@ func (r *BargeDev) Test(ctx context.Context, workspace *Workspace, opts ...Barge
 	return q.Execute(ctx)
 }
 
-// AsNode returns this BargeDev as a Node.
-// This is a local type conversion — no GraphQL call.
-func (r *BargeDev) AsNode() Node {
-	return &NodeClient{
-		query: r.query,
-	}
-}
-
-func (r *Query) BargeDev() *BargeDev { // barge-dev (../../.dagger/main.go:9:6)
+func (r *Query) BargeDev() *BargeDev { // barge-dev (../../../:0:0)
 	q := r.query.Select("bargeDev")
 
 	return &BargeDev{
