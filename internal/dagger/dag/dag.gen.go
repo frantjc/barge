@@ -186,7 +186,6 @@ func Git(url string, opts ...dagger.GitOpts) *dagger.GitRepository {
 	return client.Git(url, opts...)
 }
 
-// A generated module for Go functions
 func Go(opts ...dagger.GoOpts) *dagger.Go {
 	client := initClient()
 	return client.Go(opts...)
@@ -637,6 +636,12 @@ func LoadTerminalFromID(id dagger.TerminalID) *dagger.Terminal {
 	return client.LoadTerminalFromID(id)
 }
 
+// Load a Trivy from its ID.
+func LoadTrivyFromID(id dagger.TrivyID) *dagger.Trivy {
+	client := initClient()
+	return client.LoadTrivyFromID(id)
+}
+
 // Load a TypeDef from its ID.
 func LoadTypeDefFromID(id dagger.TypeDefID) *dagger.TypeDef {
 	client := initClient()
@@ -690,9 +695,9 @@ func Node(id dagger.ID) dagger.Node {
 	return client.Node(id)
 }
 
-func Release(ctx context.Context, opts ...dagger.ReleaseOpts) error {
+func Release(ctx context.Context, githubRepo string, githubToken *dagger.Secret, opts ...dagger.ReleaseOpts) error {
 	client := initClient()
-	return client.Release(ctx, opts...)
+	return client.Release(ctx, githubRepo, githubToken, opts...)
 }
 
 // Creates a new secret.
@@ -718,6 +723,12 @@ func SourceMap(filename string, line int, column int) *dagger.SourceMap {
 func Test(ctx context.Context, opts ...dagger.TestOpts) error {
 	client := initClient()
 	return client.Test(ctx, opts...)
+}
+
+// A generated module for Trivy functions
+func Trivy(opts ...dagger.TrivyOpts) *dagger.Trivy {
+	client := initClient()
+	return client.Trivy(opts...)
 }
 
 // Create a new TypeDef.

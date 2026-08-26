@@ -8,7 +8,7 @@
     {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0",
+      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a",
       "ignoreChecks": [
         "test",
         "vulncheck"
@@ -17,19 +17,29 @@
   ],
   "dependencies": [
     {
+      "name": "go",
+      "source": "github.com/frantjc/daggerverse/go@main",
+      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
+    },
+    {
       "name": "kwok",
       "source": "github.com/frantjc/daggerverse/kwok@main",
-      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0"
+      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
     },
     {
       "name": "mise",
       "source": "github.com/frantjc/daggerverse/mise@main",
-      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0"
+      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
     },
     {
       "name": "release",
       "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "87c8a58601e9790008fc0f941e33ddb45cac36d0"
+      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
+    },
+    {
+      "name": "trivy",
+      "source": "github.com/frantjc/daggerverse/trivy@main",
+      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
     },
     {
       "name": "wolfi",
