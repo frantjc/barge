@@ -7,23 +7,23 @@ source = ".dagger"
 
 [[dependencies]]
   name = "go"
-  source = "github.com/frantjc/daggerverse/go@main"
-  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+  source = "github.com/frantjc/daggerverse/go@dagger-v1"
+  pin = "9eaa49457dbb0653d491f2ec89b26aa94257d41e"
 
 [[dependencies]]
   name = "kwok"
-  source = "github.com/frantjc/daggerverse/kwok@main"
-  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+  source = "github.com/frantjc/daggerverse/kwok@dagger-v1"
+  pin = "9eaa49457dbb0653d491f2ec89b26aa94257d41e"
 
 [[dependencies]]
   name = "mise"
-  source = "github.com/frantjc/daggerverse/mise@main"
-  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+  source = "github.com/frantjc/daggerverse/mise@dagger-v1"
+  pin = "9eaa49457dbb0653d491f2ec89b26aa94257d41e"
 
 [[dependencies]]
   name = "release"
-  source = "github.com/frantjc/daggerverse/release@main"
-  pin = "bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+  source = "github.com/frantjc/daggerverse/release@dagger-v1"
+  pin = "9eaa49457dbb0653d491f2ec89b26aa94257d41e"
 
 [[dependencies]]
   name = "wolfi"

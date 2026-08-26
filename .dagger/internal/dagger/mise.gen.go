@@ -29,14 +29,9 @@ type MiseContainerOpts struct {
 	NoHooks bool // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L190)
 
 	Tools []string // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L192)
-
-	Include []string // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L194)
-
-	Container *Container // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L196)
 }
 
-func (r *Mise) Container(workspace *Workspace, opts ...MiseContainerOpts) *Container { // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L184)
-	assertNotNil("workspace", workspace)
+func (r *Mise) Container(opts ...MiseContainerOpts) *Container { // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L184)
 	q := r.query.Select("container")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `noEnv` optional argument
@@ -51,16 +46,7 @@ func (r *Mise) Container(workspace *Workspace, opts ...MiseContainerOpts) *Conta
 		if !querybuilder.IsZeroValue(opts[i].Tools) {
 			q = q.Arg("tools", opts[i].Tools)
 		}
-		// `include` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Include) {
-			q = q.Arg("include", opts[i].Include)
-		}
-		// `container` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Container) {
-			q = q.Arg("container", opts[i].Container)
-		}
 	}
-	q = q.Arg("workspace", workspace)
 
 	return &Container{
 		query: q,
@@ -74,14 +60,9 @@ type MiseDoctorOpts struct {
 	NoHooks bool // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L364)
 
 	Tools []string // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L366)
-
-	Include []string // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L368)
-
-	Container *Container // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L370)
 }
 
-func (r *Mise) Doctor(ctx context.Context, workspace *Workspace, opts ...MiseDoctorOpts) error { // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L358)
-	assertNotNil("workspace", workspace)
+func (r *Mise) Doctor(ctx context.Context, opts ...MiseDoctorOpts) error { // mise (https://github.com/frantjc/daggerverse/tree/bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c/mise/main.go#L358)
 	if r.doctor != nil {
 		return nil
 	}
@@ -99,16 +80,7 @@ func (r *Mise) Doctor(ctx context.Context, workspace *Workspace, opts ...MiseDoc
 		if !querybuilder.IsZeroValue(opts[i].Tools) {
 			q = q.Arg("tools", opts[i].Tools)
 		}
-		// `include` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Include) {
-			q = q.Arg("include", opts[i].Include)
-		}
-		// `container` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Container) {
-			q = q.Arg("container", opts[i].Container)
-		}
 	}
-	q = q.Arg("workspace", workspace)
 
 	return q.Execute(ctx)
 }

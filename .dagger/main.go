@@ -30,7 +30,7 @@ func (m *BargeDev) Test(
 	}
 	return dag.Go(workspace, dagger.GoOpts{
 		Container: dag.Mise(workspace).
-			Container(workspace, dagger.MiseContainerOpts{
+			Container(dagger.MiseContainerOpts{
 				Tools: tools,
 			}).
 			With(func(r *dagger.Container) *dagger.Container {

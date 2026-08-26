@@ -6,11 +6,13 @@ entrypoint = true
 source = "github.com/dagger/go-sdk"
 
 [modules.go]
-legacy-default-path = true
-source = "github.com/frantjc/daggerverse/go@bfb9a7f8bbf00fa28f3a47638cdd3595d348fc8c"
+source = "github.com/frantjc/daggerverse/go#dagger-v1"
 
-[modules.go.check]
-skip = ["test", "vulncheck"]
+[modules.mise]
+source = "github.com/frantjc/daggerverse/mise#dagger-v1"
+
+[modules.trivy]
+source = "github.com/frantjc/daggerverse/trivy#dagger-v1"
 
 [modules.dagger-go-sdk.as-sdk]
 name = "go"
