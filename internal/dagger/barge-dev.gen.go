@@ -9,7 +9,7 @@ import (
 	"github.com/dagger/querybuilder"
 )
 
-type BargeDev struct { // barge-dev (../../.dagger/main.go:9:6)
+type BargeDev struct { // barge-dev (../../.dagger/main.go:14:6)
 	query *querybuilder.Selection
 
 	id      *ID
@@ -25,22 +25,22 @@ func (r *BargeDev) WithGraphQLQuery(q *querybuilder.Selection) *BargeDev {
 
 // BargeDevBinaryOpts contains options for BargeDev.Binary
 type BargeDevBinaryOpts struct {
-	Workspace *Workspace // barge-dev (../../.dagger/main.go:75:2)
+	Ws *Workspace // barge-dev (../../.dagger/main.go:80:2)
 
 	// Default: "v0.0.0-unknown"
-	Version string // barge-dev (../../.dagger/main.go:77:2)
+	Version string // barge-dev (../../.dagger/main.go:82:2)
 
-	Goarch string // barge-dev (../../.dagger/main.go:79:2)
+	Goarch string // barge-dev (../../.dagger/main.go:84:2)
 
-	Goos string // barge-dev (../../.dagger/main.go:81:2)
+	Goos string // barge-dev (../../.dagger/main.go:86:2)
 }
 
-func (r *BargeDev) Binary(opts ...BargeDevBinaryOpts) *File { // barge-dev (../../.dagger/main.go:73:1)
+func (r *BargeDev) Binary(opts ...BargeDevBinaryOpts) *File { // barge-dev (../../.dagger/main.go:78:1)
 	q := r.query.Select("binary")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
 		}
 		// `version` optional argument
 		if !querybuilder.IsZeroValue(opts[i].Version) {
@@ -103,22 +103,34 @@ func (r *BargeDev) MarshalJSON() ([]byte, error) {
 
 // BargeDevReleaseOpts contains options for BargeDev.Release
 type BargeDevReleaseOpts struct {
-	Workspace *Workspace // barge-dev (../../.dagger/main.go:96:2)
+	Ws *Workspace // barge-dev (../../.dagger/main.go:118:2)
+
+	// Default: "frantjc/barge"
+	GithubRepo string // barge-dev (../../.dagger/main.go:122:2)
+
+	Brew bool // barge-dev (../../.dagger/main.go:124:2)
 }
 
-func (r *BargeDev) Release(ctx context.Context, githubRepo string, githubToken *Secret, opts ...BargeDevReleaseOpts) error { // barge-dev (../../.dagger/main.go:94:1)
+func (r *BargeDev) Release(ctx context.Context, githubToken *Secret, opts ...BargeDevReleaseOpts) error { // barge-dev (../../.dagger/main.go:116:1)
 	assertNotNil("githubToken", githubToken)
 	if r.release != nil {
 		return nil
 	}
 	q := r.query.Select("release")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
+		}
+		// `githubRepo` optional argument
+		if !querybuilder.IsZeroValue(opts[i].GithubRepo) {
+			q = q.Arg("githubRepo", opts[i].GithubRepo)
+		}
+		// `brew` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Brew) {
+			q = q.Arg("brew", opts[i].Brew)
 		}
 	}
-	q = q.Arg("githubRepo", githubRepo)
 	q = q.Arg("githubToken", githubToken)
 
 	return q.Execute(ctx)
@@ -126,26 +138,26 @@ func (r *BargeDev) Release(ctx context.Context, githubRepo string, githubToken *
 
 // BargeDevTestOpts contains options for BargeDev.Test
 type BargeDevTestOpts struct {
-	Workspace *Workspace // barge-dev (../../.dagger/main.go:14:2)
+	Ws *Workspace // barge-dev (../../.dagger/main.go:19:2)
 
-	GithubToken *Secret // barge-dev (../../.dagger/main.go:16:2)
+	GithubToken *Secret // barge-dev (../../.dagger/main.go:21:2)
 
-	GithubRepo string // barge-dev (../../.dagger/main.go:18:2)
+	GithubRepo string // barge-dev (../../.dagger/main.go:23:2)
 
-	AcrName string // barge-dev (../../.dagger/main.go:20:2)
+	AcrName string // barge-dev (../../.dagger/main.go:25:2)
 
-	AzureConfig *Directory // barge-dev (../../.dagger/main.go:22:2)
+	AzureConfig *Directory // barge-dev (../../.dagger/main.go:27:2)
 }
 
-func (r *BargeDev) Test(ctx context.Context, opts ...BargeDevTestOpts) error { // barge-dev (../../.dagger/main.go:12:1)
+func (r *BargeDev) Test(ctx context.Context, opts ...BargeDevTestOpts) error { // barge-dev (../../.dagger/main.go:17:1)
 	if r.test != nil {
 		return nil
 	}
 	q := r.query.Select("test")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
 		}
 		// `githubToken` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubToken) {
@@ -177,7 +189,7 @@ func (r *BargeDev) AsNode() Node {
 }
 
 // Retrieve the binding value, as type BargeDev
-func (r *Binding) AsBargeDev() *BargeDev { // barge-dev (../../.dagger/main.go:9:6)
+func (r *Binding) AsBargeDev() *BargeDev { // barge-dev (../../.dagger/main.go:14:6)
 	q := r.query.Select("asBargeDev")
 
 	return &BargeDev{
@@ -186,7 +198,7 @@ func (r *Binding) AsBargeDev() *BargeDev { // barge-dev (../../.dagger/main.go:9
 }
 
 // Create or update a binding of type BargeDev in the environment
-func (r *Env) WithBargeDevInput(name string, value *BargeDev, description string) *Env { // barge-dev (../../.dagger/main.go:9:6)
+func (r *Env) WithBargeDevInput(name string, value *BargeDev, description string) *Env { // barge-dev (../../.dagger/main.go:14:6)
 	assertNotNil("value", value)
 	q := r.query.Select("withBargeDevInput")
 	q = q.Arg("name", name)
@@ -199,7 +211,7 @@ func (r *Env) WithBargeDevInput(name string, value *BargeDev, description string
 }
 
 // Declare a desired BargeDev output to be assigned in the environment
-func (r *Env) WithBargeDevOutput(name string, description string) *Env { // barge-dev (../../.dagger/main.go:9:6)
+func (r *Env) WithBargeDevOutput(name string, description string) *Env { // barge-dev (../../.dagger/main.go:14:6)
 	q := r.query.Select("withBargeDevOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -211,22 +223,22 @@ func (r *Env) WithBargeDevOutput(name string, description string) *Env { // barg
 
 // BinaryOpts contains options for Query.Binary
 type BinaryOpts struct {
-	Workspace *Workspace // barge-dev (../../.dagger/main.go:75:2)
+	Ws *Workspace // barge-dev (../../.dagger/main.go:80:2)
 
 	// Default: "v0.0.0-unknown"
-	Version string // barge-dev (../../.dagger/main.go:77:2)
+	Version string // barge-dev (../../.dagger/main.go:82:2)
 
-	Goarch string // barge-dev (../../.dagger/main.go:79:2)
+	Goarch string // barge-dev (../../.dagger/main.go:84:2)
 
-	Goos string // barge-dev (../../.dagger/main.go:81:2)
+	Goos string // barge-dev (../../.dagger/main.go:86:2)
 }
 
-func (r *Query) Binary(opts ...BinaryOpts) *File { // barge-dev (../../.dagger/main.go:73:1)
+func (r *Query) Binary(opts ...BinaryOpts) *File { // barge-dev (../../.dagger/main.go:78:1)
 	q := r.query.Select("binary")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
 		}
 		// `version` optional argument
 		if !querybuilder.IsZeroValue(opts[i].Version) {
@@ -249,19 +261,31 @@ func (r *Query) Binary(opts ...BinaryOpts) *File { // barge-dev (../../.dagger/m
 
 // ReleaseOpts contains options for Query.Release
 type ReleaseOpts struct {
-	Workspace *Workspace // barge-dev (../../.dagger/main.go:96:2)
+	Ws *Workspace // barge-dev (../../.dagger/main.go:118:2)
+
+	// Default: "frantjc/barge"
+	GithubRepo string // barge-dev (../../.dagger/main.go:122:2)
+
+	Brew bool // barge-dev (../../.dagger/main.go:124:2)
 }
 
-func (r *Query) Release(ctx context.Context, githubRepo string, githubToken *Secret, opts ...ReleaseOpts) error { // barge-dev (../../.dagger/main.go:94:1)
+func (r *Query) Release(ctx context.Context, githubToken *Secret, opts ...ReleaseOpts) error { // barge-dev (../../.dagger/main.go:116:1)
 	assertNotNil("githubToken", githubToken)
 	q := r.query.Select("release")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
+		}
+		// `githubRepo` optional argument
+		if !querybuilder.IsZeroValue(opts[i].GithubRepo) {
+			q = q.Arg("githubRepo", opts[i].GithubRepo)
+		}
+		// `brew` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Brew) {
+			q = q.Arg("brew", opts[i].Brew)
 		}
 	}
-	q = q.Arg("githubRepo", githubRepo)
 	q = q.Arg("githubToken", githubToken)
 
 	return q.Execute(ctx)
@@ -269,23 +293,23 @@ func (r *Query) Release(ctx context.Context, githubRepo string, githubToken *Sec
 
 // TestOpts contains options for Query.Test
 type TestOpts struct {
-	Workspace *Workspace // barge-dev (../../.dagger/main.go:14:2)
+	Ws *Workspace // barge-dev (../../.dagger/main.go:19:2)
 
-	GithubToken *Secret // barge-dev (../../.dagger/main.go:16:2)
+	GithubToken *Secret // barge-dev (../../.dagger/main.go:21:2)
 
-	GithubRepo string // barge-dev (../../.dagger/main.go:18:2)
+	GithubRepo string // barge-dev (../../.dagger/main.go:23:2)
 
-	AcrName string // barge-dev (../../.dagger/main.go:20:2)
+	AcrName string // barge-dev (../../.dagger/main.go:25:2)
 
-	AzureConfig *Directory // barge-dev (../../.dagger/main.go:22:2)
+	AzureConfig *Directory // barge-dev (../../.dagger/main.go:27:2)
 }
 
-func (r *Query) Test(ctx context.Context, opts ...TestOpts) error { // barge-dev (../../.dagger/main.go:12:1)
+func (r *Query) Test(ctx context.Context, opts ...TestOpts) error { // barge-dev (../../.dagger/main.go:17:1)
 	q := r.query.Select("test")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
 		}
 		// `githubToken` optional argument
 		if !querybuilder.IsZeroValue(opts[i].GithubToken) {

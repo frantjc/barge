@@ -35,7 +35,10 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
       - name: Set azureConfig .env
         if: github.ref == 'refs/heads/main'
-        run: echo "bargeDev_test_azureConfig=${AZURE_CONFIG_DIR:-$HOME/.azure}" >> .env
+        run: |
+          cat << EOF >> .env
+          bargeDev_test_azureConfig=${AZURE_CONFIG_DIR:-$HOME/.azure}
+          EOF
       - env:
           GITHUB_TOKEN: ${{ github.token }}
         run: dagger check

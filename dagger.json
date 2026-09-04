@@ -8,38 +8,53 @@
     {
       "name": "go",
       "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479",
       "ignoreChecks": [
         "test",
         "vulncheck"
       ]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "go",
-      "source": "github.com/frantjc/daggerverse/go@main",
-      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
-    },
-    {
-      "name": "kwok",
-      "source": "github.com/frantjc/daggerverse/kwok@main",
-      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
     },
     {
       "name": "mise",
       "source": "github.com/frantjc/daggerverse/mise@main",
-      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
-    },
-    {
-      "name": "release",
-      "source": "github.com/frantjc/daggerverse/release@main",
-      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
     },
     {
       "name": "trivy",
       "source": "github.com/frantjc/daggerverse/trivy@main",
-      "pin": "6415ad74bf522dc9d89cf4ae9d1e0933affeb66a"
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "archive",
+      "source": "github.com/frantjc/daggerverse/archive@main",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
+    },
+    {
+      "name": "gh",
+      "source": "github.com/frantjc/daggerverse/gh@main",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
+    },
+    {
+      "name": "go",
+      "source": "github.com/frantjc/daggerverse/go@main",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
+    },
+    {
+      "name": "kwok",
+      "source": "github.com/frantjc/daggerverse/kwok@main",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
+    },
+    {
+      "name": "mise",
+      "source": "github.com/frantjc/daggerverse/mise@main",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
+    },
+    {
+      "name": "upx",
+      "source": "github.com/frantjc/daggerverse/upx@main",
+      "pin": "fa72b0e77a88b897ad63ab606954e099bea21479"
     },
     {
       "name": "wolfi",

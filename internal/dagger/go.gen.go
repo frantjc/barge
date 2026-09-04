@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Go
-func (r *Binding) AsGo() *Go { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L13)
+func (r *Binding) AsGo() *Go { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L13)
 	q := r.query.Select("asGo")
 
 	return &Go{
@@ -19,7 +19,7 @@ func (r *Binding) AsGo() *Go { // go (https://github.com/frantjc/daggerverse/tre
 }
 
 // Create or update a binding of type Go in the environment
-func (r *Env) WithGoInput(name string, value *Go, description string) *Env { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L13)
+func (r *Env) WithGoInput(name string, value *Go, description string) *Env { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L13)
 	assertNotNil("value", value)
 	q := r.query.Select("withGoInput")
 	q = q.Arg("name", name)
@@ -32,7 +32,7 @@ func (r *Env) WithGoInput(name string, value *Go, description string) *Env { // 
 }
 
 // Declare a desired Go output to be assigned in the environment
-func (r *Env) WithGoOutput(name string, description string) *Env { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L13)
+func (r *Env) WithGoOutput(name string, description string) *Env { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L13)
 	q := r.query.Select("withGoOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -42,7 +42,7 @@ func (r *Env) WithGoOutput(name string, description string) *Env { // go (https:
 	}
 }
 
-type Go struct { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L13)
+type Go struct { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L13)
 	query *querybuilder.Selection
 
 	id          *ID
@@ -62,19 +62,19 @@ func (r *Go) WithGraphQLQuery(q *querybuilder.Selection) *Go {
 type GoBuildOpts struct {
 
 	// Default: "./"
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L105)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L113)
 
 	// Default: "-s -w"
-	Ldflags string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L108)
+	Ldflags string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L116)
 
-	Cgo bool // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L110)
+	Cgo bool // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L118)
 
-	Goarch string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L112)
+	Goarch string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L120)
 
-	Goos string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L114)
+	Goos string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L122)
 }
 
-func (r *Go) Build(opts ...GoBuildOpts) *File { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L101)
+func (r *Go) Build(opts ...GoBuildOpts) *File { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L109)
 	q := r.query.Select("build")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `pkg` optional argument
@@ -104,7 +104,7 @@ func (r *Go) Build(opts ...GoBuildOpts) *File { // go (https://github.com/frantj
 	}
 }
 
-func (r *Go) Container() *Container { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L14)
+func (r *Go) Container() *Container { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L14)
 	q := r.query.Select("container")
 
 	return &Container{
@@ -116,10 +116,10 @@ func (r *Go) Container() *Container { // go (https://github.com/frantjc/daggerve
 type GoFmtOpts struct {
 
 	// Default: "./..."
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L191)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L194)
 }
 
-func (r *Go) Fmt(opts ...GoFmtOpts) *Changeset { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L187)
+func (r *Go) Fmt(opts ...GoFmtOpts) *Changeset { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L191)
 	q := r.query.Select("fmt")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `pkg` optional argument
@@ -137,10 +137,10 @@ func (r *Go) Fmt(opts ...GoFmtOpts) *Changeset { // go (https://github.com/frant
 type GoGenerateOpts struct {
 
 	// Default: "./..."
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L265)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L265)
 }
 
-func (r *Go) Generate(opts ...GoGenerateOpts) *Changeset { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L261)
+func (r *Go) Generate(opts ...GoGenerateOpts) *Changeset { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L262)
 	q := r.query.Select("generate")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `pkg` optional argument
@@ -198,13 +198,13 @@ func (r *Go) MarshalJSON() ([]byte, error) {
 type GoStaticcheckOpts struct {
 
 	// Default: "./..."
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L234)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L237)
 
 	// Default: "latest"
-	Version string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L237)
+	Version string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L240)
 }
 
-func (r *Go) Staticcheck(ctx context.Context, opts ...GoStaticcheckOpts) error { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L230)
+func (r *Go) Staticcheck(ctx context.Context, opts ...GoStaticcheckOpts) error { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L233)
 	if r.staticcheck != nil {
 		return nil
 	}
@@ -225,35 +225,23 @@ func (r *Go) Staticcheck(ctx context.Context, opts ...GoStaticcheckOpts) error {
 
 // GoTestOpts contains options for Go.Test
 type GoTestOpts struct {
-	Workspace *Workspace // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L150)
-
-	// Default: "."
-	Path string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L153)
 
 	// Default: "./..."
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L156)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L160)
 
-	Race bool // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L158)
+	Race bool // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L162)
 
-	Cgo bool // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L160)
+	Cgo bool // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L164)
 
-	Tags []string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L162)
+	Tags []string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L166)
 }
 
-func (r *Go) Test(ctx context.Context, opts ...GoTestOpts) error { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L148)
+func (r *Go) Test(ctx context.Context, opts ...GoTestOpts) error { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L156)
 	if r.test != nil {
 		return nil
 	}
 	q := r.query.Select("test")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
-		}
-		// `path` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Path) {
-			q = q.Arg("path", opts[i].Path)
-		}
 		// `pkg` optional argument
 		if !querybuilder.IsZeroValue(opts[i].Pkg) {
 			q = q.Arg("pkg", opts[i].Pkg)
@@ -277,19 +265,14 @@ func (r *Go) Test(ctx context.Context, opts ...GoTestOpts) error { // go (https:
 
 // GoTidyOpts contains options for Go.Tidy
 type GoTidyOpts struct {
-	Workspace *Workspace // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L249)
 
 	// Default: "."
-	Path string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L252)
+	Path string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L253)
 }
 
-func (r *Go) Tidy(opts ...GoTidyOpts) *Changeset { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L247)
+func (r *Go) Tidy(opts ...GoTidyOpts) *Changeset { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L250)
 	q := r.query.Select("tidy")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
-		}
 		// `path` optional argument
 		if !querybuilder.IsZeroValue(opts[i].Path) {
 			q = q.Arg("path", opts[i].Path)
@@ -305,10 +288,10 @@ func (r *Go) Tidy(opts ...GoTidyOpts) *Changeset { // go (https://github.com/fra
 type GoVetOpts struct {
 
 	// Default: "./..."
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L221)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L224)
 }
 
-func (r *Go) Vet(ctx context.Context, opts ...GoVetOpts) error { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L217)
+func (r *Go) Vet(ctx context.Context, opts ...GoVetOpts) error { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L220)
 	if r.vet != nil {
 		return nil
 	}
@@ -327,13 +310,13 @@ func (r *Go) Vet(ctx context.Context, opts ...GoVetOpts) error { // go (https://
 type GoVulncheckOpts struct {
 
 	// Default: "./..."
-	Pkg string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L204)
+	Pkg string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L207)
 
 	// Default: "latest"
-	Version string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L207)
+	Version string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L210)
 }
 
-func (r *Go) Vulncheck(ctx context.Context, opts ...GoVulncheckOpts) error { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L200)
+func (r *Go) Vulncheck(ctx context.Context, opts ...GoVulncheckOpts) error { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L203)
 	if r.vulncheck != nil {
 		return nil
 	}
@@ -362,20 +345,32 @@ func (r *Go) AsNode() Node {
 
 // GoOpts contains options for Query.Go
 type GoOpts struct {
-	Workspace *Workspace // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L19)
+	Ws *Workspace // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L19)
+
+	Exclude []string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L21)
+
+	Gitignore bool // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L23)
 
 	// Default: "."
-	Path string // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L22)
+	Path string // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L26)
 
-	Container *Container // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L24)
+	Container *Container // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L28)
 }
 
-func (r *Query) Go(opts ...GoOpts) *Go { // go (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/go/main.go#L17)
+func (r *Query) Go(opts ...GoOpts) *Go { // go (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/go/main.go#L17)
 	q := r.query.Select("go")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
+		}
+		// `exclude` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Exclude) {
+			q = q.Arg("exclude", opts[i].Exclude)
+		}
+		// `gitignore` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Gitignore) {
+			q = q.Arg("gitignore", opts[i].Gitignore)
 		}
 		// `path` optional argument
 		if !querybuilder.IsZeroValue(opts[i].Path) {

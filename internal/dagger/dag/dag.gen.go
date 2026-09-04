@@ -53,6 +53,11 @@ func Address(value string) *dagger.Address {
 	return client.Address(value)
 }
 
+func Archive(opts ...dagger.ArchiveOpts) *dagger.Archive {
+	client := initClient()
+	return client.Archive(opts...)
+}
+
 func Binary(opts ...dagger.BinaryOpts) *dagger.File {
 	client := initClient()
 	return client.Binary(opts...)
@@ -180,6 +185,11 @@ func GeneratedCode(code *dagger.Directory) *dagger.GeneratedCode {
 	return client.GeneratedCode(code)
 }
 
+func Gh(githubToken *dagger.Secret, opts ...dagger.GhOpts) *dagger.Gh {
+	client := initClient()
+	return client.Gh(githubToken, opts...)
+}
+
 // Queries a Git repository.
 func Git(url string, opts ...dagger.GitOpts) *dagger.GitRepository {
 	client := initClient()
@@ -232,6 +242,12 @@ func LLM(opts ...dagger.LLMOpts) *dagger.LLM {
 func LoadAddressFromID(id dagger.AddressID) *dagger.Address {
 	client := initClient()
 	return client.LoadAddressFromID(id)
+}
+
+// Load a Archive from its ID.
+func LoadArchiveFromID(id dagger.ArchiveID) *dagger.Archive {
+	client := initClient()
+	return client.LoadArchiveFromID(id)
 }
 
 // Load a BargeDev from its ID.
@@ -432,6 +448,18 @@ func LoadGeneratorGroupFromID(id dagger.GeneratorGroupID) *dagger.GeneratorGroup
 	return client.LoadGeneratorGroupFromID(id)
 }
 
+// Load a Gh from its ID.
+func LoadGhFromID(id dagger.GhID) *dagger.Gh {
+	client := initClient()
+	return client.LoadGhFromID(id)
+}
+
+// Load a GhRelease from its ID.
+func LoadGhReleaseFromID(id dagger.GhReleaseID) *dagger.GhRelease {
+	client := initClient()
+	return client.LoadGhReleaseFromID(id)
+}
+
 // Load a GitRef from its ID.
 func LoadGitRefFromID(id dagger.GitRefID) *dagger.GitRef {
 	client := initClient()
@@ -558,12 +586,6 @@ func LoadPortFromID(id dagger.PortID) *dagger.Port {
 	return client.LoadPortFromID(id)
 }
 
-// Load a Release from its ID.
-func LoadReleaseFromID(id dagger.ReleaseID) *dagger.Release {
-	client := initClient()
-	return client.LoadReleaseFromID(id)
-}
-
 // Load a RemoteGitMirror from its ID.
 func LoadRemoteGitMirrorFromID(id dagger.RemoteGitMirrorID) *dagger.RemoteGitMirror {
 	client := initClient()
@@ -660,6 +682,12 @@ func LoadUpGroupFromID(id dagger.UpGroupID) *dagger.UpGroup {
 	return client.LoadUpGroupFromID(id)
 }
 
+// Load a Upx from its ID.
+func LoadUpxFromID(id dagger.UpxID) *dagger.Upx {
+	client := initClient()
+	return client.LoadUpxFromID(id)
+}
+
 // Load a Wolfi from its ID.
 func LoadWolfiFromID(id dagger.WolfiID) *dagger.Wolfi {
 	client := initClient()
@@ -695,9 +723,9 @@ func Node(id dagger.ID) dagger.Node {
 	return client.Node(id)
 }
 
-func Release(ctx context.Context, githubRepo string, githubToken *dagger.Secret, opts ...dagger.ReleaseOpts) error {
+func Release(ctx context.Context, githubToken *dagger.Secret, opts ...dagger.ReleaseOpts) error {
 	client := initClient()
-	return client.Release(ctx, githubRepo, githubToken, opts...)
+	return client.Release(ctx, githubToken, opts...)
 }
 
 // Creates a new secret.
@@ -735,6 +763,11 @@ func Trivy(opts ...dagger.TrivyOpts) *dagger.Trivy {
 func TypeDef() *dagger.TypeDef {
 	client := initClient()
 	return client.TypeDef()
+}
+
+func Upx(opts ...dagger.UpxOpts) *dagger.Upx {
+	client := initClient()
+	return client.Upx(opts...)
 }
 
 // Get the current Dagger Engine version.

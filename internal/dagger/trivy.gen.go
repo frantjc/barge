@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Trivy
-func (r *Binding) AsTrivy() *Trivy { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L13)
+func (r *Binding) AsTrivy() *Trivy { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L13)
 	q := r.query.Select("asTrivy")
 
 	return &Trivy{
@@ -19,7 +19,7 @@ func (r *Binding) AsTrivy() *Trivy { // trivy (https://github.com/frantjc/dagger
 }
 
 // Create or update a binding of type Trivy in the environment
-func (r *Env) WithTrivyInput(name string, value *Trivy, description string) *Env { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L13)
+func (r *Env) WithTrivyInput(name string, value *Trivy, description string) *Env { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L13)
 	assertNotNil("value", value)
 	q := r.query.Select("withTrivyInput")
 	q = q.Arg("name", name)
@@ -32,7 +32,7 @@ func (r *Env) WithTrivyInput(name string, value *Trivy, description string) *Env
 }
 
 // Declare a desired Trivy output to be assigned in the environment
-func (r *Env) WithTrivyOutput(name string, description string) *Env { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L13)
+func (r *Env) WithTrivyOutput(name string, description string) *Env { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L13)
 	q := r.query.Select("withTrivyOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -44,13 +44,13 @@ func (r *Env) WithTrivyOutput(name string, description string) *Env { // trivy (
 
 // TrivyOpts contains options for Query.Trivy
 type TrivyOpts struct {
-	Modules *Directory // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L20)
+	Modules *Directory // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L20)
 
-	Container *Container // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L23)
+	Container *Container // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L23)
 }
 
 // A generated module for Trivy functions
-func (r *Query) Trivy(opts ...TrivyOpts) *Trivy { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L17)
+func (r *Query) Trivy(opts ...TrivyOpts) *Trivy { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L17)
 	q := r.query.Select("trivy")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `modules` optional argument
@@ -68,7 +68,7 @@ func (r *Query) Trivy(opts ...TrivyOpts) *Trivy { // trivy (https://github.com/f
 	}
 }
 
-type Trivy struct { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L13)
+type Trivy struct { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L13)
 	query *querybuilder.Selection
 
 	id    *ID
@@ -82,7 +82,7 @@ func (r *Trivy) WithGraphQLQuery(q *querybuilder.Selection) *Trivy {
 	}
 }
 
-func (r *Trivy) Container() *Container { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L14)
+func (r *Trivy) Container() *Container { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L14)
 	q := r.query.Select("container")
 
 	return &Container{
@@ -132,24 +132,24 @@ func (r *Trivy) MarshalJSON() ([]byte, error) {
 
 // TrivyImageOpts contains options for Trivy.Image
 type TrivyImageOpts struct {
-	DisableTelemtry bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L118)
+	DisableTelemtry bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L125)
 
-	OfflineScan bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L120)
+	OfflineScan bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L127)
 
-	SkipVersionCheck bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L122)
+	SkipVersionCheck bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L129)
 
-	IgnoreUnfixed bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L124)
+	IgnoreUnfixed bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L131)
 
-	EnableModules []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L126)
+	EnableModules []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L133)
 
-	Severity []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L128)
+	Severity []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L135)
 
-	Scanners []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L130)
+	Scanners []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L137)
 
-	IgnoreStatus []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L132)
+	IgnoreStatus []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L139)
 }
 
-func (r *Trivy) Image(ctx context.Context, container *Container, opts ...TrivyImageOpts) error { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L114)
+func (r *Trivy) Image(ctx context.Context, container *Container, opts ...TrivyImageOpts) error { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L121)
 	assertNotNil("container", container)
 	if r.image != nil {
 		return nil
@@ -196,37 +196,49 @@ func (r *Trivy) Image(ctx context.Context, container *Container, opts ...TrivyIm
 
 // TrivyRepoOpts contains options for Trivy.Repo
 type TrivyRepoOpts struct {
-	Workspace *Workspace // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L63)
+	Ws *Workspace // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L63)
+
+	Exclude []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L65)
+
+	Gitignore bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L67)
 
 	// Default: "."
-	Path string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L66)
+	Path string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L70)
 
-	DisableTelemtry bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L68)
+	DisableTelemtry bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L72)
 
-	OfflineScan bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L70)
+	OfflineScan bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L74)
 
-	SkipVersionCheck bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L72)
+	SkipVersionCheck bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L76)
 
-	IgnoreUnfixed bool // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L74)
+	IgnoreUnfixed bool // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L78)
 
-	EnableModules []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L76)
+	EnableModules []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L80)
 
-	Severity []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L78)
+	Severity []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L82)
 
-	Scanners []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L80)
+	Scanners []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L84)
 
-	IgnoreStatus []string // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L82)
+	IgnoreStatus []string // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L86)
 }
 
-func (r *Trivy) Repo(ctx context.Context, opts ...TrivyRepoOpts) error { // trivy (https://github.com/frantjc/daggerverse/tree/6415ad74bf522dc9d89cf4ae9d1e0933affeb66a/trivy/main.go#L61)
+func (r *Trivy) Repo(ctx context.Context, opts ...TrivyRepoOpts) error { // trivy (https://github.com/frantjc/daggerverse/tree/fa72b0e77a88b897ad63ab606954e099bea21479/trivy/main.go#L61)
 	if r.repo != nil {
 		return nil
 	}
 	q := r.query.Select("repo")
 	for i := len(opts) - 1; i >= 0; i-- {
-		// `workspace` optional argument
-		if !querybuilder.IsZeroValue(opts[i].Workspace) {
-			q = q.Arg("workspace", opts[i].Workspace)
+		// `ws` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Ws) {
+			q = q.Arg("ws", opts[i].Ws)
+		}
+		// `exclude` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Exclude) {
+			q = q.Arg("exclude", opts[i].Exclude)
+		}
+		// `gitignore` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Gitignore) {
+			q = q.Arg("gitignore", opts[i].Gitignore)
 		}
 		// `path` optional argument
 		if !querybuilder.IsZeroValue(opts[i].Path) {
