@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Upx
-func (r *Binding) AsUpx() *Upx { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L9)
+func (r *Binding) AsUpx() *Upx { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L9)
 	q := r.query.Select("asUpx")
 
 	return &Upx{
@@ -19,7 +19,7 @@ func (r *Binding) AsUpx() *Upx { // upx (https://github.com/frantjc/daggerverse/
 }
 
 // Create or update a binding of type Upx in the environment
-func (r *Env) WithUpxInput(name string, value *Upx, description string) *Env { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L9)
+func (r *Env) WithUpxInput(name string, value *Upx, description string) *Env { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L9)
 	assertNotNil("value", value)
 	q := r.query.Select("withUpxInput")
 	q = q.Arg("name", name)
@@ -32,7 +32,7 @@ func (r *Env) WithUpxInput(name string, value *Upx, description string) *Env { /
 }
 
 // Declare a desired Upx output to be assigned in the environment
-func (r *Env) WithUpxOutput(name string, description string) *Env { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L9)
+func (r *Env) WithUpxOutput(name string, description string) *Env { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L9)
 	q := r.query.Select("withUpxOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -44,10 +44,10 @@ func (r *Env) WithUpxOutput(name string, description string) *Env { // upx (http
 
 // UpxOpts contains options for Query.Upx
 type UpxOpts struct {
-	Container *Container // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L15)
+	Container *Container // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L15)
 }
 
-func (r *Query) Upx(opts ...UpxOpts) *Upx { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L13)
+func (r *Query) Upx(opts ...UpxOpts) *Upx { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L13)
 	q := r.query.Select("upx")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `container` optional argument
@@ -61,7 +61,7 @@ func (r *Query) Upx(opts ...UpxOpts) *Upx { // upx (https://github.com/frantjc/d
 	}
 }
 
-type Upx struct { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L9)
+type Upx struct { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L9)
 	query *querybuilder.Selection
 
 	id *ID
@@ -73,7 +73,7 @@ func (r *Upx) WithGraphQLQuery(q *querybuilder.Selection) *Upx {
 	}
 }
 
-func (r *Upx) Container() *Container { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L10)
+func (r *Upx) Container() *Container { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L10)
 	q := r.query.Select("container")
 
 	return &Container{
@@ -123,12 +123,12 @@ func (r *Upx) MarshalJSON() ([]byte, error) {
 
 // UpxPackOpts contains options for Upx.Pack
 type UpxPackOpts struct {
-	Brute bool // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L32)
+	Brute bool // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L32)
 
-	Lzma bool // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L34)
+	Lzma bool // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L34)
 }
 
-func (r *Upx) Pack(executable *File, opts ...UpxPackOpts) *File { // upx (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/upx/main.go#L28)
+func (r *Upx) Pack(executable *File, opts ...UpxPackOpts) *File { // upx (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/upx/main.go#L28)
 	assertNotNil("executable", executable)
 	q := r.query.Select("pack")
 	for i := len(opts) - 1; i >= 0; i-- {

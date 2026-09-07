@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Gh
-func (r *Binding) AsGh() *Gh { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L11)
+func (r *Binding) AsGh() *Gh { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L12)
 	q := r.query.Select("asGh")
 
 	return &Gh{
@@ -19,7 +19,7 @@ func (r *Binding) AsGh() *Gh { // gh (https://github.com/frantjc/daggerverse/tre
 }
 
 // Retrieve the binding value, as type GhRelease
-func (r *Binding) AsGhRelease() *GhRelease { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L31)
+func (r *Binding) AsGhRelease() *GhRelease { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L32)
 	q := r.query.Select("asGhRelease")
 
 	return &GhRelease{
@@ -28,7 +28,7 @@ func (r *Binding) AsGhRelease() *GhRelease { // gh (https://github.com/frantjc/d
 }
 
 // Retrieve the binding value, as type GhReleaseAsset
-func (r *Binding) AsGhReleaseAsset() *GhReleaseAsset { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L229)
+func (r *Binding) AsGhReleaseAsset() *GhReleaseAsset { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L229)
 	q := r.query.Select("asGhReleaseAsset")
 
 	return &GhReleaseAsset{
@@ -37,7 +37,7 @@ func (r *Binding) AsGhReleaseAsset() *GhReleaseAsset { // gh (https://github.com
 }
 
 // Create or update a binding of type Gh in the environment
-func (r *Env) WithGhInput(name string, value *Gh, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L11)
+func (r *Env) WithGhInput(name string, value *Gh, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L12)
 	assertNotNil("value", value)
 	q := r.query.Select("withGhInput")
 	q = q.Arg("name", name)
@@ -50,7 +50,7 @@ func (r *Env) WithGhInput(name string, value *Gh, description string) *Env { // 
 }
 
 // Declare a desired Gh output to be assigned in the environment
-func (r *Env) WithGhOutput(name string, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L11)
+func (r *Env) WithGhOutput(name string, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L12)
 	q := r.query.Select("withGhOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -61,7 +61,7 @@ func (r *Env) WithGhOutput(name string, description string) *Env { // gh (https:
 }
 
 // Create or update a binding of type GhReleaseAsset in the environment
-func (r *Env) WithGhReleaseAssetInput(name string, value *GhReleaseAsset, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L229)
+func (r *Env) WithGhReleaseAssetInput(name string, value *GhReleaseAsset, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L229)
 	assertNotNil("value", value)
 	q := r.query.Select("withGhReleaseAssetInput")
 	q = q.Arg("name", name)
@@ -74,7 +74,7 @@ func (r *Env) WithGhReleaseAssetInput(name string, value *GhReleaseAsset, descri
 }
 
 // Declare a desired GhReleaseAsset output to be assigned in the environment
-func (r *Env) WithGhReleaseAssetOutput(name string, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L229)
+func (r *Env) WithGhReleaseAssetOutput(name string, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L229)
 	q := r.query.Select("withGhReleaseAssetOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -85,7 +85,7 @@ func (r *Env) WithGhReleaseAssetOutput(name string, description string) *Env { /
 }
 
 // Create or update a binding of type GhRelease in the environment
-func (r *Env) WithGhReleaseInput(name string, value *GhRelease, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L31)
+func (r *Env) WithGhReleaseInput(name string, value *GhRelease, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L32)
 	assertNotNil("value", value)
 	q := r.query.Select("withGhReleaseInput")
 	q = q.Arg("name", name)
@@ -98,7 +98,7 @@ func (r *Env) WithGhReleaseInput(name string, value *GhRelease, description stri
 }
 
 // Declare a desired GhRelease output to be assigned in the environment
-func (r *Env) WithGhReleaseOutput(name string, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L31)
+func (r *Env) WithGhReleaseOutput(name string, description string) *Env { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L32)
 	q := r.query.Select("withGhReleaseOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -108,7 +108,7 @@ func (r *Env) WithGhReleaseOutput(name string, description string) *Env { // gh 
 	}
 }
 
-type Gh struct { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L11)
+type Gh struct { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L12)
 	query *querybuilder.Selection
 
 	id *ID
@@ -120,7 +120,7 @@ func (r *Gh) WithGraphQLQuery(q *querybuilder.Selection) *Gh {
 	}
 }
 
-func (r *Gh) Container() *Container { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L12)
+func (r *Gh) Container() *Container { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L13)
 	q := r.query.Select("container")
 
 	return &Container{
@@ -168,7 +168,7 @@ func (r *Gh) MarshalJSON() ([]byte, error) {
 	return json.Marshal(id)
 }
 
-func (r *Gh) Release(repo string, tag string) *GhRelease { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L40)
+func (r *Gh) Release(repo string, tag string) *GhRelease { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L41)
 	q := r.query.Select("release")
 	q = q.Arg("repo", repo)
 	q = q.Arg("tag", tag)
@@ -186,7 +186,7 @@ func (r *Gh) AsNode() Node {
 	}
 }
 
-type GhRelease struct { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L31)
+type GhRelease struct { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L32)
 	query *querybuilder.Selection
 
 	create *Void
@@ -201,7 +201,7 @@ func (r *GhRelease) WithGraphQLQuery(q *querybuilder.Selection) *GhRelease {
 	}
 }
 
-func (r *GhRelease) Assets(ctx context.Context) ([]GhReleaseAsset, error) { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L163)
+func (r *GhRelease) Assets(ctx context.Context) ([]GhReleaseAsset, error) { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L164)
 	q := r.query.Select("assets")
 
 	q = q.Select("id")
@@ -235,20 +235,20 @@ func (r *GhRelease) Assets(ctx context.Context) ([]GhReleaseAsset, error) { // g
 
 // GhReleaseCreateOpts contains options for GhRelease.Create
 type GhReleaseCreateOpts struct {
-	Title string // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L47)
+	Title string // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L48)
 
-	GenerateNotes bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L49)
+	GenerateNotes bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L50)
 
-	Latest bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L51)
+	Latest bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L52)
 
-	Prerelease bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L53)
+	Prerelease bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L54)
 
-	Draft bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L55)
+	Draft bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L56)
 
-	VerifyTag bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L57)
+	VerifyTag bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L58)
 }
 
-func (r *GhRelease) Create(ctx context.Context, opts ...GhReleaseCreateOpts) error { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L44)
+func (r *GhRelease) Create(ctx context.Context, opts ...GhReleaseCreateOpts) error { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L45)
 	if r.create != nil {
 		return nil
 	}
@@ -285,10 +285,10 @@ func (r *GhRelease) Create(ctx context.Context, opts ...GhReleaseCreateOpts) err
 
 // GhReleaseDownloadOpts contains options for GhRelease.Download
 type GhReleaseDownloadOpts struct {
-	Archive string // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L193)
+	Archive string // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L194)
 }
 
-func (r *GhRelease) Download(pattern []string, opts ...GhReleaseDownloadOpts) *Directory { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L189)
+func (r *GhRelease) Download(pattern []string, opts ...GhReleaseDownloadOpts) *Directory { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L190)
 	q := r.query.Select("download")
 	for i := len(opts) - 1; i >= 0; i-- {
 		// `archive` optional argument
@@ -305,20 +305,20 @@ func (r *GhRelease) Download(pattern []string, opts ...GhReleaseDownloadOpts) *D
 
 // GhReleaseEditOpts contains options for GhRelease.Edit
 type GhReleaseEditOpts struct {
-	Title string // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L91)
+	Title string // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L92)
 
-	GenerateNotes bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L93)
+	GenerateNotes bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L94)
 
-	Latest bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L95)
+	Latest bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L96)
 
-	Prerelease bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L97)
+	Prerelease bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L98)
 
-	Draft bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L99)
+	Draft bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L100)
 
-	VerifyTag bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L101)
+	VerifyTag bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L102)
 }
 
-func (r *GhRelease) Edit(ctx context.Context, opts ...GhReleaseEditOpts) error { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L88)
+func (r *GhRelease) Edit(ctx context.Context, opts ...GhReleaseEditOpts) error { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L89)
 	if r.edit != nil {
 		return nil
 	}
@@ -395,10 +395,10 @@ func (r *GhRelease) MarshalJSON() ([]byte, error) {
 
 // GhReleaseUploadOpts contains options for GhRelease.Upload
 type GhReleaseUploadOpts struct {
-	Clobber bool // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L136)
+	Clobber bool // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L137)
 }
 
-func (r *GhRelease) Upload(ctx context.Context, assets []*File, opts ...GhReleaseUploadOpts) error { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L132)
+func (r *GhRelease) Upload(ctx context.Context, assets []*File, opts ...GhReleaseUploadOpts) error { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L133)
 	if r.upload != nil {
 		return nil
 	}
@@ -422,11 +422,12 @@ func (r *GhRelease) AsNode() Node {
 	}
 }
 
-type GhReleaseAsset struct { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L229)
+type GhReleaseAsset struct { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L229)
 	query *querybuilder.Selection
 
 	digest *string
 	id     *ID
+	name   *string
 	url    *string
 }
 
@@ -436,7 +437,7 @@ func (r *GhReleaseAsset) WithGraphQLQuery(q *querybuilder.Selection) *GhReleaseA
 	}
 }
 
-func (r *GhReleaseAsset) Digest(ctx context.Context) (string, error) { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L234)
+func (r *GhReleaseAsset) Digest(ctx context.Context) (string, error) { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L233)
 	if r.digest != nil {
 		return *r.digest, nil
 	}
@@ -448,7 +449,7 @@ func (r *GhReleaseAsset) Digest(ctx context.Context) (string, error) { // gh (ht
 	return response, q.Execute(ctx)
 }
 
-func (r *GhReleaseAsset) File() *File { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L238)
+func (r *GhReleaseAsset) File() *File { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L237)
 	q := r.query.Select("file")
 
 	return &File{
@@ -496,7 +497,19 @@ func (r *GhReleaseAsset) MarshalJSON() ([]byte, error) {
 	return json.Marshal(id)
 }
 
-func (r *GhReleaseAsset) URL(ctx context.Context) (string, error) { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L235)
+func (r *GhReleaseAsset) Name(ctx context.Context) (string, error) { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L232)
+	if r.name != nil {
+		return *r.name, nil
+	}
+	q := r.query.Select("name")
+
+	var response string
+
+	q = q.Bind(&response)
+	return response, q.Execute(ctx)
+}
+
+func (r *GhReleaseAsset) URL(ctx context.Context) (string, error) { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L234)
 	if r.url != nil {
 		return *r.url, nil
 	}
@@ -518,10 +531,10 @@ func (r *GhReleaseAsset) AsNode() Node {
 
 // GhOpts contains options for Query.Gh
 type GhOpts struct {
-	Container *Container // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L18)
+	Container *Container // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L19)
 }
 
-func (r *Query) Gh(githubToken *Secret, opts ...GhOpts) *Gh { // gh (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/gh/main.go#L15)
+func (r *Query) Gh(githubToken *Secret, opts ...GhOpts) *Gh { // gh (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/gh/main.go#L16)
 	assertNotNil("githubToken", githubToken)
 	q := r.query.Select("gh")
 	for i := len(opts) - 1; i >= 0; i-- {

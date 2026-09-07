@@ -10,7 +10,7 @@ import (
 )
 
 // Retrieve the binding value, as type Homebrew
-func (r *Binding) AsHomebrew() *Homebrew { // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L17)
+func (r *Binding) AsHomebrew() *Homebrew { // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L18)
 	q := r.query.Select("asHomebrew")
 
 	return &Homebrew{
@@ -19,7 +19,7 @@ func (r *Binding) AsHomebrew() *Homebrew { // homebrew (https://github.com/frant
 }
 
 // Create or update a binding of type Homebrew in the environment
-func (r *Env) WithHomebrewInput(name string, value *Homebrew, description string) *Env { // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L17)
+func (r *Env) WithHomebrewInput(name string, value *Homebrew, description string) *Env { // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L18)
 	assertNotNil("value", value)
 	q := r.query.Select("withHomebrewInput")
 	q = q.Arg("name", name)
@@ -32,7 +32,7 @@ func (r *Env) WithHomebrewInput(name string, value *Homebrew, description string
 }
 
 // Declare a desired Homebrew output to be assigned in the environment
-func (r *Env) WithHomebrewOutput(name string, description string) *Env { // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L17)
+func (r *Env) WithHomebrewOutput(name string, description string) *Env { // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L18)
 	q := r.query.Select("withHomebrewOutput")
 	q = q.Arg("name", name)
 	q = q.Arg("description", description)
@@ -42,7 +42,7 @@ func (r *Env) WithHomebrewOutput(name string, description string) *Env { // home
 	}
 }
 
-type Homebrew struct { // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L17)
+type Homebrew struct { // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L18)
 	query *querybuilder.Selection
 
 	cask *Void
@@ -57,14 +57,14 @@ func (r *Homebrew) WithGraphQLQuery(q *querybuilder.Selection) *Homebrew {
 
 // HomebrewCaskOpts contains options for Homebrew.Cask
 type HomebrewCaskOpts struct {
-	Container *Container // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L47)
+	Container *Container // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L48)
 }
 
 // Cask renders a Homebrew cask formula for the given GitHub release and
 // uploads it to the org's homebrew-tap repo, at Casks/<name>.rb, creating or
 // updating the file as needed. Name, homepage and description are looked up
 // from the repo.
-func (r *Homebrew) Cask(ctx context.Context, githubToken *Secret, githubRepo string, tag string, opts ...HomebrewCaskOpts) error { // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L41)
+func (r *Homebrew) Cask(ctx context.Context, githubToken *Secret, githubRepo string, tag string, opts ...HomebrewCaskOpts) error { // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L42)
 	assertNotNil("githubToken", githubToken)
 	if r.cask != nil {
 		return nil
@@ -131,7 +131,7 @@ func (r *Homebrew) AsNode() Node {
 	}
 }
 
-func (r *Query) Homebrew() *Homebrew { // homebrew (https://github.com/frantjc/daggerverse/tree/626bdccf94759e5fdf32ff2b777c069309327d9a/homebrew/main.go#L17)
+func (r *Query) Homebrew() *Homebrew { // homebrew (https://github.com/frantjc/daggerverse/tree/e91bca30db6fdae3ef6460d9e225d9138effe839/homebrew/main.go#L18)
 	q := r.query.Select("homebrew")
 
 	return &Homebrew{
