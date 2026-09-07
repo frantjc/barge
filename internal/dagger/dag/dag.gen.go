@@ -201,6 +201,11 @@ func Go(opts ...dagger.GoOpts) *dagger.Go {
 	return client.Go(opts...)
 }
 
+func Homebrew() *dagger.Homebrew {
+	client := initClient()
+	return client.Homebrew()
+}
+
 // Queries the host environment.
 func Host() *dagger.Host {
 	client := initClient()
@@ -454,6 +459,12 @@ func LoadGhFromID(id dagger.GhID) *dagger.Gh {
 	return client.LoadGhFromID(id)
 }
 
+// Load a GhReleaseAsset from its ID.
+func LoadGhReleaseAssetFromID(id dagger.GhReleaseAssetID) *dagger.GhReleaseAsset {
+	client := initClient()
+	return client.LoadGhReleaseAssetFromID(id)
+}
+
 // Load a GhRelease from its ID.
 func LoadGhReleaseFromID(id dagger.GhReleaseID) *dagger.GhRelease {
 	client := initClient()
@@ -488,6 +499,12 @@ func LoadHTTPStateFromID(id dagger.HTTPStateID) *dagger.HTTPState {
 func LoadHealthcheckConfigFromID(id dagger.HealthcheckConfigID) *dagger.HealthcheckConfig {
 	client := initClient()
 	return client.LoadHealthcheckConfigFromID(id)
+}
+
+// Load a Homebrew from its ID.
+func LoadHomebrewFromID(id dagger.HomebrewID) *dagger.Homebrew {
+	client := initClient()
+	return client.LoadHomebrewFromID(id)
 }
 
 // Load a Host from its ID.

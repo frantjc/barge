@@ -1,12 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
-	"encoding/base64"
 	"fmt"
-	"html/template"
 	"strings"
 
 	"github.com/frantjc/barge/.dagger/internal/dagger"
@@ -97,23 +94,6 @@ func (m *BargeDev) Binary(
 		})
 }
 
-var (
-	//go:embed cask.rb.tpl
-	caskRbTpl string
-)
-
-type tplOsArchData struct {
-	URL    string
-	Sha256 string
-}
-type tplData struct {
-	Name        string
-	Homepage    string
-	Description string
-	Version     string
-	OsArch      map[string]map[string]tplOsArchData
-}
-
 func (m *BargeDev) Release(
 	ctx context.Context,
 	ws *dagger.Workspace,
@@ -123,17 +103,10 @@ func (m *BargeDev) Release(
 	// +optional
 	brew bool,
 ) error {
-	tpl, err := template.New("cask").Parse(caskRbTpl)
-	if err != nil {
-		return err
-	}
-	data := new(tplData)
-	owner, repo, ok := strings.Cut(githubRepo, "/")
+	_, repo, ok := strings.Cut(githubRepo, "/")
 	if !ok {
 		return fmt.Errorf("expected org/repo format, got %q", githubRepo)
 	}
-	data.Name = repo
-	data.Homepage = fmt.Sprintf("https://github.com/%s", githubRepo)
 
 	gh := dag.Gh(githubToken)
 	src := ws.Directory(".", dagger.WorkspaceDirectoryOpts{
@@ -147,32 +120,19 @@ func (m *BargeDev) Release(
 	if err != nil {
 		return err
 	}
-	data.Version = strings.TrimPrefix(ref, "refs/tags/")
-
-	description, err := gh.Container().
-		WithExec([]string{"gh", "repo", "view", githubRepo, "--json", "description", "--jq", ".description"}).
-		Stdout(ctx)
-	if err != nil {
-		return err
-	}
-	data.Description = strings.TrimSpace(description)
+	tag := strings.TrimPrefix(ref, "refs/tags/")
 
 	assets := []*dagger.File{}
 
-	version, err := dag.Version(ctx)
-	if err != nil {
-		return err
-	}
-
 	for _, goos := range []string{"linux", "darwin"} {
 		for _, goarch := range []string{"amd64", "arm64"} {
-			bin := m.Binary(ctx, ws, version, goarch, goos)
+			bin := m.Binary(ctx, ws, tag, goarch, goos)
 
 			if goos == "linux" {
 				bin = dag.Upx().Pack(bin)
 			}
 
-			file := fmt.Sprintf("%s-%s-%s-%s.tar.gz", data.Name, data.Version, goos, goarch)
+			file := fmt.Sprintf("%s-%s-%s-%s.tar.gz", repo, tag, goos, goarch)
 			asset := dag.Archive().
 				Tar(
 					src.Filter(dagger.DirectoryFilterOpts{
@@ -182,7 +142,7 @@ func (m *BargeDev) Release(
 						},
 					}).
 						WithFile(
-							data.Name,
+							repo,
 							bin,
 						),
 					dagger.ArchiveTarOpts{
@@ -190,43 +150,11 @@ func (m *BargeDev) Release(
 					},
 				).WithName(file)
 
-			sha256sum, err := dag.Wolfi().
-				Container().
-				WithFile(file, asset).
-				WithExec([]string{"sha256sum", file}).
-				Stdout(ctx)
-			if err != nil {
-				return err
-			}
-
-			checksum, _, _ := strings.Cut(sha256sum, "  ")
-
-			if data.OsArch == nil {
-				data.OsArch = map[string]map[string]tplOsArchData{}
-			}
-			osArchData := tplOsArchData{
-				URL:    fmt.Sprintf("%s/releases/download/%s/%s", data.Homepage, data.Version, file),
-				Sha256: strings.TrimPrefix(checksum, "sha256:"),
-			}
-			os := "linux"
-			if goos == "darwin" {
-				os = "macos"
-			}
-			arch := "intel"
-			if goarch == "arm64" {
-				arch = "arm"
-			}
-			if _, ok := data.OsArch[goos]; ok {
-				data.OsArch[os][arch] = osArchData
-			} else {
-				data.OsArch[os] = map[string]tplOsArchData{arch: osArchData}
-			}
-
 			assets = append(assets, asset)
 		}
 	}
 
-	release := gh.Release(githubRepo, data.Version)
+	release := gh.Release(githubRepo, tag)
 
 	if err := release.Create(ctx, dagger.GhReleaseCreateOpts{
 		Draft:         true,
@@ -242,42 +170,7 @@ func (m *BargeDev) Release(
 	}
 
 	if brew {
-		buf := new(bytes.Buffer)
-		enc := base64.NewEncoder(base64.StdEncoding, buf)
-
-		if err := tpl.Execute(enc, data); err != nil {
-			return err
-		}
-
-		if err = enc.Close(); err != nil {
-			return err
-		}
-
-		endpoint := fmt.Sprintf("repos/%s/homebrew-tap/contents/Casks/%s.rb", owner, data.Name)
-		upload := []string{
-			"gh",
-			"api",
-			"-X=PUT",
-			endpoint,
-			"-f", fmt.Sprintf("message=chore: bump %s to %s", data.Name, data.Version),
-			"-f", fmt.Sprintf("content=%s", buf.String()),
-		}
-
-		if sha, err := gh.Container().
-			WithExec([]string{
-				"gh",
-				"api",
-				endpoint,
-				"--jq",
-				".sha",
-			}).
-			Stdout(ctx); err == nil {
-			upload = append(upload, "-f", fmt.Sprintf("sha=%s", strings.TrimSpace(sha)))
-		}
-
-		if _, err := gh.Container().
-			WithExec(upload).
-			Sync(ctx); err != nil {
+		if err := dag.Homebrew().Cask(ctx, githubToken, githubRepo, tag); err != nil {
 			return err
 		}
 	}

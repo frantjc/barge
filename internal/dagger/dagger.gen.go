@@ -246,6 +246,9 @@ type GeneratorID string
 type GhID string
 
 // A unique identifier for an object.
+type GhReleaseAssetID string
+
+// A unique identifier for an object.
 type GhReleaseID string
 
 // A unique identifier for an object.
@@ -262,6 +265,9 @@ type HTTPStateID string
 
 // A unique identifier for an object.
 type HealthcheckConfigID string
+
+// A unique identifier for an object.
+type HomebrewID string
 
 // A unique identifier for an object.
 type HostID string
@@ -13588,6 +13594,16 @@ func (r *Query) LoadGhFromID(id GhID) *Gh {
 	}
 }
 
+// Load a GhReleaseAsset from its ID.
+func (r *Query) LoadGhReleaseAssetFromID(id GhReleaseAssetID) *GhReleaseAsset {
+	q := r.query.Select("loadGhReleaseAssetFromID")
+	q = q.Arg("id", id)
+
+	return &GhReleaseAsset{
+		query: q,
+	}
+}
+
 // Load a GhRelease from its ID.
 func (r *Query) LoadGhReleaseFromID(id GhReleaseID) *GhRelease {
 	q := r.query.Select("loadGhReleaseFromID")
@@ -13644,6 +13660,16 @@ func (r *Query) LoadHealthcheckConfigFromID(id HealthcheckConfigID) *Healthcheck
 	q = q.Arg("id", id)
 
 	return &HealthcheckConfig{
+		query: q,
+	}
+}
+
+// Load a Homebrew from its ID.
+func (r *Query) LoadHomebrewFromID(id HomebrewID) *Homebrew {
+	q := r.query.Select("loadHomebrewFromID")
+	q = q.Arg("id", id)
+
+	return &Homebrew{
 		query: q,
 	}
 }
@@ -17809,7 +17835,7 @@ func (c *Client) Do(ctx context.Context, req *Request, resp *Response) error {
 func serveModuleDependencies(ctx context.Context, client *Client) error {
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/archive@main",
-		ModuleSourceOpts{RefPin: "fa72b0e77a88b897ad63ab606954e099bea21479"},
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
 	).
 		WithName("archive").
 		AsModule().
@@ -17819,7 +17845,7 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/gh@main",
-		ModuleSourceOpts{RefPin: "fa72b0e77a88b897ad63ab606954e099bea21479"},
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
 	).
 		WithName("gh").
 		AsModule().
@@ -17829,7 +17855,7 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/go@main",
-		ModuleSourceOpts{RefPin: "fa72b0e77a88b897ad63ab606954e099bea21479"},
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
 	).
 		WithName("go").
 		AsModule().
@@ -17838,8 +17864,18 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 	}
 
 	if err := client.ModuleSource(
+		"github.com/frantjc/daggerverse/homebrew@main",
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
+	).
+		WithName("homebrew").
+		AsModule().
+		Serve(ctx); err != nil {
+		return err
+	}
+
+	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/kwok@main",
-		ModuleSourceOpts{RefPin: "fa72b0e77a88b897ad63ab606954e099bea21479"},
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
 	).
 		WithName("kwok").
 		AsModule().
@@ -17849,7 +17885,7 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/mise@main",
-		ModuleSourceOpts{RefPin: "fa72b0e77a88b897ad63ab606954e099bea21479"},
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
 	).
 		WithName("mise").
 		AsModule().
@@ -17859,7 +17895,7 @@ func serveModuleDependencies(ctx context.Context, client *Client) error {
 
 	if err := client.ModuleSource(
 		"github.com/frantjc/daggerverse/upx@main",
-		ModuleSourceOpts{RefPin: "fa72b0e77a88b897ad63ab606954e099bea21479"},
+		ModuleSourceOpts{RefPin: "626bdccf94759e5fdf32ff2b777c069309327d9a"},
 	).
 		WithName("upx").
 		AsModule().
