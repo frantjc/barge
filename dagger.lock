@@ -11,6 +11,7 @@
 ["","oci-sha",["docker.io/aquasec/trivy:0.75.0"],"sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa"]
 ["","oci-sha",["docker.io/library/busybox:1.38.0"],"sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e"]
 ["","oci-sha",["docker.io/library/golang:1.26.6"],"sha256:0d1d3a794be25f809dd2cb3160d8c73276c4056a9f8242a138e908ddeee7b6b6"]
+["","oci-sha",["docker.io/library/golang:1.26.8"],"sha256:eb36c1664dd974cde625f736e02c204383deebe03977365caaec5bf49f794348"]
 ["","oci-sha",["registry.k8s.io/kwok/cluster:v0.7.0-k8s.v1.33.0"],"sha256:c2cbb68659b0ece25694a0520415e24be09a617b70086971bc18e60b9f43c12f"]
 ["","vanity-url",["https://dagger.io/linux/alpine"],"https://github.com/dagger/alpine"]
 ["","vanity-url",["https://dagger.io/sdk/helpers"],"https://github.com/dagger/sdk-helpers"]

@@ -9,15 +9,12 @@ source = "github.com/dagger/go-sdk"
 skip = ["test", "vulncheck"]
 
 [modules.go]
-legacy-default-path = true
 source = "github.com/frantjc/daggerverse/go@317778c0cca004064e57a02fd9d4b1c913576114"
 
 [modules.mise]
-legacy-default-path = true
 source = "github.com/frantjc/daggerverse/mise@317778c0cca004064e57a02fd9d4b1c913576114"
 
 [modules.trivy]
-legacy-default-path = true
 source = "github.com/frantjc/daggerverse/trivy@317778c0cca004064e57a02fd9d4b1c913576114"
 
 [sdks.go]
