@@ -1,0 +1,46 @@
+name = "barge-dev"
+engineVersion = "v1.0.0-beta.18"
+source = ".dagger"
+
+[runtime]
+  source = "go"
+
+[[dependencies]]
+  name = "archive"
+  source = "github.com/frantjc/daggerverse/archive@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "gh"
+  source = "github.com/frantjc/daggerverse/gh@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "go"
+  source = "github.com/frantjc/daggerverse/go@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "homebrew"
+  source = "github.com/frantjc/daggerverse/homebrew@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "kwok"
+  source = "github.com/frantjc/daggerverse/kwok@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "mise"
+  source = "github.com/frantjc/daggerverse/mise@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "trivy"
+  source = "github.com/frantjc/daggerverse/trivy@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "upx"
+  source = "github.com/frantjc/daggerverse/upx@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[[dependencies]]
+  name = "wolfi"
+  source = "github.com/dagger/wolfi@0b73dcbea9c7d63969d747386f96b0694fb4dadc"
+
+[[clients]]
+  generator = "go"
+  directory = "./internal/dagger"

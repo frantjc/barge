@@ -31,11 +31,8 @@ func (m *BargeDev) Test(
 	if azureConfig != nil && acrName != "" {
 		tools = append(tools, "azure-cli")
 	}
-	return dag.Go(dagger.GoOpts{
-		Ws: ws,
-		Container: dag.Mise(dagger.MiseOpts{
-			Ws: ws,
-		}).
+	_, err := dag.Go(ws, dagger.GoOpts{
+		Container: dag.Mise(ws).
 			Container(dagger.MiseContainerOpts{
 				Tools: tools,
 			}).
@@ -67,10 +64,12 @@ func (m *BargeDev) Test(
 				Expand: true,
 			}),
 	}).
-		Test(ctx, dagger.GoTestOpts{
+		Test(dagger.GoTestOpts{
 			Race: true,
 			Tags: tags,
-		})
+		}).
+		Error(ctx)
+	return err
 }
 
 func (m *BargeDev) Binary(
@@ -83,9 +82,7 @@ func (m *BargeDev) Binary(
 	// +optional
 	goos string,
 ) *dagger.File {
-	return dag.Go(dagger.GoOpts{
-		Ws: ws,
-	}).
+	return dag.Go(ws).
 		Build(dagger.GoBuildOpts{
 			Pkg:     "./cmd/barge",
 			Ldflags: "-s -w -X main.version=" + version,
@@ -114,7 +111,7 @@ func (m *BargeDev) Release(
 	})
 
 	gitRepository := src.AsGit()
-	latestVersion := gitRepository.LatestVersion()
+	latestVersion := gitRepository.Latest()
 
 	ref, err := latestVersion.Ref(ctx)
 	if err != nil {

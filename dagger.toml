@@ -1,0 +1,28 @@
+[modules.barge-dev]
+source = "."
+entrypoint = true
+
+[modules.dagger-go-sdk]
+source = "github.com/dagger/go-sdk"
+
+[modules.go.check]
+skip = ["test", "vulncheck"]
+
+[modules.go]
+legacy-default-path = true
+source = "github.com/frantjc/daggerverse/go@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[modules.mise]
+legacy-default-path = true
+source = "github.com/frantjc/daggerverse/mise@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[modules.trivy]
+legacy-default-path = true
+source = "github.com/frantjc/daggerverse/trivy@317778c0cca004064e57a02fd9d4b1c913576114"
+
+[sdks.go]
+module = "dagger-go-sdk"
+
+[sdks.go.scopes."."]
+clients = ["github.com/frantjc/daggerverse/archive@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/frantjc/daggerverse/gh@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/frantjc/daggerverse/go@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/frantjc/daggerverse/homebrew@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/frantjc/daggerverse/kwok@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/frantjc/daggerverse/mise@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/frantjc/daggerverse/upx@317778c0cca004064e57a02fd9d4b1c913576114", "github.com/dagger/wolfi@0b73dcbea9c7d63969d747386f96b0694fb4dadc", "github.com/frantjc/daggerverse/trivy@317778c0cca004064e57a02fd9d4b1c913576114"]
+is-module = true
