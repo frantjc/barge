@@ -15,6 +15,7 @@ import (
 )
 
 func TestCopyGHCR(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	githubRepository := os.Getenv("GITHUB_REPOSITORY")

@@ -15,6 +15,7 @@ import (
 )
 
 func TestCopyACR(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	acrName := os.Getenv("ACR_NAME")

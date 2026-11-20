@@ -12,11 +12,13 @@ import (
 	"strings"
 
 	"github.com/frantjc/barge"
+	"github.com/frantjc/barge/internal/credential"
 	"github.com/frantjc/barge/internal/util"
 	billy "github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	github "github.com/google/go-github/v72/github"
@@ -38,24 +40,24 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	remote, rel := remoteAndPathFromURL(ctx, u)
+	remote, rel, cred := remoteAndPathFromURL(ctx, u)
 	ref := u.Query().Get("ref")
 	_ = util.SloggerFrom(ctx)
 
 	if remote.Hostname() == "github.com" {
-		return s.openGitHub(ctx, remote, rel, ref)
+		return s.openGitHub(ctx, remote, cred, rel, ref)
 	}
 
-	return s.openGit(ctx, remote, rel, ref)
+	return s.openGit(ctx, remote, cred, rel, ref)
 }
 
-func (s *source) openGitHub(ctx context.Context, remote *url.URL, rel, ref string) (*chart.Chart, error) {
+func (s *source) openGitHub(ctx context.Context, remote *url.URL, cred *credential.Credential, rel, ref string) (*chart.Chart, error) {
 	owner, repo, err := ownerAndRepo(remote)
 	if err != nil {
 		return nil, err
 	}
 
-	client := github.NewClient(githubHTTPClient(remote))
+	client := github.NewClient(githubHTTPClient(cred))
 	archiveURL, _, err := client.Repositories.GetArchiveLink(ctx, owner, repo, github.Tarball, &github.RepositoryContentGetOptions{Ref: ref}, 3)
 	if err != nil {
 		return nil, err
@@ -66,7 +68,7 @@ func (s *source) openGitHub(ctx context.Context, remote *url.URL, rel, ref strin
 		return nil, err
 	}
 
-	res, err := githubHTTPClient(remote).Do(req)
+	res, err := githubHTTPClient(cred).Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -79,8 +81,8 @@ func (s *source) openGitHub(ctx context.Context, remote *url.URL, rel, ref strin
 	return loadChartFromTarball(res.Body, rel)
 }
 
-func (s *source) openGit(ctx context.Context, remote *url.URL, rel, ref string) (*chart.Chart, error) {
-	fs, err := clone(ctx, remote, ref)
+func (s *source) openGit(ctx context.Context, remote *url.URL, cred *credential.Credential, rel, ref string) (*chart.Chart, error) {
+	fs, err := clone(ctx, remote, cred, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +90,8 @@ func (s *source) openGit(ctx context.Context, remote *url.URL, rel, ref string) 
 	return loadChartFromFilesystem(fs, rel)
 }
 
-func clone(ctx context.Context, remote *url.URL, ref string) (billy.Filesystem, error) {
-	auth := authMethod(remote)
+func clone(ctx context.Context, remote *url.URL, cred *credential.Credential, ref string) (billy.Filesystem, error) {
+	auth := authMethod(cred)
 	options := []*git.CloneOptions{{
 		URL:   remote.String(),
 		Depth: 1,
@@ -141,20 +143,17 @@ func clone(ctx context.Context, remote *url.URL, ref string) (billy.Filesystem, 
 	return nil, err
 }
 
-func authMethod(remote *url.URL) *githttp.BasicAuth {
-	if remote == nil || remote.User == nil {
+func authMethod(cred *credential.Credential) transport.AuthMethod {
+	switch {
+	case cred == nil:
 		return nil
+	case cred.Token != "":
+		return &githttp.TokenAuth{Token: cred.Token}
+	case cred.Password != "":
+		return &githttp.BasicAuth{Username: cred.Username, Password: cred.Password}
 	}
 
-	password, ok := remote.User.Password()
-	if !ok || password == "" {
-		return nil
-	}
-
-	return &githttp.BasicAuth{
-		Username: remote.User.Username(),
-		Password: password,
-	}
+	return nil
 }
 
 func loadChartFromTarball(r io.Reader, rel string) (*chart.Chart, error) {
@@ -303,23 +302,15 @@ func ownerAndRepo(remote *url.URL) (string, string, error) {
 	return parts[0], strings.TrimSuffix(parts[1], ".git"), nil
 }
 
-func githubHTTPClient(remote *url.URL) *http.Client {
-	if remote == nil || remote.User == nil {
+func githubHTTPClient(cred *credential.Credential) *http.Client {
+	if cred == nil || (cred.Token == "" && cred.Password == "") {
 		return http.DefaultClient
 	}
-
-	password, ok := remote.User.Password()
-	if !ok || password == "" {
-		return http.DefaultClient
-	}
-
-	username := remote.User.Username()
-	transport := http.DefaultTransport
 
 	return &http.Client{Transport: roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		clone := req.Clone(req.Context())
-		clone.SetBasicAuth(username, password)
-		return transport.RoundTrip(clone)
+		cred.SetAuth(clone)
+		return http.DefaultTransport.RoundTrip(clone)
 	})}
 }
 
@@ -329,7 +320,7 @@ func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
 }
 
-func remoteAndPathFromURL(ctx context.Context, u *url.URL) (*url.URL, string) {
+func remoteAndPathFromURL(ctx context.Context, u *url.URL) (*url.URL, string, *credential.Credential) {
 	repoPath := u.Path
 	rel := "."
 
@@ -358,15 +349,7 @@ func remoteAndPathFromURL(ctx context.Context, u *url.URL) (*url.URL, string) {
 		remote.Scheme = scheme
 	}
 
-	if remote.User == nil {
-		if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, "git"); ok {
-			remote.User = url.UserPassword(username, password)
-		} else if remote.Hostname() == "github.com" {
-			if username, password, err := util.GetGitHubAuth(ctx); err == nil && password != "" {
-				remote.User = url.UserPassword(username, password)
-			}
-		}
-	}
+	cred, _ := credential.ForURL(ctx, &remote, credential.Source, "git")
 
-	return &remote, rel
+	return &remote, rel, cred
 }

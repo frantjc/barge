@@ -3,7 +3,6 @@ package chartmuseum
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -11,6 +10,7 @@ import (
 	"net/url"
 
 	"github.com/frantjc/barge"
+	"github.com/frantjc/barge/internal/credential"
 	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 )
@@ -35,11 +35,12 @@ type destination struct {
 }
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	scheme := u.Scheme
-	if d.Scheme == "" {
-		d.Scheme = "https"
-	}
+	cred, hasCred := credential.ForURL(ctx, u, credential.Destination, u.Scheme, "chartmuseum")
+
 	u.Scheme = d.Scheme
+	if u.Scheme == "" {
+		u.Scheme = "https"
+	}
 
 	// TODO(frantjc): Use io.Pipe here.
 	buf := new(bytes.Buffer)
@@ -70,16 +71,8 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 
-	if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, scheme); ok {
-		req.Header.Add(
-			"Authorization",
-			fmt.Sprintf(
-				"Basic %s",
-				base64.RawURLEncoding.EncodeToString(
-					fmt.Appendf(nil, "%s:%s", username, password),
-				),
-			),
-		)
+	if hasCred {
+		cred.SetAuth(req)
 	}
 
 	res, err := http.DefaultClient.Do(req)

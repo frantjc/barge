@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/frantjc/barge"
+	"github.com/frantjc/barge/internal/credential"
 	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"
@@ -24,7 +25,7 @@ func init() {
 type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	r, err := util.NewRegistryClientFromURL(ctx, u)
+	r, err := newRegistryClient(ctx, u, credential.Destination)
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,15 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 
-	ref := util.RefFromURL(u)
+	// Like `helm push`, tag the chart with its version unless the URL says
+	// otherwise, via a tag in its path or its version query parameter.
+	w := *u
+	if q := w.Query(); !strings.Contains(w.Path, ":") && q.Get("version") == "" {
+		q.Set("version", c.Metadata.Version)
+		w.RawQuery = q.Encode()
+	}
+
+	ref := util.RefFromURL(&w)
 
 	if _, err := r.Push(data, ref, registry.PushOptStrictMode(false)); err != nil {
 		return err

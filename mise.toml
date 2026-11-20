@@ -1,8 +1,13 @@
+min_version = "2026.10.15"
+
 [tools]
-azure-cli = { version = "2.88.0", uvx_args = "--prerelease=allow" }
+azure-cli = "2.88.0"
 dagger = "0.21.11"
 go = "1.27.4"
 helm = "4.2.0"
 
 [env]
 DAGGER_X_RELEASE = "v1.0.0-beta.27"
+
+[settings]
+python.compile = false

@@ -12,6 +12,7 @@ import (
 )
 
 func TestExampleOCI(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	require.NoError(t, barge.Copy(ctx, "oci://ghcr.io/frantjc/barge/charts/test", t.TempDir()))
 }

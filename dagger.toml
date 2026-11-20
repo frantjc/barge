@@ -2,14 +2,20 @@
 source = "."
 main = true
 
-[modules.go.check]
-skip = ["test", "vulncheck"]
-
 [modules.go]
 source = "github.com/frantjc/daggerverse/go@16db280eba06e531d3d83a9a13fc31deb9607da1"
 
+[modules.go.check]
+skip = ["test", "vulncheck"]
+
+[modules.go.settings]
+gitignore = true
+
 [modules.mise]
 source = "github.com/frantjc/daggerverse/mise@16db280eba06e531d3d83a9a13fc31deb9607da1"
+
+[modules.mise.settings]
+gitignore = true
 
 [modules.trivy]
 source = "github.com/frantjc/daggerverse/trivy@16db280eba06e531d3d83a9a13fc31deb9607da1"

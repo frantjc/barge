@@ -10,6 +10,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/frantjc/barge"
+	"github.com/frantjc/barge/internal/credential"
 	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -38,11 +39,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		return nil, err
 	}
 
-	opts := []getter.Option{}
-
-	if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, scheme); ok {
-		opts = append(opts, getter.WithBasicAuth(username, password))
-	}
+	cred, _ := credential.ForURL(ctx, u, credential.Source, scheme)
 
 	w := u.JoinPath()
 	name := path.Base(w.Path)
@@ -50,7 +47,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		if ext := path.Ext(name); ext == "" {
 			w.Path = path.Join("/", path.Dir(u.Path), "index.yaml")
 
-			buf, err := g.Get(w.String(), opts...)
+			buf, err := credential.Get(ctx, g, w.String(), cred)
 			if err != nil {
 				return nil, err
 			}
@@ -82,13 +79,22 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 							return nil, err
 						}
 
-						opts := []getter.Option{}
-
-						if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, scheme); ok {
-							opts = append(opts, getter.WithBasicAuth(username, password))
+						chartURL, err := url.Parse(rawURLOrPath)
+						if err != nil {
+							errs = errors.Join(errs, err)
+							continue
 						}
 
-						buf, err := g.Get(rawURLOrPath, opts...)
+						// The repository's credentials apply to charts on the
+						// same host, as with Helm. Charts elsewhere only get
+						// credentials scoped to their own host, so that an
+						// index can't collect the repository's.
+						chartCred := cred
+						if chartURL.Host != u.Host {
+							chartCred, _ = credential.ForReferencedURL(ctx, chartURL, credential.Source)
+						}
+
+						buf, err := credential.Get(ctx, g, chartURL.String(), chartCred)
 						if err != nil {
 							errs = errors.Join(errs, err)
 							continue
@@ -103,7 +109,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		}
 	}
 
-	buf, err := g.Get(w.String(), opts...)
+	buf, err := credential.Get(ctx, g, w.String(), cred)
 	if err != nil {
 		return nil, err
 	}
@@ -120,13 +126,9 @@ func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]barge
 		return nil, err
 	}
 
-	opts := []getter.Option{}
+	cred, _ := credential.ForURL(ctx, u, credential.Source, scheme)
 
-	if username, password, ok := util.UsernameAndPasswordForURLWithEnvFallback(u, util.LocationSource, scheme); ok {
-		opts = append(opts, getter.WithBasicAuth(username, password))
-	}
-
-	buf, err := g.Get(u.JoinPath("index.yaml").String(), opts...)
+	buf, err := credential.Get(ctx, g, u.JoinPath("index.yaml").String(), cred)
 	if err != nil {
 		return nil, err
 	}

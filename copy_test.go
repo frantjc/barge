@@ -23,6 +23,7 @@ import (
 )
 
 func TestCopyArchive(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	_, archive := Archive(t)
 	directory := fmt.Sprintf("directory://%s", t.TempDir())
@@ -30,6 +31,7 @@ func TestCopyArchive(t *testing.T) {
 }
 
 func TestCopyDirectory(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	_, archive := Archive(t)
 	directory := fmt.Sprintf("directory://%s", t.TempDir())
@@ -38,6 +40,7 @@ func TestCopyDirectory(t *testing.T) {
 }
 
 func TestCopyFile(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	archiveChart, archive := Archive(t)
 	file := fmt.Sprintf("file://%s/%s-%s.tgz", t.TempDir(), archiveChart.Name(), archiveChart.Metadata.Version)
@@ -49,6 +52,7 @@ func TestCopyFile(t *testing.T) {
 }
 
 func TestCopyDefault(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	archiveChart, archive := Archive(t)
 	file := fmt.Sprintf("%s/%s-%s.tgz", t.TempDir(), archiveChart.Name(), archiveChart.Metadata.Version)
@@ -60,6 +64,7 @@ func TestCopyDefault(t *testing.T) {
 }
 
 func TestCopyHTTP(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(testdata.ChartArchive)
@@ -78,6 +83,7 @@ func TestCopyRepo(t *testing.T) {
 }
 
 func TestCopyOCI(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	_, archive := Archive(t)
 	oci := OCI(t).JoinPath("test")
@@ -86,12 +92,14 @@ func TestCopyOCI(t *testing.T) {
 }
 
 func TestCopyErrorUnknownScheme(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	require.Error(t, barge.Copy(ctx, "foo://", t.TempDir()))
 	require.Error(t, barge.Copy(ctx, fmt.Sprintf("file://%s", t.TempDir()), "bar://"))
 }
 
 func TestCopyErrorInvalid(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	_, archive := Archive(t)
 	ociURL := &url.URL{Scheme: "oci", Host: "does-not-exist"}
@@ -99,6 +107,7 @@ func TestCopyErrorInvalid(t *testing.T) {
 }
 
 func TestCopyBeforeEqualToAfter(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	expected, archive := Archive(t)
 	tmp := t.TempDir()
@@ -110,6 +119,7 @@ func TestCopyBeforeEqualToAfter(t *testing.T) {
 }
 
 func TestCopyPreservesSchema(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	chart, archive := Archive(t)
 	expected := map[string]any{}

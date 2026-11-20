@@ -21,6 +21,10 @@ func TestCopyChartmuseum(t *testing.T) {
 	dag := Dag(t)
 	archiveChart, archiveURL := Archive(t)
 	chartmuseumURL := Chartmuseum(t, dag)
+	// After starting ChartMuseum, which may use the developer's credentials to
+	// pull its image, and before `helm repo add`, which mustn't modify the
+	// developer's repositories.
+	IsolateCredentials(t)
 	require.NoError(t, barge.Copy(ctx, archiveURL.String(), chartmuseumURL.String()))
 
 	repo := "chartmuseum"
@@ -43,6 +47,7 @@ func TestCopyChartmuseum(t *testing.T) {
 }
 
 func TestCopyDistribution(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	dag := Dag(t)

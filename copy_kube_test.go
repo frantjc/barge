@@ -19,6 +19,7 @@ import (
 )
 
 func TestCopyRelease(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	restCfg, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(

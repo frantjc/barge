@@ -18,6 +18,7 @@ import (
 )
 
 func TestExampleHTTP(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(testdata.ChartArchive)
@@ -27,6 +28,10 @@ func TestExampleHTTP(t *testing.T) {
 }
 
 func TestExampleSync(t *testing.T) {
+	// barge-sync.yml names the repo "chartmuseum", which developers may well
+	// have added themselves, so it mustn't be added to or removed from their
+	// own config.
+	IsolateCredentials(t)
 	ctx := Context(t)
 	repoName := "chartmuseum"
 	add := Command(t, "helm", "repo", "add", "--force-update", repoName, "https://chartmuseum.github.io/charts")

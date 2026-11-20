@@ -15,6 +15,7 @@ import (
 )
 
 func TestCopyGitHub(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	git := "git://github.com/chartmuseum/charts/src/chartmuseum"
 	tmp := t.TempDir()
@@ -23,6 +24,7 @@ func TestCopyGitHub(t *testing.T) {
 }
 
 func TestCopyRawGitHubUserContent(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	repoName := uuid.NewString()
 	add := Command(t, "helm", "repo", "add", repoName, "https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/charts")
@@ -38,6 +40,7 @@ func TestCopyRawGitHubUserContent(t *testing.T) {
 }
 
 func TestCopyGitHubIO(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	repoName := uuid.NewString()
 	add := Command(t, "helm", "repo", "add", repoName, "https://coredns.github.io/helm")

@@ -1,9 +1,11 @@
 package barge_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -43,8 +46,10 @@ func Command(t testing.TB, name string, arg ...string) *exec.Cmd {
 	t.Helper()
 	ctx := Context(t)
 	cmd := exec.CommandContext(ctx, name, arg...)
-	cmd.Stdout = t.Output()
-	cmd.Stderr = t.Output()
+	// Through Context's writers, so that its check for secrets covers
+	// commands' output too.
+	cmd.Stdout = util.StdoutFrom(ctx)
+	cmd.Stderr = util.StderrFrom(ctx)
 	return cmd
 }
 
@@ -57,10 +62,38 @@ func Context(t testing.TB) context.Context {
 		ctx, cancel = context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		t.Cleanup(cancel)
 	}
+
+	// Everything barge writes is also captured, to check after the test that
+	// no secret was written anywhere.
+	captured := new(lockedBuffer)
+	t.Cleanup(func() {
+		requireNoSecrets(t, captured.String())
+	})
+	out := io.MultiWriter(t.Output(), captured)
+
 	return util.SloggerInto(
-		util.StdoutInto(util.StderrInto(ctx, t.Output()), t.Output()),
-		slog.New(slog.NewTextHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
+		util.StdoutInto(util.StderrInto(ctx, out), out),
+		slog.New(slog.NewTextHandler(out, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	)
+}
+
+// lockedBuffer is a bytes.Buffer that's safe to write to concurrently, as
+// barge does when syncing.
+type lockedBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *lockedBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *lockedBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
 }
 
 // Repo starts an in-process Helm chart repository serving the given chart,
@@ -68,6 +101,7 @@ func Context(t testing.TB) context.Context {
 // name and the server's base URL.
 func Repo(t testing.TB, chart *chart.Chart) (string, *url.URL) {
 	t.Helper()
+	IsolateCredentials(t)
 
 	rootPath := "/"
 	chartPath := filepath.Join(rootPath, fmt.Sprintf("%s-%s.tgz", chart.Name(), chart.Metadata.Version))

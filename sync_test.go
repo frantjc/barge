@@ -20,6 +20,7 @@ import (
 )
 
 func TestSyncDirectory(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	archiveChart, archiveURL := Archive(t)
@@ -81,6 +82,7 @@ func TestSyncDirectory(t *testing.T) {
 }
 
 func TestSyncFile(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	archiveChart, archiveURL := Archive(t)
@@ -174,6 +176,7 @@ func TestSyncRepo(t *testing.T) {
 }
 
 func TestSyncOCI(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	archiveChart, archiveURL := Archive(t)
@@ -233,6 +236,7 @@ func TestSyncOCI(t *testing.T) {
 }
 
 func TestSyncErrorInvalidDest(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	_, archiveURL := Archive(t)

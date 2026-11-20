@@ -21,6 +21,7 @@ import (
 )
 
 func TestSyncDistribution(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	namespace := uuid.NewString()
@@ -80,6 +81,7 @@ func TestSyncDistribution(t *testing.T) {
 }
 
 func TestSyncChartmuseum(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 
 	_, archiveURL := Archive(t)
@@ -104,6 +106,7 @@ func TestSyncChartmuseum(t *testing.T) {
 }
 
 func TestSyncErrorMissingConfig(t *testing.T) {
+	t.Parallel()
 	ctx := Context(t)
 	dag := Dag(t)
 	distributionURL := Distribution(t, dag)
