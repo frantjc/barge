@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/getter"
 )
 
@@ -44,7 +45,7 @@ func Get(ctx context.Context, g getter.Getter, rawURL string, cred *Credential, 
 		cred.SetAuth(req)
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := util.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -51,7 +51,10 @@ func newRegistryClient(ctx context.Context, u *url.URL, cred *credential.Credent
 	}
 
 	if cred != nil {
+		// Unlike Helm's own client, which isn't used here as it's the
+		// credentials' authorizer that's replaced, retry transient failures.
 		opts = append(opts, registry.ClientOptAuthorizer(auth.Client{
+			Client: util.HTTPClient,
 			Credential: auth.StaticCredential(u.Host, auth.Credential{
 				Username:     cred.Username,
 				Password:     cred.Password,

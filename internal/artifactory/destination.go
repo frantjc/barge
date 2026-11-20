@@ -70,7 +70,7 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 			cred.SetAuth(req)
 		}
 
-		res, err := http.DefaultClient.Do(req)
+		res, err := util.HTTPClient.Do(req)
 		if err != nil {
 			return err
 		}

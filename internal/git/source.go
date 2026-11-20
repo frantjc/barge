@@ -14,6 +14,7 @@ import (
 
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/credential"
+	"github.com/frantjc/barge/internal/util"
 	billy "github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	git "github.com/go-git/go-git/v5"
@@ -52,7 +53,7 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 			c, err = s.openGit(ctx, remote, cred, rel, ref)
 		}
 
-		if isUnauthorized(err) {
+		if isRejected(err, cred != nil) {
 			return credential.Rejected(err)
 		}
 
@@ -65,8 +66,11 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 // errUnauthorized marks an HTTP 401 that isn't otherwise typed.
 var errUnauthorized = errors.New("unauthorized")
 
-// isUnauthorized reports whether err is the remote rejecting credentials.
-func isUnauthorized(err error) bool {
+// isRejected reports whether err is the remote rejecting credentials.
+// GitHub's API answers 404 rather than 401 for a private repository that the
+// given token can't see, so with credentials, a 404 from it counts too, for
+// another provider's token to be tried. Without, a 404 is just that.
+func isRejected(err error, withCredentials bool) bool {
 	if err == nil {
 		return false
 	}
@@ -78,7 +82,18 @@ func isUnauthorized(err error) bool {
 	}
 
 	var ghErr *github.ErrorResponse
-	return errors.As(err, &ghErr) && ghErr.Response != nil && ghErr.Response.StatusCode == http.StatusUnauthorized
+	if !errors.As(err, &ghErr) || ghErr.Response == nil {
+		return false
+	}
+
+	switch ghErr.Response.StatusCode {
+	case http.StatusUnauthorized:
+		return true
+	case http.StatusNotFound:
+		return withCredentials
+	}
+
+	return false
 }
 
 func (s *source) openGitHub(ctx context.Context, remote *url.URL, cred *credential.Credential, rel, ref string) (*chart.Chart, error) {
@@ -338,13 +353,13 @@ func ownerAndRepo(remote *url.URL) (string, string, error) {
 
 func githubHTTPClient(cred *credential.Credential) *http.Client {
 	if cred == nil || (cred.Token == "" && cred.Password == "") {
-		return http.DefaultClient
+		return util.HTTPClient
 	}
 
 	return &http.Client{Transport: roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		clone := req.Clone(req.Context())
 		cred.SetAuth(clone)
-		return http.DefaultTransport.RoundTrip(clone)
+		return util.HTTPClient.Transport.RoundTrip(clone)
 	})}
 }
 
