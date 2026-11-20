@@ -48,12 +48,15 @@ func newBarge() *cobra.Command {
 			PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 				cmd.SetContext(
 					util.SloggerInto(
-						util.StdoutInto(
-							util.StderrInto(
-								cmd.Context(),
-								cmd.ErrOrStderr(),
+						util.StdinInto(
+							util.StdoutInto(
+								util.StderrInto(
+									cmd.Context(),
+									cmd.ErrOrStderr(),
+								),
+								cmd.OutOrStdout(),
 							),
-							cmd.OutOrStdout(),
+							cmd.InOrStdin(),
 						),
 						slog.New(slog.NewTextHandler(cmd.OutOrStdout(), &slog.HandlerOptions{
 							Level: slogConfig,

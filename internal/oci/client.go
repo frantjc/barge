@@ -2,6 +2,8 @@ package oci
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -10,20 +12,45 @@ import (
 	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/registry"
 	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/errcode"
 )
 
+// withRegistryClient calls fn with a client for the registry that u points
+// to, authenticated with each of the credentials that credential.Try finds for
+// it in turn, until the registry doesn't reject them.
+func withRegistryClient(ctx context.Context, u *url.URL, location credential.Location, fn func(*registry.Client) error) error {
+	return credential.Try(ctx, u, location, []string{u.Scheme, "oci"}, func(cred *credential.Credential) error {
+		r, err := newRegistryClient(ctx, u, cred)
+		if err != nil {
+			return err
+		}
+
+		err = fn(r)
+		if isUnauthorized(err) {
+			return credential.Rejected(err)
+		}
+
+		return err
+	})
+}
+
+// isUnauthorized reports whether err is the registry rejecting credentials.
+func isUnauthorized(err error) bool {
+	var errResp *errcode.ErrorResponse
+	return errors.As(err, &errResp) && errResp.StatusCode == http.StatusUnauthorized
+}
+
 // newRegistryClient returns a client for the registry that u points to,
-// authenticated with the credentials that credential.ForURL finds for it.
-// Failing that, the client uses Helm's own credential lookup, which can't
-// find anything that credential.Default didn't, but keeps `helm registry
-// login` working the way Helm users expect.
-func newRegistryClient(ctx context.Context, u *url.URL, location credential.Location) (*registry.Client, error) {
+// authenticated with cred. Without cred, the client uses Helm's own credential
+// lookup, which can't find anything that credential.Default didn't, but keeps
+// `helm registry login` working the way Helm users expect.
+func newRegistryClient(ctx context.Context, u *url.URL, cred *credential.Credential) (*registry.Client, error) {
 	opts := []registry.ClientOption{
 		registry.ClientOptWriter(util.StdoutFrom(ctx)),
 		registry.ClientOptCredentialsFile(barge.HelmSettings().RegistryConfig),
 	}
 
-	if cred, ok := credential.ForURL(ctx, u, location, u.Scheme, "oci"); ok {
+	if cred != nil {
 		opts = append(opts, registry.ClientOptAuthorizer(auth.Client{
 			Credential: auth.StaticCredential(u.Host, auth.Credential{
 				Username:     cred.Username,

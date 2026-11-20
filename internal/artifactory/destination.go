@@ -1,8 +1,10 @@
 package artifactory
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -39,7 +41,7 @@ type destination struct {
 }
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	cred, hasCred := credential.ForURL(ctx, u, credential.Destination, u.Scheme, Scheme)
+	schemes := []string{u.Scheme, Scheme}
 
 	u.Scheme = d.Scheme
 	if u.Scheme == "" {
@@ -52,26 +54,36 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 	}
 	defer rc.Close()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, u.JoinPath(fmt.Sprintf("%s-%s.tgz", c.Name(), c.Metadata.Version)).String(), rc)
+	// Read into memory to send again with each credentials that are tried.
+	data, err := io.ReadAll(rc)
 	if err != nil {
 		return err
 	}
 
-	if hasCred {
-		cred.SetAuth(req)
-	}
+	return credential.Try(ctx, u, credential.Destination, schemes, func(cred *credential.Credential) error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPut, u.JoinPath(fmt.Sprintf("%s-%s.tgz", c.Name(), c.Metadata.Version)).String(), bytes.NewReader(data))
+		if err != nil {
+			return err
+		}
 
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
+		if cred != nil {
+			cred.SetAuth(req)
+		}
 
-	if statusCode := res.StatusCode; 200 > statusCode || statusCode >= 400 {
-		return fmt.Errorf("http status %s", res.Status)
-	}
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
 
-	return nil
+		if statusCode := res.StatusCode; statusCode == http.StatusUnauthorized {
+			return credential.Rejected(fmt.Errorf("http status %s", res.Status))
+		} else if 200 > statusCode || statusCode >= 400 {
+			return fmt.Errorf("http status %s", res.Status)
+		}
+
+		return nil
+	})
 }
 
 func (d *destination) Sync(ctx context.Context, u *url.URL, namespace, _ string, c *chart.Chart) error {

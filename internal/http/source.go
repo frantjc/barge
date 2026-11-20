@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -11,9 +12,9 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/credential"
-	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/repo"
 	"sigs.k8s.io/yaml"
@@ -30,7 +31,6 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	_ = util.SloggerFrom(ctx)
 	settings := barge.HelmSettings()
 	scheme := u.Scheme
 
@@ -39,8 +39,20 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		return nil, err
 	}
 
-	cred, _ := credential.ForURL(ctx, u, credential.Source, scheme)
+	var c *chart.Chart
+	err = credential.Try(ctx, u, credential.Source, []string{scheme}, func(cred *credential.Credential) error {
+		var err error
+		c, err = s.open(ctx, settings, g, u, cred)
+		return err
+	})
 
+	return c, err
+}
+
+// open opens the chart at u, authenticating with cred. A rejection of cred by
+// u's host is returned as is, for credential.Try to move on to the next
+// credentials.
+func (s *source) open(ctx context.Context, settings *cli.EnvSettings, g getter.Getter, u *url.URL, cred *credential.Credential) (*chart.Chart, error) {
 	w := u.JoinPath()
 	name := path.Base(w.Path)
 	if version := u.Query().Get("version"); version != "" {
@@ -85,16 +97,24 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 							continue
 						}
 
+						var buf *bytes.Buffer
+						fetch := func(cred *credential.Credential) error {
+							var err error
+							buf, err = credential.Get(ctx, g, chartURL.String(), cred)
+							return err
+						}
+
 						// The repository's credentials apply to charts on the
 						// same host, as with Helm. Charts elsewhere only get
 						// credentials scoped to their own host, so that an
-						// index can't collect the repository's.
-						chartCred := cred
-						if chartURL.Host != u.Host {
-							chartCred, _ = credential.ForReferencedURL(ctx, chartURL, credential.Source)
+						// index can't collect the repository's. Either way, a
+						// rejection is joined into errs, so it isn't taken
+						// for a rejection of the repository's credentials.
+						if chartURL.Host == u.Host {
+							err = fetch(cred)
+						} else {
+							err = credential.TryReferenced(ctx, chartURL, credential.Source, fetch)
 						}
-
-						buf, err := credential.Get(ctx, g, chartURL.String(), chartCred)
 						if err != nil {
 							errs = errors.Join(errs, err)
 							continue
@@ -126,9 +146,12 @@ func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]barge
 		return nil, err
 	}
 
-	cred, _ := credential.ForURL(ctx, u, credential.Source, scheme)
-
-	buf, err := credential.Get(ctx, g, u.JoinPath("index.yaml").String(), cred)
+	var buf *bytes.Buffer
+	err = credential.Try(ctx, u, credential.Source, []string{scheme}, func(cred *credential.Credential) error {
+		var err error
+		buf, err = credential.Get(ctx, g, u.JoinPath("index.yaml").String(), cred)
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}

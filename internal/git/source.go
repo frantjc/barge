@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/frantjc/barge"
 	"github.com/frantjc/barge/internal/credential"
-	"github.com/frantjc/barge/internal/util"
 	billy "github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	git "github.com/go-git/go-git/v5"
@@ -40,15 +40,45 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	remote, rel, cred := remoteAndPathFromURL(ctx, u)
+	remote, rel := remoteAndPathFromURL(u)
 	ref := u.Query().Get("ref")
-	_ = util.SloggerFrom(ctx)
 
-	if remote.Hostname() == "github.com" {
-		return s.openGitHub(ctx, remote, cred, rel, ref)
+	var c *chart.Chart
+	err := credential.Try(ctx, remote, credential.Source, []string{"git"}, func(cred *credential.Credential) error {
+		var err error
+		if remote.Hostname() == "github.com" {
+			c, err = s.openGitHub(ctx, remote, cred, rel, ref)
+		} else {
+			c, err = s.openGit(ctx, remote, cred, rel, ref)
+		}
+
+		if isUnauthorized(err) {
+			return credential.Rejected(err)
+		}
+
+		return err
+	})
+
+	return c, err
+}
+
+// errUnauthorized marks an HTTP 401 that isn't otherwise typed.
+var errUnauthorized = errors.New("unauthorized")
+
+// isUnauthorized reports whether err is the remote rejecting credentials.
+func isUnauthorized(err error) bool {
+	if err == nil {
+		return false
 	}
 
-	return s.openGit(ctx, remote, cred, rel, ref)
+	if errors.Is(err, errUnauthorized) ||
+		errors.Is(err, transport.ErrAuthenticationRequired) ||
+		errors.Is(err, transport.ErrAuthorizationFailed) {
+		return true
+	}
+
+	var ghErr *github.ErrorResponse
+	return errors.As(err, &ghErr) && ghErr.Response != nil && ghErr.Response.StatusCode == http.StatusUnauthorized
 }
 
 func (s *source) openGitHub(ctx context.Context, remote *url.URL, cred *credential.Credential, rel, ref string) (*chart.Chart, error) {
@@ -73,6 +103,10 @@ func (s *source) openGitHub(ctx context.Context, remote *url.URL, cred *credenti
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusUnauthorized {
+		return nil, fmt.Errorf("get github tarball: %s: %w", res.Status, errUnauthorized)
+	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return nil, fmt.Errorf("get github tarball: %s", res.Status)
@@ -320,7 +354,7 @@ func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
 }
 
-func remoteAndPathFromURL(ctx context.Context, u *url.URL) (*url.URL, string, *credential.Credential) {
+func remoteAndPathFromURL(u *url.URL) (*url.URL, string) {
 	repoPath := u.Path
 	rel := "."
 
@@ -349,7 +383,5 @@ func remoteAndPathFromURL(ctx context.Context, u *url.URL) (*url.URL, string, *c
 		remote.Scheme = scheme
 	}
 
-	cred, _ := credential.ForURL(ctx, &remote, credential.Source, "git")
-
-	return &remote, rel, cred
+	return &remote, rel
 }

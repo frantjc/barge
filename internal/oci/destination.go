@@ -25,11 +25,6 @@ func init() {
 type destination struct{}
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	r, err := newRegistryClient(ctx, u, credential.Destination)
-	if err != nil {
-		return err
-	}
-
 	rc, err := util.WriteChartToArchive(c)
 	if err != nil {
 		return err
@@ -51,11 +46,10 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 
 	ref := util.RefFromURL(&w)
 
-	if _, err := r.Push(data, ref, registry.PushOptStrictMode(false)); err != nil {
+	return withRegistryClient(ctx, u, credential.Destination, func(r *registry.Client) error {
+		_, err := r.Push(data, ref, registry.PushOptStrictMode(false))
 		return err
-	}
-
-	return nil
+	})
 }
 
 func (d *destination) Sync(ctx context.Context, u *url.URL, namespace, name string, c *chart.Chart) error {

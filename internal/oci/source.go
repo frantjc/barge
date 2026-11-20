@@ -12,6 +12,7 @@ import (
 	"github.com/frantjc/barge/internal/util"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/registry"
 )
 
 func init() {
@@ -26,11 +27,20 @@ func init() {
 type source struct{}
 
 func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
-	r, err := newRegistryClient(ctx, u, credential.Source)
+	var res *registry.PullResult
+	err := withRegistryClient(ctx, u, credential.Source, func(r *registry.Client) error {
+		var err error
+		res, err = pull(r, u)
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	return loader.LoadArchive(bytes.NewReader(res.Chart.Data))
+}
+
+func pull(r *registry.Client, u *url.URL) (*registry.PullResult, error) {
 	// Like `helm pull` without --version, pull the highest semver tag unless the
 	// URL names one, via a tag in its path or its version query parameter.
 	// Fall back to :latest if there's no semver tag, e.g. for charts that
@@ -43,23 +53,16 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 		}
 	}
 
-	ref := util.RefFromURL(&w)
-
-	res, err := r.Pull(ref)
-	if err != nil {
-		return nil, err
-	}
-
-	return loader.LoadArchive(bytes.NewReader(res.Chart.Data))
+	return r.Pull(util.RefFromURL(&w))
 }
 
 func (s *source) Versions(ctx context.Context, u *url.URL, name string) ([]barge.SyncableVersion, error) {
-	r, err := newRegistryClient(ctx, u, credential.Source)
-	if err != nil {
-		return nil, err
-	}
-
-	tags, err := r.Tags(util.RefFromURL(u.JoinPath(name)))
+	var tags []string
+	err := withRegistryClient(ctx, u, credential.Source, func(r *registry.Client) error {
+		var err error
+		tags, err = r.Tags(util.RefFromURL(u.JoinPath(name)))
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -35,7 +35,7 @@ type destination struct {
 }
 
 func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) error {
-	cred, hasCred := credential.ForURL(ctx, u, credential.Destination, u.Scheme, "chartmuseum")
+	schemes := []string{u.Scheme, "chartmuseum"}
 
 	u.Scheme = d.Scheme
 	if u.Scheme == "" {
@@ -64,28 +64,34 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.JoinPath("/api/charts").String(), buf)
-	if err != nil {
-		return err
-	}
+	return credential.Try(ctx, u, credential.Destination, schemes, func(cred *credential.Credential) error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.JoinPath("/api/charts").String(), bytes.NewReader(buf.Bytes()))
+		if err != nil {
+			return err
+		}
 
-	req.Header.Set("Content-Type", mw.FormDataContentType())
+		req.Header.Set("Content-Type", mw.FormDataContentType())
 
-	if hasCred {
-		cred.SetAuth(req)
-	}
+		if cred != nil {
+			cred.SetAuth(req)
+		}
 
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
 
-	if statusCode := res.StatusCode; 200 > statusCode || statusCode >= 400 {
-		return fmt.Errorf("http status %s", res.Status)
-	}
+		if res.StatusCode == http.StatusUnauthorized {
+			return credential.Rejected(fmt.Errorf("http status %s", res.Status))
+		}
 
-	return nil
+		if statusCode := res.StatusCode; 200 > statusCode || statusCode >= 400 {
+			return fmt.Errorf("http status %s", res.Status)
+		}
+
+		return nil
+	})
 }
 
 func (d *destination) Sync(ctx context.Context, u *url.URL, namespace, _ string, c *chart.Chart) error {

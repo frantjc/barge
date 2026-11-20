@@ -29,15 +29,18 @@ func writeFile(t *testing.T, name, contents string) string {
 	return path
 }
 
-func TestForURLPrefersUserinfoAndStripsIt(t *testing.T) {
+func TestTryPrefersUserinfoAndStripsIt(t *testing.T) {
 	t.Setenv("BARGE_HTTPS_SOURCE_PASSWORD", "from-env")
 
 	u, err := url.Parse("https://user:pass@charts.example.com/stable")
 	require.NoError(t, err)
 
-	cred, ok := ForURL(t.Context(), u, Source)
-	require.True(t, ok)
-	require.Equal(t, &Credential{Username: "user", Password: "pass"}, cred)
+	// Even when rejected, userinfo is used alone.
+	tried, err := record(func(fn func(*Credential) error) error {
+		return Try(t.Context(), u, Source, nil, fn)
+	}, rejectAll)
+	require.Error(t, err)
+	require.Equal(t, []*Credential{{Username: "user", Password: "pass"}}, tried)
 	require.Nil(t, u.User)
 }
 

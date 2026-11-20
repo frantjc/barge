@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -96,17 +97,21 @@ func (s *source) Open(ctx context.Context, u *url.URL) (*chart.Chart, error) {
 			continue
 		}
 
+		var buf *bytes.Buffer
+		fetch := func(cred *credential.Credential) error {
+			var err error
+			buf, err = credential.Get(ctx, g, chartURL.String(), cred)
+			return err
+		}
+
 		// Charts on the repository's host get its credentials. Charts
 		// elsewhere only get credentials scoped to their own host, so that an
 		// index can't collect the repository's.
-		var cred *credential.Credential
-		if repoURL, err := url.Parse(entry.URL); err == nil && repoURL.Host == chartURL.Host {
-			cred, _ = credential.ForURL(ctx, chartURL, credential.Source, scheme)
+		if repoURL, parseErr := url.Parse(entry.URL); parseErr == nil && repoURL.Host == chartURL.Host {
+			err = credential.Try(ctx, chartURL, credential.Source, []string{scheme}, fetch)
 		} else {
-			cred, _ = credential.ForReferencedURL(ctx, chartURL, credential.Source)
+			err = credential.TryReferenced(ctx, chartURL, credential.Source, fetch)
 		}
-
-		buf, err := credential.Get(ctx, g, chartURL.String(), cred)
 		if err != nil {
 			errs = errors.Join(errs, err)
 			continue

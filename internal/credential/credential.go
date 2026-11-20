@@ -117,16 +117,91 @@ var Default = Chain{
 	Docker{},
 }
 
-// ForURL returns credentials for u. Credentials in u's userinfo win. Otherwise,
-// they are looked up by Default. Either way, ForURL removes u's userinfo so
-// that it isn't sent alongside the returned credentials.
-func ForURL(ctx context.Context, u *url.URL, location Location, schemes ...string) (*Credential, bool) {
+// rejectedError marks an error as the server rejecting credentials, e.g. with
+// an HTTP 401.
+type rejectedError struct{ err error }
+
+func (e *rejectedError) Error() string { return "credentials rejected: " + e.err.Error() }
+func (e *rejectedError) Unwrap() error { return e.err }
+
+// Rejected marks err as the server rejecting the credentials that it was
+// given, so that Try moves on to the next credentials. Try only recognizes
+// the error that Rejected returns, not errors that wrap it, so that a
+// rejection from somewhere else, e.g. a chart on another host, can't make Try
+// move on from credentials that worked.
+func Rejected(err error) error {
+	return &rejectedError{err}
+}
+
+func isRejected(err error) bool {
+	_, ok := err.(*rejectedError)
+	return ok
+}
+
+// Try calls fn with each of the Chain's credentials for req in turn, most
+// preferred first, until fn returns anything other than a rejection from
+// Rejected, and returns that. Each Provider is only asked for credentials
+// once fn rejects the previous ones, and credentials that a previous Provider
+// already gave are skipped. If no Provider has any credentials, Try calls fn
+// once with nil. If every Provider's credentials are rejected, Try returns
+// the last rejection.
+//
+// Env's credentials are final: if they're rejected, Try returns the rejection
+// rather than trying other Providers' credentials, as the user asked for those
+// credentials in particular, and other Providers may well have credentials
+// for every host of the scheme that a malicious host could collect by
+// rejecting them in turn.
+func (c Chain) Try(ctx context.Context, req *Request, fn func(*Credential) error) error {
+	log := util.SloggerFrom(ctx).With("host", req.URL.Host, "location", req.Location)
+
+	var (
+		tried    = map[Credential]bool{}
+		rejected error
+	)
+
+	for _, p := range c {
+		cred, err := p.Credential(ctx, req)
+		if err != nil {
+			log.Debug("skipping credential provider", "provider", providerName(p), "err", err)
+			continue
+		}
+
+		if cred == nil || tried[*cred] {
+			continue
+		}
+		tried[*cred] = true
+
+		log.Debug("using credentials", "provider", providerName(p))
+		if err := fn(cred); !isRejected(err) {
+			return err
+		} else if _, final := p.(Env); final {
+			return err
+		} else {
+			log.Warn("credentials rejected", "provider", providerName(p), "err", err)
+			rejected = err
+		}
+	}
+
+	if rejected != nil {
+		return rejected
+	}
+
+	return fn(nil)
+}
+
+// Try calls fn with each of the credentials for u in turn, as Chain.Try does
+// with Default, but credentials in u's userinfo are used alone. Either way, Try
+// removes u's userinfo so that it isn't sent alongside the credentials.
+//
+// schemes are the names that u's scheme goes by, most specific first, for
+// environment variables. They default to u's scheme.
+func Try(ctx context.Context, u *url.URL, location Location, schemes []string, fn func(*Credential) error) error {
 	user := u.User
 	u.User = nil
 
 	if user != nil {
 		if password, ok := user.Password(); ok {
-			return &Credential{Username: user.Username(), Password: password}, true
+			return fn(&Credential{Username: user.Username(), Password: password})
 		}
 	}
 
@@ -134,23 +209,21 @@ func ForURL(ctx context.Context, u *url.URL, location Location, schemes ...strin
 		schemes = []string{u.Scheme}
 	}
 
-	cred := Default.Credential(ctx, &Request{
+	return Default.Try(ctx, &Request{
 		URL:      u,
 		Location: location,
 		Schemes:  schemes,
-	})
-
-	return cred, cred != nil
+	}, fn)
 }
 
-// ForReferencedURL returns credentials for a URL that barge didn't get from
-// the user but found somewhere, e.g. a chart URL in a repository's index.
-// Only credentials scoped to u's host are used: not u's userinfo, nor
-// environment variables, which apply to every host of their scheme and so
-// would be sent wherever an index points. Nor does u's query select a cloud
-// provider, lest an index have barge exchange a cloud identity's token with a
-// host of its choosing. ForReferencedURL removes u's userinfo regardless.
-func ForReferencedURL(ctx context.Context, u *url.URL, location Location) (*Credential, bool) {
+// TryReferenced is Try for a URL that barge didn't get from the user but
+// found somewhere, e.g. a chart URL in a repository's index. Only credentials
+// scoped to u's host are used: not u's userinfo, nor environment variables,
+// which apply to every host of their scheme and so would be sent wherever an
+// index points. Nor does u's query select a cloud provider, lest an index have
+// barge exchange a cloud identity's token with a host of its choosing.
+// TryReferenced removes u's userinfo regardless.
+func TryReferenced(ctx context.Context, u *url.URL, location Location, fn func(*Credential) error) error {
 	u.User = nil
 
 	hostScoped := Chain{}
@@ -163,13 +236,11 @@ func ForReferencedURL(ctx context.Context, u *url.URL, location Location) (*Cred
 	withoutQuery := *u
 	withoutQuery.RawQuery = ""
 
-	cred := hostScoped.Credential(ctx, &Request{
+	return hostScoped.Try(ctx, &Request{
 		URL:      &withoutQuery,
 		Location: location,
 		Schemes:  []string{u.Scheme},
-	})
-
-	return cred, cred != nil
+	}, fn)
 }
 
 // hostPort returns u's host with its port, defaulting the port from u's

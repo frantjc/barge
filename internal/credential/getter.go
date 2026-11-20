@@ -11,34 +11,38 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-// Get gets rawURL with g, authenticating with cred if it's non-nil. Helm's
-// getters only support basic authentication, so if cred has a bearer token,
-// Get makes a plain HTTP request instead, which only works for HTTP(S) URLs.
+// Get gets rawURL, authenticating with cred if it's non-nil. An HTTP(S) URL is
+// gotten by a plain HTTP request, so that bearer tokens can be sent and a 401
+// is reported as Rejected, for Try to move on to the next credentials. Any
+// other URL is gotten by g, e.g. a Helm getter plugin's, which only supports
+// basic authentication.
 func Get(ctx context.Context, g getter.Getter, rawURL string, cred *Credential, opts ...getter.Option) (*bytes.Buffer, error) {
-	if cred == nil {
-		return g.Get(rawURL, opts...)
-	}
-
-	if cred.Token == "" {
-		// Helm's HTTP getter only sends basic auth to the scheme and host of
-		// the URL given by WithURL.
-		return g.Get(rawURL, append(opts, getter.WithURL(rawURL), getter.WithBasicAuth(cred.Username, cred.Password))...)
-	}
-
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
 	}
 
 	if u.Scheme != "http" && u.Scheme != "https" {
-		return nil, fmt.Errorf("bearer tokens are only supported for http(s) URLs, not %s", u.Scheme)
+		switch {
+		case cred == nil:
+			return g.Get(rawURL, opts...)
+		case cred.Token != "":
+			return nil, fmt.Errorf("bearer tokens are only supported for http(s) URLs, not %s", u.Scheme)
+		}
+
+		// Helm's getters only send basic auth to the scheme and host of the
+		// URL given by WithURL.
+		return g.Get(rawURL, append(opts, getter.WithURL(rawURL), getter.WithBasicAuth(cred.Username, cred.Password))...)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	cred.SetAuth(req)
+
+	if cred != nil {
+		cred.SetAuth(req)
+	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -46,7 +50,9 @@ func Get(ctx context.Context, g getter.Getter, rawURL string, cred *Credential, 
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode < 200 || res.StatusCode >= 300 {
+	if statusCode := res.StatusCode; statusCode == http.StatusUnauthorized {
+		return nil, Rejected(fmt.Errorf("failed to fetch %s: %s", rawURL, res.Status))
+	} else if statusCode < 200 || statusCode >= 300 {
 		return nil, fmt.Errorf("failed to fetch %s: %s", rawURL, res.Status)
 	}
 

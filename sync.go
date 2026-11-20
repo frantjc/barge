@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"runtime"
@@ -149,12 +150,25 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 		return fmt.Errorf("not a syncable destination scheme: %s", d.Scheme)
 	}
 
+	// With FailFast, the first error cancels the rest of the work. This isn't
+	// errgroup.WithContext's context, as it's canceled when Wait returns, too,
+	// and egv's Wait returns once its sources have queued their charts on egs,
+	// before those are synced.
+	ctx, cancel := context.WithCancelCause(ctx)
+	defer cancel(nil)
+
+	failFast := func(f func() error) func() error {
+		return func() error {
+			err := f()
+			if err != nil && o.FailFast {
+				cancel(err)
+			}
+			return err
+		}
+	}
+
 	egv := new(errgroup.Group)
 	egs := new(errgroup.Group)
-	if o.FailFast {
-		egv, ctx = errgroup.WithContext(ctx)
-		egs, ctx = errgroup.WithContext(ctx)
-	}
 
 	if o.Concurrency != 0 {
 		egv.SetLimit(o.Concurrency)
@@ -162,7 +176,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 	}
 
 	for _, src := range s.Sources {
-		egv.Go(func() error {
+		egv.Go(failFast(func() error {
 			namespace := src.Namespace
 
 			s, err := url.Parse(os.ExpandEnv(src.URL.String()))
@@ -193,7 +207,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 
 					for _, syncableVersion := range syncableVersions {
 						if constraints.Check(syncableVersion.Version) {
-							egs.Go(func() error {
+							egs.Go(failFast(func() error {
 								syncSource := source
 
 								if syncableVersion.URL.Scheme != s.Scheme {
@@ -211,7 +225,7 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 								log.Info("syncing", "chart", chart.Name(), "version", chart.Metadata.Version, "destination", d.Redacted(), "namespace", namespace)
 
 								return syncableDestination.Sync(ctx, d, namespace, name, chart)
-							})
+							}))
 						}
 					}
 				}
@@ -225,18 +239,22 @@ func (s *SyncConfig) Sync(ctx context.Context, dest string, opts ...SyncOpt) err
 			}
 
 			return syncableDestination.Sync(ctx, d, namespace, "", chart)
-		})
+		}))
 	}
 
 	return errors.Join(egv.Wait(), egs.Wait())
 }
 
 func Sync(ctx context.Context, cfg, dest string, opts ...SyncOpt) error {
+	var (
+		b   []byte
+		err error
+	)
 	if cfg == "-" {
-		cfg = "/dev/stdin"
+		b, err = io.ReadAll(util.StdinFrom(ctx))
+	} else {
+		b, err = os.ReadFile(cfg)
 	}
-
-	b, err := os.ReadFile(cfg)
 	if err != nil {
 		return err
 	}
