@@ -119,11 +119,9 @@ func (s *source) openGitHub(ctx context.Context, remote *url.URL, cred *credenti
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode == http.StatusUnauthorized {
+	if statusCode := res.StatusCode; statusCode == http.StatusUnauthorized {
 		return nil, fmt.Errorf("get github tarball: %s: %w", res.Status, errUnauthorized)
-	}
-
-	if res.StatusCode < 200 || res.StatusCode >= 300 {
+	} else if statusCode < 200 || statusCode >= 300 {
 		return nil, fmt.Errorf("get github tarball: %s", res.Status)
 	}
 

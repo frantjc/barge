@@ -82,11 +82,9 @@ func (d *destination) Write(ctx context.Context, u *url.URL, c *chart.Chart) err
 		}
 		defer res.Body.Close()
 
-		if res.StatusCode == http.StatusUnauthorized {
+		if statusCode := res.StatusCode; statusCode == http.StatusUnauthorized {
 			return credential.Rejected(fmt.Errorf("http status %s", res.Status))
-		}
-
-		if statusCode := res.StatusCode; 200 > statusCode || statusCode >= 400 {
+		} else if 200 > statusCode || statusCode >= 400 {
 			return fmt.Errorf("http status %s", res.Status)
 		}
 

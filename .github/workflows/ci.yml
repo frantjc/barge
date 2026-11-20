@@ -21,26 +21,27 @@ jobs:
           install_args: dagger
       - name: Set default .env
         env:
-          ACR_NAME: ""
+          ACR_NAME: "${{ vars.ACR_NAME }}"
         run: |
           cat << EOF > .env
           bargeDev_test_githubToken=env://GITHUB_TOKEN
           bargeDev_test_githubRepo=${{ github.repository }}
           bargeDev_test_acrName=${ACR_NAME}
           EOF
-      - uses: azure/login@v3
-        # This identity only allows federation from main.
-        if: github.ref == 'refs/heads/main'
-        with:
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-      - name: Set azureConfig .env
-        if: github.ref == 'refs/heads/main'
-        run: |
-          cat << EOF >> .env
-          bargeDev_test_azureConfig=${AZURE_CONFIG_DIR:-$HOME/.azure}
-          EOF
-      - env:
+      # - uses: azure/login@v3
+      #   # This identity only allows federation from main.
+      #   if: github.ref == 'refs/heads/main'
+      #   with:
+      #     tenant-id: ${{ vars.AZURE_TENANT_ID }}
+      #     subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      #     client-id: ${{ vars.AZURE_CLIENT_ID }}
+      # - name: Set azureConfig .env
+      #   if: github.ref == 'refs/heads/main'
+      #   run: |
+      #     cat << EOF >> .env
+      #     bargeDev_test_azureConfig=${AZURE_CONFIG_DIR:-$HOME/.azure}
+      #     EOF
+      - name: Dagger check
+        env:
           GITHUB_TOKEN: ${{ github.token }}
         run: dagger check
