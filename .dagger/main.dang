@@ -1,0 +1,115 @@
+"""
+Development tasks for barge: testing, building and releasing.
+"""
+type BargeDev {
+  """
+  Runs the tests against a kwok cluster, plus the ACR and GHCR/GitHub tests
+  when their credentials are given.
+  """
+  test(
+    ws: Workspace!,
+    githubToken: Secret,
+    githubRepo: String! = "",
+    acrName: String! = "",
+    azureConfig: Directory,
+  ): Void @check {
+    let tags = ["dagger", "examples", "kubernetes"]
+    let tools = ["go", "helm"]
+    if (azureConfig != null and acrName != "") {
+      tools += ["azure-cli"]
+    }
+
+    let ctr = mise(ws).container(tools: tools)
+    if (azureConfig != null and acrName != "") {
+      tags += ["acr"]
+      ctr = ctr
+        .withEnvVariable("ACR_NAME", acrName)
+        .withMountedDirectory("$HOME/.azure", azureConfig, expand: true)
+    }
+    if (githubToken != null and githubRepo != "") {
+      tags += ["ghcr", "github"]
+      ctr = ctr
+        .withSecretVariable("GITHUB_TOKEN", githubToken)
+        .withEnvVariable("GITHUB_REPOSITORY", githubRepo)
+    }
+    let failure = go(ws, container: kwok.cluster.bind(ctr)).test(race: true, tags: tags).error
+    if (failure != null) {
+      raise failure.message
+    }
+
+    null
+  }
+
+  """
+  Builds the barge binary.
+  """
+  binary(
+    ws: Workspace!,
+    version: String! = "v0.0.0-unknown",
+    goarch: String! = "",
+    goos: String! = "",
+  ): File! {
+    go(ws).build(
+      pkg: "./cmd/barge",
+      ldflags: "-s -w -X main.version=" + version,
+      goos: goos,
+      goarch: goarch,
+    )
+  }
+
+  """
+  Creates a GitHub release for the latest tag with binaries for each
+  supported platform, optionally publishing a Homebrew cask for it.
+  """
+  @cache(policy: FunctionCachePolicy.NEVER)
+  release(
+    ws: Workspace!,
+    githubToken: Secret!,
+    githubRepo: String! = "",
+    brew: Boolean! = false,
+  ): Void {
+    let parts = githubRepo.split("/", limit: 2)
+    if (parts.length != 2) {
+      raise `expected org/repo format, got "${githubRepo}"`
+    }
+    let repo = parts[1] ?? ""
+
+    let src = ws.directory(".", gitignore: true)
+    let tag = src.asGit.latest.ref.trimPrefix("refs/tags/")
+
+    let assets = [] :: [File!]!
+    ["linux", "darwin"].each { goos =>
+      ["amd64", "arm64"].each { goarch =>
+        let bin = binary(ws, version: tag, goarch: goarch, goos: goos)
+        if (goos == "linux") {
+          bin = upx.pack(bin)
+        }
+
+        assets += [
+          archive
+            .tar(
+              src
+                .filter(include: ["README.md", "LICENSE"])
+                .withFile(repo, bin),
+              gzip: true,
+            )
+            .withName(`${repo}-${tag}-${goos}-${goarch}.tar.gz`),
+        ]
+      }
+    }
+
+    let release = gh(githubToken).release(githubRepo, tag)
+
+    release.create(draft: true, generateNotes: true)
+
+    release.upload(assets, clobber: true)
+
+    if (brew) {
+      homebrew.cask(githubToken, githubRepo, tag)
+    }
+
+    release.edit(latest: true)
+
+    null
+  }
+}

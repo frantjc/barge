@@ -20,6 +20,8 @@ jobs:
         with:
           install_args: dagger
       - name: Set default .env
+        env:
+          ACR_NAME: ""
         run: |
           cat << EOF > .env
           bargeDev_test_githubToken=env://GITHUB_TOKEN

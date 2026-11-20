@@ -6,12 +6,13 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/frantjc/barge/internal/dagger"
+	"dagger.io/dagger"
+	"dagger.io/dagger/core"
 	"github.com/frantjc/barge/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
-func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
+func Chartmuseum(t testing.TB, dag *core.Query) *url.URL {
 	t.Helper()
 	ctx := t.Context()
 	container := dag.Container()
@@ -31,14 +32,14 @@ func Chartmuseum(t testing.TB, dag *dagger.Client) *url.URL {
 		_, err = chartmuseum.Stop(Context(t))
 		require.NoError(t, err)
 	})
-	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "chartmuseum+http"})
+	rawChartmuseumURL, err := chartmuseum.Endpoint(ctx, core.ServiceEndpointOpts{Scheme: "chartmuseum+http"})
 	require.NoError(t, err)
 	chartmuseumURL, err := url.Parse(rawChartmuseumURL)
 	require.NoError(t, err)
 	return chartmuseumURL
 }
 
-func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
+func Distribution(t testing.TB, dag *core.Query) *url.URL {
 	t.Helper()
 	ctx := t.Context()
 	distribution, err := dag.Container().
@@ -51,20 +52,20 @@ func Distribution(t testing.TB, dag *dagger.Client) *url.URL {
 		_, err = distribution.Stop(Context(t))
 		require.NoError(t, err)
 	})
-	rawDistributionURL, err := distribution.Endpoint(ctx, dagger.ServiceEndpointOpts{Scheme: "oci+http"})
+	rawDistributionURL, err := distribution.Endpoint(ctx, core.ServiceEndpointOpts{Scheme: "oci+http"})
 	require.NoError(t, err)
 	distributionURL, err := url.Parse(rawDistributionURL)
 	require.NoError(t, err)
 	return distributionURL
 }
 
-func Dag(t testing.TB) *dagger.Client {
+func Dag(t testing.TB) *core.Query {
 	t.Helper()
 	ctx := Context(t)
-	dag, err := dagger.Connect(ctx)
+	client, err := dagger.Connect(ctx)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		require.NoError(t, dag.Close())
+		require.NoError(t, client.Close())
 	})
-	return dag
+	return core.NewQuery(client)
 }
