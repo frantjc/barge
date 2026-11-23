@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/frantjc/barge/internal/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStdinFrom(t *testing.T) {
@@ -14,13 +15,11 @@ func TestStdinFrom(t *testing.T) {
 	// Without stdin in the context, nothing is read, rather than the
 	// process's own stdin.
 	b, err := io.ReadAll(util.StdinFrom(t.Context()))
-	if err != nil || len(b) != 0 {
-		t.Fatalf("expected an empty reader, got %q, %v", b, err)
-	}
+	require.NoError(t, err)
+	require.Empty(t, b)
 
 	ctx := util.StdinInto(t.Context(), strings.NewReader("hello"))
 	b, err = io.ReadAll(util.StdinFrom(ctx))
-	if err != nil || string(b) != "hello" {
-		t.Fatalf("expected %q, got %q, %v", "hello", b, err)
-	}
+	require.NoError(t, err)
+	require.Equal(t, "hello", string(b))
 }

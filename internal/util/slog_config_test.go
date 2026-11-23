@@ -7,6 +7,7 @@ import (
 
 	"github.com/frantjc/barge/internal/util"
 	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSlogConfigAddFlags(t *testing.T) {
@@ -15,37 +16,18 @@ func TestSlogConfigAddFlags(t *testing.T) {
 		flagSet    = pflag.NewFlagSet("test", pflag.ContinueOnError)
 	)
 
-	if err := os.Unsetenv("DEBUG"); err != nil {
-		t.Fatalf("failed to unset DEBUG environment variable: %v", err)
-	}
+	require.NoError(t, os.Unsetenv("DEBUG"))
 
 	slogConfig.AddFlags(flagSet)
 
-	if slogConfig.Level() != slog.LevelInfo {
-		t.Fatalf("expected level %v, got %v", slog.LevelInfo, slogConfig.Level())
-	}
+	require.Equal(t, slog.LevelInfo, slogConfig.Level())
 
-	if err := flagSet.Parse([]string{"--debug"}); err != nil {
-		t.Fatalf("failed to set debug flag: %v", err)
-	}
+	require.NoError(t, flagSet.Parse([]string{"--debug"}))
+	require.Equal(t, slog.LevelDebug, slogConfig.Level())
 
-	if slogConfig.Level() != slog.LevelDebug {
-		t.Fatalf("expected level %v, got %v", slog.LevelDebug, slogConfig.Level())
-	}
+	require.NoError(t, flagSet.Parse([]string{"--quiet"}))
+	require.Equal(t, slog.LevelError, slogConfig.Level())
 
-	if err := flagSet.Parse([]string{"--quiet"}); err != nil {
-		t.Fatalf("failed to set quiet flag: %v", err)
-	}
-
-	if slogConfig.Level() != slog.LevelError {
-		t.Fatalf("expected level %v, got %v", slog.LevelError, slogConfig.Level())
-	}
-
-	if err := flagSet.Parse([]string{"-v"}); err != nil {
-		t.Fatalf("failed to set V flag: %v", err)
-	}
-
-	if slogConfig.Level() != slog.LevelWarn {
-		t.Fatalf("expected level %v, got %v", slog.LevelWarn, slogConfig.Level())
-	}
+	require.NoError(t, flagSet.Parse([]string{"-v"}))
+	require.Equal(t, slog.LevelWarn, slogConfig.Level())
 }
